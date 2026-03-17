@@ -1,0 +1,9 @@
+spring:
+    application:
+        name: api-gateway
+    main:
+        web-application-type: reactive
+    server:
+        port: ${SERVER_PORT:8080}
+microservices:
+    auth-service-url: ${AUTH_SERVICE_URL:https://localhost:8081}
