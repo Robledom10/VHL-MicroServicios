@@ -1,0 +1,20 @@
+services:
+  auth-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.runtime
+      args:
+          # Ahora el nombre es fijo gracias al <finalName> del POM
+          JAR_PATH: services/auth-service/target/auth-service.jar
+
+    depends_on:
+      mysql-db: 
+        condition: service_healthy
+    container_name: auth-service
+    ports:
+        - "8081:8081"
+    environment:
+      APP_JWT_SECRET: ${APP_JWT_SECRET:BQQeIbR3lGiFeS/wWomud6keJvxadFKosqD76mh/WYk=}
+ 
+
+      
