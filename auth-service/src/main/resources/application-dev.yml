@@ -1,0 +1,14 @@
+# src/main/resources/application-dev.yml
+DB_URL: jdbc:mysql://localhost:3306/auth_service
+DB_USER: root
+DB_PASSWORD: robledo2007
+
+# Configuración extra solo para tu PC
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update # Esto crea las tablas automáticamente al iniciar
+    show-sql: true # Muestra las consultas en la consola para depurar
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
