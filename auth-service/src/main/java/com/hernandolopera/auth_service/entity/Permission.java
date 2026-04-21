@@ -17,7 +17,7 @@ import lombok.Data;
 public class Permission {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_permissions")
+    @Column(name = "id_permission")
     private Integer id;
 
     @Column(nullable = false)

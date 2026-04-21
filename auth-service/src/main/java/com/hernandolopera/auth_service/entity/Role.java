@@ -2,8 +2,11 @@ package com.hernandolopera.auth_service.entity;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -31,9 +34,10 @@ public class Role {
     private Boolean status = true;
 
     @OneToMany(mappedBy = "role")
+    @JsonIgnore
     private Set<User> users;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "role_permission", joinColumns = @JoinColumn(name = "fk_id_rol"), inverseJoinColumns = @JoinColumn(name = "fk_id_permission"))
     private Set<Permission> permissions;
 }

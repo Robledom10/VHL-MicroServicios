@@ -40,13 +40,13 @@ public class User {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "document_type", nullable = false)
+    @Column(name = "document_type")
     private DocumentType documentType;
 
     @Column(name = "document_number", nullable = false, unique = true)
     private String documentNumber;
 
-    @Column(name = "birth_date", nullable = false)
+    @Column(name = "birth_date", nullable = true)
     private LocalDate birthDate;
 
     private String state;

@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.hernandolopera.auth_service.entity.User;
 
-public interface UsersRepository extends JpaRepository<User, Integer> {
+public interface UserRepository extends JpaRepository<User, Integer> {
     Optional<User> findByEmail(String email);
 }

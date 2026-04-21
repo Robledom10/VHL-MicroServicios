@@ -1,7 +1,9 @@
 package com.hernandolopera.auth_service.enums;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum DocumentType {
-    CEDULA_CIUDADANIA("Cedula Cidadania"),
+    CEDULA_CIUDADANIA("Cedula Ciudadania"),
     TARJETA_IDENTIDAD("Tarjeta Identidad"),
     PASAPORTE("Pasaporte"),
     CEDULA_EXTRANJERIA("Cedula Extranjeria"),
@@ -13,7 +15,13 @@ public enum DocumentType {
         this.value = value;
     }
 
+    @JsonValue // Para que Jackson use el String en el JSON
     public String getValue() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
         return value;
     }
 }
