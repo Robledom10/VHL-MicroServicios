@@ -61,7 +61,7 @@ CREATE TABLE `role` (
 
 LOCK TABLES `role` WRITE;
 /*!40000 ALTER TABLE `role` DISABLE KEYS */;
-INSERT INTO `role` VALUES (1,'USER',_binary ''),(2,'ADMIN',_binary '');
+INSERT INTO `role` VALUES (1,'CLIENT',_binary ''),(2,'ADMIN',_binary '');
 /*!40000 ALTER TABLE `role` ENABLE KEYS */;
 UNLOCK TABLES;
 
