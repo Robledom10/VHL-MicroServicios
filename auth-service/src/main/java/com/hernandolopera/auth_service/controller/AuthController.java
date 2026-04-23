@@ -53,4 +53,10 @@ public class AuthController {
         return ResponseEntity.ok("solo ADMIN puede ver esto");
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','CLIENT')")
+    @GetMapping("/user")
+    public ResponseEntity<?> user() {
+        return ResponseEntity.ok("Usuarios autenticados");
+    }
+
 }
