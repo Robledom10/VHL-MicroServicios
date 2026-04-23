@@ -1,9 +1,26 @@
+server:
+  port: 8080
+
 spring:
-    application:
-        name: api-gateway
-    main:
-        web-application-type: reactive
-    server:
-        port: ${SERVER_PORT:8080}
-microservices:
-    auth-service-url: ${AUTH_SERVICE_URL:https://localhost:8081}
+  application:
+    name: api-gateway
+
+  main:
+    web-application-type: reactive
+
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: http://auth-service:8081
+          predicates:
+            - Path=/api/auth/**
+
+      default-filters:
+        # Nota: Espacio entre las cabeceras, coma antes de la estrategia
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
+
+app:
+  jwt:
+    secret: oH+9q7wdTI5MPQmt5wRelMhO70B6FmEGOanhAPEAGbM=
+    expiration: 900000
