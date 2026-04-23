@@ -1,20 +1,40 @@
 services:
-  auth-service:
-    build:
-      context: .
-      dockerfile: Dockerfile.runtime
-      args:
-          # Ahora el nombre es fijo gracias al <finalName> del POM
-          JAR_PATH: services/auth-service/target/auth-service.jar
-
-    depends_on:
-      mysql-db: 
-        condition: service_healthy
-    container_name: auth-service
-    ports:
-        - "8081:8081"
+  mysql:
+    image: mysql:8
+    container_name: mysql-db
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    restart: always
     environment:
-      APP_JWT_SECRET: ${APP_JWT_SECRET:BQQeIbR3lGiFeS/wWomud6keJvxadFKosqD76mh/WYk=}
- 
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: auth_db
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./docker/auth_service.sql:/docker-entrypoint-initdb.d/auth_service.sql
+    networks:
+      - microservices-net
 
-      
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DB_HOST: mysql
+      DB_NAME: auth_db
+      DB_USER: root
+      DB_PASSWORD: root
+    ports:
+      - "8081:8081"
+    networks:
+      - microservices-net
+
+networks:
+  microservices-net:
