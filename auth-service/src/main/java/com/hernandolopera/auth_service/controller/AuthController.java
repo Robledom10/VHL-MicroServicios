@@ -3,7 +3,6 @@ package com.hernandolopera.auth_service.controller;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -21,8 +20,6 @@ import com.hernandolopera.auth_service.service.AuthService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestParam;
-
 
 @RestController
 @RequestMapping("/api/auth")
@@ -55,5 +52,5 @@ public class AuthController {
     public ResponseEntity<?> admin() {
         return ResponseEntity.ok("solo ADMIN puede ver esto");
     }
-    
+
 }
