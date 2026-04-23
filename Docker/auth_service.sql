@@ -128,6 +128,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
+INSERT INTO `user` VALUES (1,NULL,NULL,NULL,'12345','CEDULA_CIUDADANIA','admin@test.com',_binary '\0','Admin','test','$2a$10$iySk7zZzK.dpLGH.yMuCoOhPehgHAUXTKc0eatSkF6yntG2Y0QfE6',NULL,_binary '\0',NULL,2);
 INSERT INTO `user` VALUES (1,NULL,NULL,NULL,'12345678','CEDULA_CIUDADANIA','juan@test.com',_binary '\0','Juan','Perez','$2a$10$FgWmVYmlvdDW2NGcbMsCd.pvnqHOiUZq4pKIBTQ8CAOmHudbClyNu',NULL,_binary '\0',NULL,1);
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;

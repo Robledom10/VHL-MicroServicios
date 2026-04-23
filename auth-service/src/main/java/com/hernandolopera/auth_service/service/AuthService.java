@@ -8,7 +8,6 @@ import com.hernandolopera.auth_service.dto.request.RegisterRequest;
 import com.hernandolopera.auth_service.dto.response.AuthResponse;
 import com.hernandolopera.auth_service.entity.Role;
 import com.hernandolopera.auth_service.entity.User;
-import com.hernandolopera.auth_service.repository.PermissionRepository;
 import com.hernandolopera.auth_service.repository.RoleRepository;
 import com.hernandolopera.auth_service.repository.UserRepository;
 import com.hernandolopera.auth_service.security.JwtTokenProvider;
