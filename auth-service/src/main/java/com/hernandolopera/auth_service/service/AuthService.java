@@ -21,7 +21,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-    private final PermissionRepository permissionRepository;
+    // private final PermissionRepository permissionRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
     public User registerUser(RegisterRequest request) {
@@ -38,7 +38,7 @@ public class AuthService {
 
         user.setDocumentType(request.getDocumentType());
 
-        Role role = roleRepository.findByName("USER").orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+        Role role = roleRepository.findById(1).orElseThrow(() -> new RuntimeException("Rol no encontrado"));
 
         user.setRole(role);
 

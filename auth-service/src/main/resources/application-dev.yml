@@ -1,14 +1,22 @@
-# src/main/resources/application-dev.yml
-DB_URL: jdbc:mysql://localhost:3306/auth_service
-DB_USER: root
-DB_PASSWORD: robledo2007
-
-# Configuración extra solo para tu PC
 spring:
+  # 1. Configuración correcta de la conexión
+  datasource:
+    # url: jdbc:mysql://mysql-db:3306/auth_db
+    url: jdbc:mysql://localhost:3306/auth_service
+    username: root
+    password: robledo2007 # ¡Asegúrate de que esta coincida con tu docker-compose!
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # 2. Configuración de JPA/Hibernate
   jpa:
+    # Cambia a 'update' si quieres que Java cree/modifique las tablas automáticamente
+    # Cambia a 'validate' si prefieres que tu archivo .sql sea la única fuente de verdad
     hibernate:
-      ddl-auto: update # Esto crea las tablas automáticamente al iniciar
-    show-sql: true # Muestra las consultas en la consola para depurar
+      ddl-auto: update 
+    show-sql: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
+
+server:
+  port: 8081

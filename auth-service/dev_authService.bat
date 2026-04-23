@@ -1,7 +1,7 @@
 @echo off
-echo 🔥 Liberando puerto 8080...
+echo 🔥 Liberando puerto 8081...
 
-for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8080') do (
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8081') do (
   taskkill /PID %%a /F
 )
 
