@@ -1,7 +1,9 @@
 package com.hernandolopera.auth_service.service;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.hernandolopera.auth_service.dto.request.LoginRequest;
 import com.hernandolopera.auth_service.dto.request.RegisterRequest;
@@ -12,6 +14,7 @@ import com.hernandolopera.auth_service.repository.RoleRepository;
 import com.hernandolopera.auth_service.repository.UserRepository;
 import com.hernandolopera.auth_service.security.JwtTokenProvider;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -23,21 +26,29 @@ public class AuthService {
     // private final PermissionRepository permissionRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
+    @Transactional
     public User registerUser(RegisterRequest request) {
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("El email ya existe");
+
+        String email = request.getEmail().trim().toLowerCase();
+
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "El correo electrónico ya está registrado");
         }
 
         User user = new User();
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
-        user.setEmail(request.getEmail());
+        user.setEmail(email);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setDocumentNumber(request.getDocumentNumber());
-
         user.setDocumentType(request.getDocumentType());
 
-        Role role = roleRepository.findById(1).orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+        Role role = roleRepository.findByName("CLIENT")
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        "Rol no encontrado"));
 
         user.setRole(role);
 
@@ -49,7 +60,7 @@ public class AuthService {
         String emailLimpio = request.getEmail().trim().toLowerCase();
 
         User user = userRepository.findByEmail(emailLimpio)
-                .orElseThrow(() -> new RuntimeException("Email invalido: [" + emailLimpio + "]"));
+                .orElseThrow(() -> new RuntimeException("Credenciales invalidas"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("Credenciales invalidas");

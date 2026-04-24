@@ -1,5 +1,7 @@
 package com.hernandolopera.api_gateway.security;
 
+import java.util.List;
+
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -23,8 +25,14 @@ public class JwtFilter implements GlobalFilter, Ordered {
 
         String path = exchange.getRequest().getURI().getPath();
 
-        // 🔥 Rutas públicas
-        if (path.contains("/api/auth/login") || path.contains("/api/auth/register")) {
+        List<String> publicRoutes = List.of(
+                "/api/auth/login",
+                "/api/auth/register");
+
+        boolean isPublic = path.equals("/api/auth/login") ||
+                path.equals("/api/auth/register");
+
+        if (isPublic) {
             return chain.filter(exchange);
         }
 
@@ -43,6 +51,8 @@ public class JwtFilter implements GlobalFilter, Ordered {
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
+
+        System.out.println("GATEWAY PATH: [" + path + "]");
 
         return chain.filter(exchange);
     }
