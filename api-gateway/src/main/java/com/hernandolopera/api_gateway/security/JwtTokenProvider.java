@@ -10,6 +10,9 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+/**
+ * Proveedor utilitario para la generación y validación de tokens JWT en el API Gateway.
+ */
 @Component
 public class JwtTokenProvider {
 
@@ -27,6 +30,12 @@ public class JwtTokenProvider {
         return Keys.hmacShaKeyFor(JWT_SECRET.getBytes());
     }
 
+    /**
+     * Genera un nuevo token JWT para un usuario en específico.
+     *
+     * @param email El correo electrónico del usuario, que se utilizará como "subject" del token
+     * @return El token JWT generado y firmado
+     */
     public String generateToken(String email) {
         return Jwts.builder()
                 .subject(email)
@@ -36,6 +45,14 @@ public class JwtTokenProvider {
                 .compact();
     }
 
+    /**
+     * Extrae el correo electrónico (subject) contenido dentro del token JWT.
+     * También verifica que el token esté correctamente firmado y no haya expirado.
+     *
+     * @param token El token JWT codificado a evaluar
+     * @return El correo electrónico extraído del token
+     * @throws io.jsonwebtoken.JwtException si el token es inválido, está expirado o malformado
+     */
     public String getEmailFromToken(String token) {
         return Jwts.parser()
                 .verifyWith(getSigningKey()) // Nuevo método de verificación

@@ -11,6 +11,10 @@ import org.springframework.web.server.ServerWebExchange;
 
 import reactor.core.publisher.Mono;
 
+/**
+ * Filtro global de Gateway que intercepta todas las peticiones entrantes
+ * para validar la existencia y validez de un token JWT en el encabezado de autorización.
+ */
 @Component
 public class JwtFilter implements GlobalFilter, Ordered {
 
@@ -20,6 +24,15 @@ public class JwtFilter implements GlobalFilter, Ordered {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
+    /**
+     * Intercepta las solicitudes y verifica el token JWT.
+     * Ignora las rutas públicas designadas. Si la solicitud no es pública y falta el token
+     * o es inválido, rechaza la solicitud retornando un estado UNAUTHORIZED.
+     *
+     * @param exchange El entorno de la solicitud/respuesta web actual
+     * @param chain    La cadena de filtros del gateway
+     * @return Mono<Void> para indicar cuándo se completa el procesamiento de la solicitud
+     */
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 
@@ -57,6 +70,12 @@ public class JwtFilter implements GlobalFilter, Ordered {
         return chain.filter(exchange);
     }
 
+    /**
+     * Configura el orden de ejecución de este filtro dentro de la cadena de filtros.
+     * Un valor negativo asegura que se ejecute tempranamente.
+     *
+     * @return El orden del filtro (ej. -1)
+     */
     @Override
     public int getOrder() {
         return -1;
