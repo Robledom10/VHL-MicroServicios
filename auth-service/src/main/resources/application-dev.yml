@@ -1,10 +1,10 @@
 spring:
   # 1. Configuración correcta de la conexión
   datasource:
-    # url: jdbc:mysql://mysql-db:3306/auth_db
-    url: jdbc:mysql://localhost:3306/auth_service
+    url: jdbc:mysql://mysql-db:3306/auth_db
+    # url: jdbc:mysql://localhost:3306/auth_service
     username: root
-    password: robledo2007 # ¡Asegúrate de que esta coincida con tu docker-compose!
+    password: root # ¡Asegúrate de que esta coincida con tu docker-compose!
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   # 2. Configuración de JPA/Hibernate

@@ -14,6 +14,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Filtro de seguridad que se ejecuta una vez por cada petición.
+ * Se encarga de interceptar la petición web HTTP, buscar el Bearer token, validarlo
+ * e inyectar el usuario autenticado dentro del contexto de Spring Security local de este microservicio.
+ */
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -21,11 +26,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTokenProvider jwtTokenProvider;
     private final CustomUserDetailsService userDetailsService;
 
+    /**
+     * Lógica principal del filtro. Verifica si el endpoint debe ser ignorado, si no,
+     * comprueba la cabecera "Authorization" en busca del token para parsearlo.
+     *
+     * @param request La solicitud HTTP
+     * @param response La respuesta HTTP
+     * @param filterChain La cadena de filtros actual
+     * @throws ServletException si ocurre un error general en el servelt
+     * @throws IOException si ocurre un error a nivel de escritura/lectura
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
- String path = request.getServletPath();
+        String path = request.getServletPath();
 
     // 🔥 IGNORA AUTH ENDPOINTS
     if (path.equals("/api/auth/login") || path.equals("/api/auth/register")) {

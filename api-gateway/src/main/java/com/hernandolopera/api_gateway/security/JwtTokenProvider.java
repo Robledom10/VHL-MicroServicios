@@ -1,4 +1,4 @@
-package com.hernandolopera.auth_service.security;
+package com.hernandolopera.api_gateway.security;
 
 import java.util.Date;
 
@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
- * Proveedor utilitario para la generación y validación de tokens JWT en el microservicio de autenticación.
+ * Proveedor utilitario para la generación y validación de tokens JWT en el API Gateway.
  */
 @Component
 public class JwtTokenProvider {
@@ -31,10 +31,10 @@ public class JwtTokenProvider {
     }
 
     /**
-     * Genera un nuevo token JWT utilizando el email del usuario como sujeto (subject).
+     * Genera un nuevo token JWT para un usuario en específico.
      *
-     * @param email Email a incrustar en el token
-     * @return El token en formato String
+     * @param email El correo electrónico del usuario, que se utilizará como "subject" del token
+     * @return El token JWT generado y firmado
      */
     public String generateToken(String email) {
         return Jwts.builder()
@@ -46,11 +46,12 @@ public class JwtTokenProvider {
     }
 
     /**
-     * Verifica la validez de un token y obtiene el respectivo email (subject).
+     * Extrae el correo electrónico (subject) contenido dentro del token JWT.
+     * También verifica que el token esté correctamente firmado y no haya expirado.
      *
-     * @param token El token recibido
-     * @return El correo electrónico almacenado en el token
-     * @throws io.jsonwebtoken.JwtException si el token está manipulado o expirado
+     * @param token El token JWT codificado a evaluar
+     * @return El correo electrónico extraído del token
+     * @throws io.jsonwebtoken.JwtException si el token es inválido, está expirado o malformado
      */
     public String getEmailFromToken(String token) {
         return Jwts.parser()
