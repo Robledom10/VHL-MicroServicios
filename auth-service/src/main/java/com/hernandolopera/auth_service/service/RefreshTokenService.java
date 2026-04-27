@@ -10,6 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.hernandolopera.auth_service.entity.RefreshToken;
 import com.hernandolopera.auth_service.entity.User;
 import com.hernandolopera.auth_service.repository.RefreshTokenRepository;
+import com.hernandolopera.auth_service.security.JwtTokenProvider;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,6 +19,8 @@ import lombok.RequiredArgsConstructor;
 public class RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final BlacklistedTokenService blacklistedTokenService;
 
     /**
      * Crea y guarda un nuevo refresh token para el usuario
@@ -73,11 +76,15 @@ public class RefreshTokenService {
         refreshTokenRepository.deleteByUser(user);
     }
 
-    public void logout(String refreshToken) {
+    public void logout(String refreshToken, String accessToken) {
 
         RefreshToken token = refreshTokenRepository
                 .findByToken(refreshToken)
                 .orElseThrow(() -> new RuntimeException("Refresh token no válido"));
+
+        LocalDateTime expirationDate = jwtTokenProvider.getExpirationDate(accessToken);
+
+        blacklistedTokenService.blacklistToken(accessToken, expirationDate);
 
         refreshTokenRepository.delete(token);
     }

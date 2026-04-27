@@ -5,6 +5,10 @@ import lombok.Data;
 
 @Data
 public class LogoutRequest {
+
     @NotBlank(message = "El refresh token es obligatorio")
     private String refreshToken;
+
+    @NotBlank(message = "El access token es obligatorio")
+    private String accessToken;
 }

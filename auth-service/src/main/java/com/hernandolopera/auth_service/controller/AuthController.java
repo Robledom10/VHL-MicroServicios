@@ -108,7 +108,7 @@ public class AuthController {
     public ResponseEntity<Map<String, Object>> logout(
             @Valid @RequestBody LogoutRequest request) {
 
-        authService.logout(request);;
+        authService.logout(request.getRefreshToken(), request.getAccessToken());
 
         return ResponseEntity.ok(
                 Map.of(

@@ -3,10 +3,8 @@ package com.hernandolopera.auth_service.service;
 import org.springframework.stereotype.Service;
 
 import com.hernandolopera.auth_service.dto.request.LoginRequest;
-import com.hernandolopera.auth_service.dto.request.LogoutRequest;
 import com.hernandolopera.auth_service.dto.request.RegisterRequest;
 import com.hernandolopera.auth_service.dto.response.AuthResponse;
-
 import com.hernandolopera.auth_service.entity.User;
 
 import lombok.RequiredArgsConstructor;
@@ -20,9 +18,9 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-    private final LogoutService logoutService;
     private final RegistrationService registrationService;
     private final LoginService loginService;
+    private final RefreshTokenService refreshTokenService;
 
     /**
      * Registra un nuevo usuario en el sistema.
@@ -44,7 +42,7 @@ public class AuthService {
         return loginService.login(request);
     }
 
-    public void logout(LogoutRequest request) {
-        logoutService.logout(request);
+    public void logout(String refreshToken, String accessToken) {
+        refreshTokenService.logout(refreshToken, accessToken);
     }
 }

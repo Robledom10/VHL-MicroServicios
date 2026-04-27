@@ -1,7 +1,6 @@
 package com.hernandolopera.auth_service.exception;
 
 import java.nio.file.AccessDeniedException;
-import java.security.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.stream.Collectors;

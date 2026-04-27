@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import com.hernandolopera.auth_service.dto.request.LogoutRequest;
 import com.hernandolopera.auth_service.entity.RefreshToken;
 import com.hernandolopera.auth_service.entity.User;
-import com.hernandolopera.auth_service.service.RefreshTokenService;
 
 import lombok.RequiredArgsConstructor;
 

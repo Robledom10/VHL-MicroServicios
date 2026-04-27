@@ -1,5 +1,7 @@
 package com.hernandolopera.auth_service.security;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 import javax.crypto.SecretKey;
@@ -99,5 +101,26 @@ public class JwtTokenProvider {
                 .parseSignedClaims(token)
                 .getPayload()
                 .get("role", String.class);
+    }
+
+    /**
+     * Obtiene la fecha de expiración del JWT.
+     * Esto se usa para guardar el token en blacklist
+     * hasta que expire naturalmente.
+     *
+     * @param token JWT recibido
+     * @return fecha de expiración del token
+     */
+    public LocalDateTime getExpirationDate(String token) {
+        Date expiration = Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getExpiration();
+
+        return expiration.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
     }
 }
