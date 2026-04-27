@@ -68,8 +68,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // Aquí luego puedes setear el usuario en el contexto
                 System.out.println("Usuario autenticado: " + email);
             } catch (Exception e) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return;
+                System.out.println("Token inválido: " + e.getMessage());
             }
         }
         filterChain.doFilter(request, response);

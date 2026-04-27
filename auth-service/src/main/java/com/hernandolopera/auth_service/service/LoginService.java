@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import com.hernandolopera.auth_service.dto.request.LoginRequest;
 import com.hernandolopera.auth_service.dto.response.AuthResponse;
+import com.hernandolopera.auth_service.entity.RefreshToken;
 import com.hernandolopera.auth_service.entity.User;
 import com.hernandolopera.auth_service.repository.UserRepository;
 import com.hernandolopera.auth_service.security.JwtTokenProvider;
@@ -12,7 +13,8 @@ import com.hernandolopera.auth_service.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Servicio encargado exclusivamente del inicio de sesión (Login) de los usuarios.
+ * Servicio encargado exclusivamente del inicio de sesión (Login) de los
+ * usuarios.
  */
 @Service
 @RequiredArgsConstructor
@@ -20,9 +22,11 @@ public class LoginService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final RefreshTokenService refreshTokenService;
 
     /**
-     * Comprueba las credenciales del usuario y genera un token JWT si son correctas.
+     * Comprueba las credenciales del usuario y genera un token JWT si son
+     * correctas.
      *
      * @param request Datos de la petición conteniendo email y contraseña
      * @return Respuesta que contiene el token JWT generado
@@ -39,9 +43,16 @@ public class LoginService {
             throw new RuntimeException("Credenciales invalidas");
         }
 
-        String token = jwtTokenProvider.generateToken(user.getEmail());
+        String accessToken = jwtTokenProvider.generateToken(
+                user.getId(),
+                user.getEmail(),
+                user.getRole().getName());
         // System.out.println("TOKEN: " + token);
 
-        return new AuthResponse(token);
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
+
+        return new AuthResponse(
+                accessToken,
+                refreshToken.getToken());
     }
 }

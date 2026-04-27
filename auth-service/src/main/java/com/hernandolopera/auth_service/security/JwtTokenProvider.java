@@ -4,14 +4,15 @@ import java.util.Date;
 
 import javax.crypto.SecretKey;
 
-import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.Keys;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+
 /**
- * Proveedor utilitario para la generación y validación de tokens JWT en el microservicio de autenticación.
+ * Proveedor utilitario para la generación y validación de tokens JWT en el
+ * microservicio de autenticación.
  */
 @Component
 public class JwtTokenProvider {
@@ -31,14 +32,17 @@ public class JwtTokenProvider {
     }
 
     /**
-     * Genera un nuevo token JWT utilizando el email del usuario como sujeto (subject).
+     * Genera un nuevo token JWT utilizando el email del usuario como sujeto
+     * (subject).
      *
      * @param email Email a incrustar en el token
      * @return El token en formato String
      */
-    public String generateToken(String email) {
+    public String generateToken(Integer userId, String email, String role) {
         return Jwts.builder()
                 .subject(email)
+                .claim("userId", userId)
+                .claim("role", role)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + JWT_EXPIRATION))
                 .signWith(getSigningKey())
@@ -59,5 +63,41 @@ public class JwtTokenProvider {
                 .parseSignedClaims(token) // Parseo moderno
                 .getPayload() // Obtenemos el cuerpo (payload)
                 .getSubject();
+    }
+
+    /**
+     * Verifica la validez de un token y obtiene el respectivo id
+     * 
+     * @param token
+     * @return El id almacenado en el token
+     * @throws io.jsonwebtoken.ClaimJwtException si el token esta manipulado o
+     *                                           expirado
+     */
+
+    public Integer getUserIdFromToken(String token) {
+        return Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("userId", Integer.class);
+    }
+
+    /**
+     * Verifica la validez de un token y obtiene el respectivo role
+     * 
+     * @param token
+     * @return El role almacenado en el token
+     * @throws io.jsonwebtoken.ClaimJwtException si el token esta manipulado o
+     *                                           expirado
+     */
+
+    public String getRoleFromToken(String token) {
+        return Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("role", String.class);
     }
 }
