@@ -1,6 +1,7 @@
 package com.hernandolopera.auth_service.entity;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import com.hernandolopera.auth_service.enums.DocumentType;
 
@@ -58,6 +59,22 @@ public class User {
 
     @Column(name = "phone_verified", nullable = false)
     private Boolean phoneVerified = false;
+
+    @Column(name = "failed_attemps", nullable = false)
+    private Integer failedAttemps = 0;
+
+    @Column(name = "account_non_locked", nullable = false)
+    private Boolean accountNonLocked = true;
+
+    @Column(name = "lock_time")
+    private LocalDateTime lockTime;
+
+    public boolean isAccountLocked() {
+        return !this.accountNonLocked;
+    }
+
+    @Column(name = "is_active", nullable = false)
+    private Boolean active = true;
 
     @ManyToOne
     @JoinColumn(name = "fk_id_rol", nullable = false)

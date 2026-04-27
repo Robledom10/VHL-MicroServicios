@@ -1,5 +1,7 @@
 package com.hernandolopera.auth_service.controller;
 
+import com.hernandolopera.auth_service.service.RefreshAuthService;
+
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -14,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hernandolopera.auth_service.dto.request.LoginRequest;
+import com.hernandolopera.auth_service.dto.request.LogoutRequest;
+import com.hernandolopera.auth_service.dto.request.RefreshTokenRequest;
 import com.hernandolopera.auth_service.dto.request.RegisterRequest;
 import com.hernandolopera.auth_service.dto.response.AuthResponse;
 import com.hernandolopera.auth_service.service.AuthService;
@@ -22,7 +26,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Controlador de entrada para las operaciones REST relacionadas con la seguridad del usuario.
+ * Controlador de entrada para las operaciones REST relacionadas con la
+ * seguridad del usuario.
  * Proporciona endpoints para registro, inicio de sesión y obtención de roles.
  */
 @RestController
@@ -30,10 +35,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthController {
 
+    private final RefreshAuthService refreshAuthService;
     private final AuthService authService;
 
     /**
-     * Endpoint responsable de registrar o introducir un nuevo usuario en la base de datos.
+     * Endpoint responsable de registrar o introducir un nuevo usuario en la base de
+     * datos.
      *
      * @param request Contiene todos los campos necesarios listos en JSON
      * @return Mapa de datos con estado 201 indicando un registro exitoso
@@ -59,7 +66,8 @@ public class AuthController {
     }
 
     /**
-     * Endpoint para consultar los detalles del usuario actualmente autenticado (mi perfil).
+     * Endpoint para consultar los detalles del usuario actualmente autenticado (mi
+     * perfil).
      *
      * @param authentication El contexto de seguridad inyectado por spring
      * @return Un JSON resumiendo el email de usuario y roles
@@ -89,6 +97,23 @@ public class AuthController {
         return ResponseEntity.ok(
                 Map.of(
                         "message", "Acceso autorizado para usuario autenticado"));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refresh(@Valid @RequestBody RefreshTokenRequest request) {
+        return ResponseEntity.ok(refreshAuthService.refreshToken(request));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, Object>> logout(
+            @Valid @RequestBody LogoutRequest request) {
+
+        authService.logout(request.getRefreshToken(), request.getAccessToken());
+
+        return ResponseEntity.ok(
+                Map.of(
+                        "message", "Logout exitoso",
+                        "status", HttpStatus.OK.value()));
     }
 
 }
