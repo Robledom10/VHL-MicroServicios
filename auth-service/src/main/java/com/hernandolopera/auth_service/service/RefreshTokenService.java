@@ -3,7 +3,9 @@ package com.hernandolopera.auth_service.service;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.hernandolopera.auth_service.entity.RefreshToken;
 import com.hernandolopera.auth_service.entity.User;
@@ -44,7 +46,7 @@ public class RefreshTokenService {
      */
     public RefreshToken findByToken(String token) {
         return refreshTokenRepository.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Refresh token no valido"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh token inválido"));
     }
 
     /**
@@ -55,7 +57,10 @@ public class RefreshTokenService {
     public void verifyExpiration(RefreshToken token) {
         if (token.getExpiryDate().isBefore(LocalDateTime.now())) {
             refreshTokenRepository.delete(token);
-            throw new RuntimeException("Refresh token expirado");
+
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Refresh token expirado");
         }
     }
 
@@ -66,6 +71,15 @@ public class RefreshTokenService {
      */
     public void deleteByUser(User user) {
         refreshTokenRepository.deleteByUser(user);
+    }
+
+    public void logout(String refreshToken) {
+
+        RefreshToken token = refreshTokenRepository
+                .findByToken(refreshToken)
+                .orElseThrow(() -> new RuntimeException("Refresh token no válido"));
+
+        refreshTokenRepository.delete(token);
     }
 
 }

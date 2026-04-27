@@ -13,46 +13,85 @@ import com.hernandolopera.auth_service.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Servicio encargado exclusivamente del inicio de sesión (Login) de los
- * usuarios.
+ * Servicio encargado del inicio de sesión:
+ * - validación de credenciales
+ * - control de intentos fallidos
+ * - bloqueo temporal
+ * - generación de Access Token + Refresh Token
  */
 @Service
 @RequiredArgsConstructor
 public class LoginService {
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtTokenProvider jwtTokenProvider;
-    private final RefreshTokenService refreshTokenService;
 
-    /**
-     * Comprueba las credenciales del usuario y genera un token JWT si son
-     * correctas.
-     *
-     * @param request Datos de la petición conteniendo email y contraseña
-     * @return Respuesta que contiene el token JWT generado
-     * @throws RuntimeException si las credenciales son inválidas
-     */
-    public AuthResponse login(LoginRequest request) {
+        private final UserRepository userRepository;
+        private final PasswordEncoder passwordEncoder;
+        private final JwtTokenProvider jwtTokenProvider;
+        private final RefreshTokenService refreshTokenService;
+        private final LoginAttemptService loginAttemptService;
 
-        String emailLimpio = request.getEmail().trim().toLowerCase();
+        /**
+         * Procesa el login del usuario
+         */
+        public AuthResponse login(LoginRequest request) {
 
-        User user = userRepository.findByEmail(emailLimpio)
-                .orElseThrow(() -> new RuntimeException("Credenciales invalidas"));
+                String emailLimpio = request.getEmail()
+                                .trim()
+                                .toLowerCase();
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Credenciales invalidas");
+                User user = userRepository.findByEmail(emailLimpio)
+                                .orElseThrow(() -> new RuntimeException("Credenciales inválidas"));
+
+                if (!user.getActive()) {
+                        throw new RuntimeException(
+                                        "La cuenta se encuentra inactiva. Contacte al administrador.");
+                }
+
+                /**
+                 * Validar si la cuenta está bloqueada
+                 */
+                if (!user.getAccountNonLocked()) {
+
+                        boolean unlocked = loginAttemptService
+                                        .unlockWhenTimeExpired(user);
+
+                        if (!unlocked) {
+                                throw new RuntimeException(
+                                                "Cuenta bloqueada temporalmente. Intenta nuevamente más tarde.");
+                        }
+                }
+
+                /**
+                 * Validar contraseña
+                 */
+                if (!passwordEncoder.matches(
+                                request.getPassword(),
+                                user.getPassword())) {
+
+                        loginAttemptService.increaseFailedAttemps(user);
+
+                        throw new RuntimeException("Credenciales inválidas");
+                }
+
+                /**
+                 * Login exitoso → resetear intentos
+                 */
+                loginAttemptService.resetFailedAttemps(user);
+
+                /**
+                 * Generar Access Token (JWT)
+                 */
+                String accessToken = jwtTokenProvider.generateToken(
+                                user.getId(),
+                                user.getEmail(),
+                                user.getRole().getName());
+
+                /**
+                 * Generar Refresh Token
+                 */
+                RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
+
+                return new AuthResponse(
+                                accessToken,
+                                refreshToken.getToken());
         }
-
-        String accessToken = jwtTokenProvider.generateToken(
-                user.getId(),
-                user.getEmail(),
-                user.getRole().getName());
-        // System.out.println("TOKEN: " + token);
-
-        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
-
-        return new AuthResponse(
-                accessToken,
-                refreshToken.getToken());
-    }
 }

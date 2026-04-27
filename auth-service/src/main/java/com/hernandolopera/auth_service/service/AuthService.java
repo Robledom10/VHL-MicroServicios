@@ -3,6 +3,7 @@ package com.hernandolopera.auth_service.service;
 import org.springframework.stereotype.Service;
 
 import com.hernandolopera.auth_service.dto.request.LoginRequest;
+import com.hernandolopera.auth_service.dto.request.LogoutRequest;
 import com.hernandolopera.auth_service.dto.request.RegisterRequest;
 import com.hernandolopera.auth_service.dto.response.AuthResponse;
 
@@ -11,12 +12,15 @@ import com.hernandolopera.auth_service.entity.User;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Servicio facade que agrupa las operaciones principales de autenticación y registro.
- * Delega responsabilidades a los respectivos servicios específicos ({@link LoginService} y {@link RegistrationService}).
+ * Servicio facade que agrupa las operaciones principales de autenticación y
+ * registro.
+ * Delega responsabilidades a los respectivos servicios específicos
+ * ({@link LoginService} y {@link RegistrationService}).
  */
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+    private final LogoutService logoutService;
     private final RegistrationService registrationService;
     private final LoginService loginService;
 
@@ -38,5 +42,9 @@ public class AuthService {
      */
     public AuthResponse login(LoginRequest request) {
         return loginService.login(request);
+    }
+
+    public void logout(LogoutRequest request) {
+        logoutService.logout(request);
     }
 }
