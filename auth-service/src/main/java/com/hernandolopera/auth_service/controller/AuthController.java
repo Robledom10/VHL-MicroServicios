@@ -1,7 +1,6 @@
 package com.hernandolopera.auth_service.controller;
 
-import com.hernandolopera.auth_service.service.RefreshAuthService;
-
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -12,15 +11,18 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hernandolopera.auth_service.dto.request.LoginRequest;
-import com.hernandolopera.auth_service.dto.request.LogoutRequest;
 import com.hernandolopera.auth_service.dto.request.RefreshTokenRequest;
 import com.hernandolopera.auth_service.dto.request.RegisterRequest;
 import com.hernandolopera.auth_service.dto.response.AuthResponse;
+import com.hernandolopera.auth_service.security.JwtTokenProvider;
 import com.hernandolopera.auth_service.service.AuthService;
+import com.hernandolopera.auth_service.service.BlacklistedTokenService;
+import com.hernandolopera.auth_service.service.RefreshAuthService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +39,8 @@ public class AuthController {
 
     private final RefreshAuthService refreshAuthService;
     private final AuthService authService;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final BlacklistedTokenService blacklistedTokenService;
 
     /**
      * Endpoint responsable de registrar o introducir un nuevo usuario en la base de
@@ -75,12 +79,17 @@ public class AuthController {
     @GetMapping("/me")
     public ResponseEntity<Map<String, Object>> getProfile(Authentication authentication) {
 
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Usuario no autenticado"));
+        }
+
+        String email = authentication.getName();
 
         return ResponseEntity.ok(
                 Map.of(
-                        "email", userDetails.getUsername(),
-                        "roles", userDetails.getAuthorities()));
+                        "email", email,
+                        "message", "Usuario autenticado correctamente"));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -105,15 +114,35 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Map<String, Object>> logout(
-            @Valid @RequestBody LogoutRequest request) {
+    public ResponseEntity<String> logout(
+            @RequestHeader("Authorization") String authHeader) {
 
-        authService.logout(request.getRefreshToken(), request.getAccessToken());
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.badRequest().body("Token no proporcionado");
+        }
 
-        return ResponseEntity.ok(
-                Map.of(
-                        "message", "Logout exitoso",
-                        "status", HttpStatus.OK.value()));
+        String token = authHeader.substring(7);
+
+        LocalDateTime expirationDate = jwtTokenProvider.getExpirationDate(token);
+
+        blacklistedTokenService.blacklistToken(token, expirationDate);
+
+        return ResponseEntity.ok("Logout exitoso");
+    }
+
+    @GetMapping("/check-blacklist")
+    public ResponseEntity<Boolean> checkBlacklist(
+            @RequestHeader("Authorization") String authHeader) {
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.badRequest().body(false);
+        }
+
+        String token = authHeader.substring(7);
+
+        boolean isBlacklisted = blacklistedTokenService.isBlacklisted(token);
+
+        return ResponseEntity.ok(isBlacklisted);
     }
 
 }
