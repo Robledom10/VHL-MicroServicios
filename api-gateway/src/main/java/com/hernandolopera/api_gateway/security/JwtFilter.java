@@ -7,34 +7,37 @@ import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ServerWebExchange;
 
 import reactor.core.publisher.Mono;
 
 /**
  * Filtro global de Gateway que intercepta todas las peticiones entrantes
- * para validar la existencia y validez de un token JWT en el encabezado de
- * autorización.
+ * para validar la existencia y validez de un token JWT en el encabezado
+ * Authorization.
  */
 @Component
 public class JwtFilter implements GlobalFilter, Ordered {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final WebClient.Builder webClientBuilder;
 
-    public JwtFilter(JwtTokenProvider jwtTokenProvider) {
+    public JwtFilter(
+            JwtTokenProvider jwtTokenProvider,
+            WebClient.Builder webClientBuilder) {
+
         this.jwtTokenProvider = jwtTokenProvider;
+        this.webClientBuilder = webClientBuilder;
     }
 
     /**
      * Intercepta las solicitudes y verifica el token JWT.
-     * Ignora las rutas públicas designadas. Si la solicitud no es pública y falta
-     * el token
-     * o es inválido, rechaza la solicitud retornando un estado UNAUTHORIZED.
+     * Ignora rutas públicas y valida blacklist + JWT para rutas protegidas.
      *
-     * @param exchange El entorno de la solicitud/respuesta web actual
-     * @param chain    La cadena de filtros del gateway
-     * @return Mono<Void> para indicar cuándo se completa el procesamiento de la
-     *         solicitud
+     * @param exchange entorno actual de request/response
+     * @param chain    cadena de filtros del gateway
+     * @return Mono<Void>
      */
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -44,7 +47,9 @@ public class JwtFilter implements GlobalFilter, Ordered {
         List<String> publicRoutes = List.of(
                 "/api/auth/login",
                 "/api/auth/register",
-                "/api/auth/refresh");
+                "/api/auth/refresh",
+                "/api/auth/logout",
+                "/api/auth/check-blacklist");
 
         boolean isPublic = publicRoutes.stream()
                 .anyMatch(path::startsWith);
@@ -53,7 +58,9 @@ public class JwtFilter implements GlobalFilter, Ordered {
             return chain.filter(exchange);
         }
 
-        String authHeader = exchange.getRequest().getHeaders().getFirst("Authorization");
+        String authHeader = exchange.getRequest()
+                .getHeaders()
+                .getFirst("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
@@ -67,17 +74,27 @@ public class JwtFilter implements GlobalFilter, Ordered {
             return exchange.getResponse().setComplete();
         }
 
-        System.out.println("GATEWAY PATH: [" + path + "]");
+        return webClientBuilder.build()
+                .get()
+                .uri("http://auth-service:8081/api/auth/check-blacklist")
+                .header("Authorization", authHeader)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .flatMap(isBlacklisted -> {
 
-        return chain.filter(exchange);
+                    if (Boolean.TRUE.equals(isBlacklisted)) {
+                        exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+                        return exchange.getResponse().setComplete();
+                    }
+
+                    System.out.println("GATEWAY PATH: [" + path + "]");
+                    return chain.filter(exchange);
+                });
     }
 
     /**
-     * Configura el orden de ejecución de este filtro dentro de la cadena de
-     * filtros.
-     * Un valor negativo asegura que se ejecute tempranamente.
-     *
-     * @return El orden del filtro (ej. -1)
+     * Define el orden de ejecución del filtro.
+     * Un valor negativo asegura ejecución temprana.
      */
     @Override
     public int getOrder() {

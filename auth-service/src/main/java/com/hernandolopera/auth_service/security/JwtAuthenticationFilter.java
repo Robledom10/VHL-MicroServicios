@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -18,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * Filtro de seguridad que se ejecuta una vez por cada petición.
- * Se encarga de interceptar la petición web HTTP, buscar el Bearer token,
+ * Se encarga de interceptar la petición HTTP, buscar el Bearer token,
  * validarlo e inyectar el usuario autenticado dentro del contexto de Spring
  * Security.
  */
@@ -37,15 +38,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain)
             throws ServletException, IOException {
 
+        System.out.println("=================================");
+        System.out.println("PATH: " + request.getServletPath());
+        System.out.println("AUTH HEADER: " + request.getHeader("Authorization"));
+        System.out.println("=================================");
+
         String path = request.getServletPath();
 
-        /**
+        /*
          * Ignorar endpoints públicos
          */
         if (path.equals("/api/auth/login")
                 || path.equals("/api/auth/register")
                 || path.equals("/api/auth/refresh")
-                || path.equals("/api/auth/logout")) {
+                || path.equals("/api/auth/logout")
+                || path.equals("/api/auth/check-blacklist")) {
 
             filterChain.doFilter(request, response);
             return;
@@ -57,7 +64,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             String token = header.substring(7);
 
-            /**
+            /*
              * Validar blacklist
              */
             if (blacklistedTokenService.isBlacklisted(token)) {
@@ -71,14 +78,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
                         userDetails.getAuthorities());
 
-                SecurityContextHolder
-                        .getContext()
-                        .setAuthentication(auth);
+                authentication.setDetails(
+                        new WebAuthenticationDetailsSource()
+                                .buildDetails(request));
+
+                SecurityContextHolder.getContext()
+                        .setAuthentication(authentication);
 
                 System.out.println("Usuario autenticado: " + email);
 
