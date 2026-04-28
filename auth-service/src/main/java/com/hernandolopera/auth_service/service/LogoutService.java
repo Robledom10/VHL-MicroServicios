@@ -1,5 +1,7 @@
 package com.hernandolopera.auth_service.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.hernandolopera.auth_service.dto.request.LogoutRequest;
@@ -12,11 +14,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class LogoutService {
 
+    private static final Logger logger = LoggerFactory.getLogger(LogoutService.class);
+
     private final RefreshTokenService refreshTokenService;
 
     /**
-     * Procesa el cierre de sesion del usuario
-     * 
+     * Procesa el cierre de sesión del usuario
+     *
      * @param request contiene el refresh token enviado por el cliente
      */
     public void logout(LogoutRequest request) {
@@ -27,7 +31,7 @@ public class LogoutService {
         RefreshToken refreshToken = refreshTokenService.findByToken(request.getRefreshToken());
 
         /**
-         * Validar expiracion
+         * Validar expiración
          */
         refreshTokenService.verifyExpiration(refreshToken);
 
@@ -40,5 +44,12 @@ public class LogoutService {
          * Eliminar refresh token
          */
         refreshTokenService.deleteByUser(user);
+
+        /**
+         * Registrar evento de logout
+         */
+        logger.info(
+                "Usuario {} cerró sesión correctamente",
+                user.getEmail());
     }
 }

@@ -24,6 +24,37 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `blacklisted_token`
+--
+DROP TABLE IF EXISTS `blacklisted_token`;
+
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+
+/*!50503 SET character_set_client = utf8mb4 */;
+
+CREATE TABLE
+  `blacklisted_token` (
+    `id_blacklisted_token` int NOT NULL AUTO_INCREMENT,
+    `token` text NOT NULL,
+    `logout_at` datetime NOT NULL,
+    `expires_at` datetime NOT NULL,
+    PRIMARY KEY (`id_blacklisted_token`)
+  ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `blacklisted_token`
+--
+LOCK TABLES `blacklisted_token` WRITE;
+
+/*!40000 ALTER TABLE `blacklisted_token` DISABLE KEYS */;
+
+/*!40000 ALTER TABLE `blacklisted_token` ENABLE KEYS */;
+
+UNLOCK TABLES;
+
+--
 -- Table structure for table `permission`
 --
 DROP TABLE IF EXISTS `permission`;
@@ -188,6 +219,10 @@ CREATE TABLE
     `phone_verified` bit (1) NOT NULL,
     `state` varchar(255) DEFAULT NULL,
     `fk_id_rol` int NOT NULL,
+    `failed_attempts` int NOT NULL DEFAULT '0',
+    `account_non_locked` tinyint (1) NOT NULL DEFAULT '1',
+    `lock_time` datetime DEFAULT NULL,
+    `is_active` tinyint (1) NOT NULL DEFAULT '1',
     PRIMARY KEY (`id_user`),
     UNIQUE KEY `UKckltqnf47mr90fw56edpewrk8` (`document_number`),
     UNIQUE KEY `UKob8kqyqqgmefl0aco34akdtpe` (`email`),
@@ -222,6 +257,10 @@ VALUES
     NULL,
     _binary '\0',
     NULL,
+    1,
+    0,
+    1,
+    NULL,
     1
   ),
   (
@@ -239,7 +278,11 @@ VALUES
     NULL,
     _binary '\0',
     NULL,
-    2
+    2,
+    0,
+    1,
+    NULL,
+    1
   );
 
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
@@ -262,4 +305,4 @@ UNLOCK TABLES;
 
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-04-27 12:27:48
+-- Dump completed on 2026-04-28 12:42:35

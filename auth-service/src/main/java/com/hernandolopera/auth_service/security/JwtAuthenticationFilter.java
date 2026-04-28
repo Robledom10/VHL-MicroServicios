@@ -8,6 +8,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.hernandolopera.auth_service.service.BlacklistedTokenService;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,8 +18,9 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * Filtro de seguridad que se ejecuta una vez por cada petición.
- * Se encarga de interceptar la petición web HTTP, buscar el Bearer token, validarlo
- * e inyectar el usuario autenticado dentro del contexto de Spring Security local de este microservicio.
+ * Se encarga de interceptar la petición web HTTP, buscar el Bearer token,
+ * validarlo e inyectar el usuario autenticado dentro del contexto de Spring
+ * Security.
  */
 @Component
 @RequiredArgsConstructor
@@ -25,33 +28,43 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final CustomUserDetailsService userDetailsService;
+    private final BlacklistedTokenService blacklistedTokenService;
 
-    /**
-     * Lógica principal del filtro. Verifica si el endpoint debe ser ignorado, si no,
-     * comprueba la cabecera "Authorization" en busca del token para parsearlo.
-     *
-     * @param request La solicitud HTTP
-     * @param response La respuesta HTTP
-     * @param filterChain La cadena de filtros actual
-     * @throws ServletException si ocurre un error general en el servelt
-     * @throws IOException si ocurre un error a nivel de escritura/lectura
-     */
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain)
             throws ServletException, IOException {
 
         String path = request.getServletPath();
 
-    // 🔥 IGNORA AUTH ENDPOINTS
-    if (path.equals("/api/auth/login") || path.equals("/api/auth/register")) {
-        filterChain.doFilter(request, response);
-        return;
-    }
+        /**
+         * Ignorar endpoints públicos
+         */
+        if (path.equals("/api/auth/login")
+                || path.equals("/api/auth/register")
+                || path.equals("/api/auth/refresh")
+                || path.equals("/api/auth/logout")) {
+
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         String header = request.getHeader("Authorization");
 
         if (header != null && header.startsWith("Bearer ")) {
+
             String token = header.substring(7);
+
+            /**
+             * Validar blacklist
+             */
+            if (blacklistedTokenService.isBlacklisted(token)) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("Token invalidado por logout");
+                return;
+            }
 
             try {
                 String email = jwtTokenProvider.getEmailFromToken(token);
@@ -63,14 +76,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         null,
                         userDetails.getAuthorities());
 
-                SecurityContextHolder.getContext().setAuthentication(auth);
+                SecurityContextHolder
+                        .getContext()
+                        .setAuthentication(auth);
 
-                // Aquí luego puedes setear el usuario en el contexto
                 System.out.println("Usuario autenticado: " + email);
+
             } catch (Exception e) {
-                System.out.println("Token inválido: " + e.getMessage());
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("Token inválido o expirado");
+                return;
             }
         }
+
         filterChain.doFilter(request, response);
     }
 }

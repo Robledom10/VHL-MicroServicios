@@ -1,7 +1,5 @@
 package com.hernandolopera.auth_service.controller;
 
-import com.hernandolopera.auth_service.service.RefreshAuthService;
-
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -16,11 +14,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hernandolopera.auth_service.dto.request.LoginRequest;
-import com.hernandolopera.auth_service.dto.request.LogoutRequest;
 import com.hernandolopera.auth_service.dto.request.RefreshTokenRequest;
 import com.hernandolopera.auth_service.dto.request.RegisterRequest;
 import com.hernandolopera.auth_service.dto.response.AuthResponse;
 import com.hernandolopera.auth_service.service.AuthService;
+import com.hernandolopera.auth_service.service.RefreshAuthService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -104,16 +102,16 @@ public class AuthController {
         return ResponseEntity.ok(refreshAuthService.refreshToken(request));
     }
 
-    @PostMapping("/logout")
-    public ResponseEntity<Map<String, Object>> logout(
-            @Valid @RequestBody LogoutRequest request) {
+    // @PostMapping("/logout")
+    // public ResponseEntity<Map<String, Object>> logout(
+    //         @Valid @RequestBody LogoutRequest request) {
 
-        authService.logout(request.getRefreshToken(), request.getAccessToken());
+    //     authService.logout(request.getRefreshToken(), request.getAccessToken());
 
-        return ResponseEntity.ok(
-                Map.of(
-                        "message", "Logout exitoso",
-                        "status", HttpStatus.OK.value()));
-    }
+    //     return ResponseEntity.ok(
+    //             Map.of(
+    //                     "message", "Logout exitoso",
+    //                     "status", HttpStatus.OK.value()));
+    // }
 
 }

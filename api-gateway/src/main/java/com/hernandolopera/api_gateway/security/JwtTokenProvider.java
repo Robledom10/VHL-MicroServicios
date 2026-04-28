@@ -11,7 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
- * Proveedor utilitario para la generación y validación de tokens JWT en el API Gateway.
+ * Proveedor utilitario para la generación y validación de tokens JWT en el API
+ * Gateway.
  */
 @Component
 public class JwtTokenProvider {
@@ -33,7 +34,8 @@ public class JwtTokenProvider {
     /**
      * Genera un nuevo token JWT para un usuario en específico.
      *
-     * @param email El correo electrónico del usuario, que se utilizará como "subject" del token
+     * @param email El correo electrónico del usuario, que se utilizará como
+     *              "subject" del token
      * @return El token JWT generado y firmado
      */
     public String generateToken(String email) {
@@ -51,7 +53,8 @@ public class JwtTokenProvider {
      *
      * @param token El token JWT codificado a evaluar
      * @return El correo electrónico extraído del token
-     * @throws io.jsonwebtoken.JwtException si el token es inválido, está expirado o malformado
+     * @throws io.jsonwebtoken.JwtException si el token es inválido, está expirado o
+     *                                      malformado
      */
     public String getEmailFromToken(String token) {
         return Jwts.parser()
@@ -60,5 +63,17 @@ public class JwtTokenProvider {
                 .parseSignedClaims(token) // Parseo moderno
                 .getPayload() // Obtenemos el cuerpo (payload)
                 .getSubject();
+    }
+
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parser()
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(token);
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
     }
 }
