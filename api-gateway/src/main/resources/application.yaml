@@ -16,10 +16,26 @@ spring:
           predicates:
             - Path=/api/auth/**
 
-      default-filters:
-        # Nota: Espacio entre las cabeceras, coma antes de la estrategia
-        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
+      globalcors:
+        corsConfigurations:
+          "[/**]":
+            allowedOrigins:
+              - "http://localhost:4200"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
 
+      default-filters:
+        - name: DedupeResponseHeader
+      args:
+        name: Access-Control-Allow-Origin Access-Control-Allow-Credentials
+        strategy: RETAIN_UNIQUE
 app:
   jwt:
     secret: oH+9q7wdTI5MPQmt5wRelMhO70B6FmEGOanhAPEAGbM=
