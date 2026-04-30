@@ -1,8 +1,11 @@
 package com.vhl.reservationservice.controller;
 
 import com.vhl.reservationservice.dto.ApiResponse;
+import com.vhl.reservationservice.dto.CancelReservationRequestDTO;
+import com.vhl.reservationservice.dto.CancelReservationResponseDTO;
 import com.vhl.reservationservice.dto.ReservationRequestDTO;
 import com.vhl.reservationservice.dto.ReservationResponseDTO;
+import com.vhl.reservationservice.dto.TravelerRequestDTO;
 import com.vhl.reservationservice.service.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -126,13 +129,27 @@ public class ReservationController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Cancelar reserva", description = "Cancela una reserva existente")
-    public ResponseEntity<ApiResponse<String>> cancelReservation(
-            @Parameter(description = "ID de la reserva") @PathVariable Long id) {
+    public ResponseEntity<ApiResponse<CancelReservationResponseDTO>> cancelReservation(
+            @Parameter(description = "ID de la reserva") @PathVariable Long id,
+            @RequestBody(required = false) CancelReservationRequestDTO requestDTO) {
         logger.info("DELETE /api/reservations/{} - Cancelando reserva", id);
         
-        reservationService.cancelReservation(id);
+        CancelReservationResponseDTO response = reservationService.cancelReservation(id, requestDTO);
         return ResponseEntity.ok(
-            new ApiResponse<>(true, "Reserva cancelada exitosamente", "OK", "RES_CANCELLED")
+            new ApiResponse<>(true, "Reserva cancelada exitosamente. Devolucion gestionada", response, "RES_CANCELLED")
+        );
+    }
+
+    @PostMapping("/{id}/travelers")
+    @Operation(summary = "Registrar viajeros en una reserva", description = "Registra o reemplaza los viajeros asociados a una reserva existente")
+    public ResponseEntity<ApiResponse<ReservationResponseDTO>> registerTravelers(
+            @Parameter(description = "ID de la reserva") @PathVariable Long id,
+            @Valid @RequestBody List<TravelerRequestDTO> travelers) {
+        logger.info("POST /api/reservations/{}/travelers - Registrando viajeros", id);
+
+        ReservationResponseDTO response = reservationService.registerTravelers(id, travelers);
+        return ResponseEntity.ok(
+            new ApiResponse<>(true, "Viajeros registrados exitosamente", response, "TRAVELERS_REGISTERED")
         );
     }
 

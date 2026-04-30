@@ -1,15 +1,21 @@
 package com.vhl.reservationservice.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse<T> {
 
+    @JsonProperty("exitoso")
     private boolean success;
+    @JsonProperty("mensaje")
     private String message;
+    @JsonProperty("datos")
     private T data;
+    @JsonProperty("fechaHora")
     private LocalDateTime timestamp;
+    @JsonProperty("codigo")
     private String code;
 
     public ApiResponse() {

@@ -1,21 +1,39 @@
 package com.vhl.reservationservice.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
+import java.util.List;
+
 public class ReservationRequestDTO {
 
-    @NotNull(message = "Package ID is required")
+    @JsonProperty("idPaquete")
+    @JsonAlias("packageId")
+    @NotNull(message = "El ID del paquete es obligatorio")
     private Long packageId;
 
-    @NotNull(message = "User ID is required")
+    @JsonProperty("idUsuario")
+    @JsonAlias("userId")
+    @NotNull(message = "El ID del usuario es obligatorio")
     private Long userId;
 
-    @NotNull(message = "Number of spots is required")
-    @Positive(message = "Number of spots must be greater than 0")
+    @JsonProperty("numeroCupos")
+    @JsonAlias("numberOfSpots")
+    @NotNull(message = "El numero de cupos es obligatorio")
+    @Positive(message = "El numero de cupos debe ser mayor a 0")
     private Integer numberOfSpots;
 
+    @JsonProperty("notas")
+    @JsonAlias("notes")
     private String notes;
+
+    @JsonProperty("viajeros")
+    @JsonAlias("travelers")
+    @Valid
+    private List<TravelerRequestDTO> travelers;
 
     public ReservationRequestDTO() {
     }
@@ -57,5 +75,13 @@ public class ReservationRequestDTO {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public List<TravelerRequestDTO> getTravelers() {
+        return travelers;
+    }
+
+    public void setTravelers(List<TravelerRequestDTO> travelers) {
+        this.travelers = travelers;
     }
 }

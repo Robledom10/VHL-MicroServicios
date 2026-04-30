@@ -1,12 +1,17 @@
 package com.vhl.reservationservice.service.impl;
 
 import com.vhl.reservationservice.client.PackageServiceClient;
+import com.vhl.reservationservice.dto.CancelReservationRequestDTO;
+import com.vhl.reservationservice.dto.CancelReservationResponseDTO;
 import com.vhl.reservationservice.dto.ReservationRequestDTO;
 import com.vhl.reservationservice.dto.ReservationResponseDTO;
+import com.vhl.reservationservice.dto.TravelerRequestDTO;
 import com.vhl.reservationservice.exception.InsufficientSpotsException;
 import com.vhl.reservationservice.exception.PackageNotFoundException;
 import com.vhl.reservationservice.exception.ReservationException;
+import com.vhl.reservationservice.exception.ReservationNotFoundException;
 import com.vhl.reservationservice.model.Reservation;
+import com.vhl.reservationservice.model.ReservationTraveler;
 import com.vhl.reservationservice.repository.ReservationRepository;
 import com.vhl.reservationservice.service.AuditService;
 import com.vhl.reservationservice.service.ReservationService;
@@ -74,13 +79,14 @@ public class ReservationServiceImpl implements ReservationService {
         );
 
         // Generar código de confirmación
-        reservation.setConfirmationCode(ConfirmationCodeGenerator.generate());
+        reservation.setConfirmationCode(generateUniqueConfirmationCode());
 
         // Calcular precio total
         Double totalPrice = packageInfo.getPrice() * requestDTO.getNumberOfSpots();
         reservation.setTotalPrice(totalPrice);
 
         reservation.setNotes(requestDTO.getNotes());
+        addTravelersToReservation(reservation, requestDTO.getTravelers(), requestDTO.getNumberOfSpots());
 
         // Guardar la reserva
         Reservation savedReservation = reservationRepository.save(reservation);
@@ -99,7 +105,7 @@ public class ReservationServiceImpl implements ReservationService {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> {
                     logger.error("Reserva no encontrada: {}", id);
-                    return new PackageNotFoundException("Reserva no encontrada con ID: " + id);
+                    return new ReservationNotFoundException("Reserva no encontrada con ID: " + id);
                 });
         
         return new ReservationResponseDTO(reservation);
@@ -130,7 +136,7 @@ public class ReservationServiceImpl implements ReservationService {
         logger.info("Actualizando reserva: {}", id);
         
         Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new PackageNotFoundException("Reserva no encontrada con ID: " + id));
+                .orElseThrow(() -> new ReservationNotFoundException("Reserva no encontrada con ID: " + id));
 
         // Validar que solo se pueden actualizar reservas pendientes
         if (!reservation.getStatus().equals(Reservation.ReservationStatus.PENDING)) {
@@ -167,11 +173,11 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public void cancelReservation(Long id) {
+    public CancelReservationResponseDTO cancelReservation(Long id, CancelReservationRequestDTO requestDTO) {
         logger.info("Cancelando reserva: {}", id);
         
         Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new PackageNotFoundException("Reserva no encontrada con ID: " + id));
+                .orElseThrow(() -> new ReservationNotFoundException("Reserva no encontrada con ID: " + id));
 
         if (reservation.getStatus().equals(Reservation.ReservationStatus.CANCELLED)) {
             throw new ReservationException("La reserva ya ha sido cancelada");
@@ -179,13 +185,18 @@ public class ReservationServiceImpl implements ReservationService {
 
         Reservation.ReservationStatus oldStatus = reservation.getStatus();
         reservation.setStatus(Reservation.ReservationStatus.CANCELLED);
+        reservation.setCancellationReason(requestDTO != null ? requestDTO.getCancellationReason() : null);
+        reservation.setRefundAmount(calculateRefundAmount(reservation));
+        reservation.setRefundStatus(Reservation.RefundStatus.PROCESSED);
+        reservation.setRefundRequestedAt(LocalDateTime.now());
         reservation.setUpdatedAt(LocalDateTime.now());
-        reservationRepository.save(reservation);
+        Reservation cancelledReservation = reservationRepository.save(reservation);
         
         logger.info("Reserva cancelada: {}", id);
         
         auditService.logAction(id, com.vhl.reservationservice.model.ReservationAudit.AuditAction.CANCELLED, 
                                oldStatus, Reservation.ReservationStatus.CANCELLED, "SYSTEM");
+        return new CancelReservationResponseDTO(cancelledReservation);
     }
 
     @Override
@@ -193,7 +204,7 @@ public class ReservationServiceImpl implements ReservationService {
         logger.info("Confirmando reserva: {}", id);
         
         Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new PackageNotFoundException("Reserva no encontrada con ID: " + id));
+                .orElseThrow(() -> new ReservationNotFoundException("Reserva no encontrada con ID: " + id));
 
         if (!reservation.getStatus().equals(Reservation.ReservationStatus.PENDING)) {
             throw new ReservationException("Solo se pueden confirmar reservas en estado pendiente");
@@ -218,6 +229,64 @@ public class ReservationServiceImpl implements ReservationService {
         return reservations.stream()
                 .map(ReservationResponseDTO::new)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public ReservationResponseDTO registerTravelers(Long id, List<TravelerRequestDTO> travelers) {
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new ReservationNotFoundException("Reserva no encontrada con ID: " + id));
+
+        if (reservation.getStatus().equals(Reservation.ReservationStatus.CANCELLED)) {
+            throw new ReservationException("No se pueden registrar viajeros en una reserva cancelada");
+        }
+
+        reservation.getTravelers().clear();
+        addTravelersToReservation(reservation, travelers, reservation.getNumberOfSpots());
+        Reservation updatedReservation = reservationRepository.save(reservation);
+        auditService.logAction(id, com.vhl.reservationservice.model.ReservationAudit.AuditAction.UPDATED, "SYSTEM");
+
+        return new ReservationResponseDTO(updatedReservation);
+    }
+
+    private String generateUniqueConfirmationCode() {
+        String confirmationCode;
+        int attempts = 0;
+
+        do {
+            confirmationCode = ConfirmationCodeGenerator.generate();
+            attempts++;
+            if (attempts > 5) {
+                confirmationCode = ConfirmationCodeGenerator.generateUUID();
+                break;
+            }
+        } while (reservationRepository.existsByConfirmationCode(confirmationCode));
+
+        return confirmationCode;
+    }
+
+    private void addTravelersToReservation(Reservation reservation, List<TravelerRequestDTO> travelers, Integer numberOfSpots) {
+        if (travelers == null || travelers.isEmpty()) {
+            return;
+        }
+
+        if (travelers.size() > numberOfSpots) {
+            throw new ReservationException("No se pueden registrar mas viajeros que cupos reservados");
+        }
+
+        for (TravelerRequestDTO travelerDTO : travelers) {
+            ReservationTraveler traveler = new ReservationTraveler();
+            traveler.setFullName(travelerDTO.getFullName());
+            traveler.setDocumentType(travelerDTO.getDocumentType());
+            traveler.setDocumentNumber(travelerDTO.getDocumentNumber());
+            traveler.setBirthDate(travelerDTO.getBirthDate());
+            traveler.setPhone(travelerDTO.getPhone());
+            traveler.setEmail(travelerDTO.getEmail());
+            reservation.addTraveler(traveler);
+        }
+    }
+
+    private Double calculateRefundAmount(Reservation reservation) {
+        return reservation.getTotalPrice() != null ? reservation.getTotalPrice() : 0.0;
     }
 
     private void validateReservationRequest(ReservationRequestDTO requestDTO) {

@@ -1,0 +1,21 @@
+{
+  "priority": 5,
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/api/packages/[0-9]+"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": 20,
+      "name": "Paquete turistico de prueba",
+      "description": "Mock backend para pruebas Docker de reservation-service",
+      "totalSpots": 30,
+      "availableSpots": 12,
+      "price": 150.0
+    }
+  }
+}

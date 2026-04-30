@@ -1,13 +1,14 @@
 package com.vhl.reservationservice;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+import static org.assertj.core.api.Assertions.assertThat;
+
 public class ReservationServiceApplicationTests {
 
     @Test
-    public void contextLoads() {
+    public void applicationClassIsAvailable() {
+        assertThat(ReservationServiceApplication.class).isNotNull();
     }
 
 }

@@ -136,22 +136,24 @@ services:
       dockerfile: Dockerfile
     container_name: reservation-service
     ports:
-      - "8082:8082"
+      - "8084:8082"
     environment:
       SPRING_PROFILES_ACTIVE: docker
       SERVER_PORT: 8082
       SPRING_DATASOURCE_URL: jdbc:mysql://reservation-db:3306/reservation_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATASOURCE_USERNAME: reservation_user
+      SPRING_DATASOURCE_PASSWORD: reservation_password
       SPRING_REDIS_HOST: redis
       SPRING_REDIS_PORT: 6379
-      SERVICE_PACKAGE_URL: http://package-service:8083
+      SERVICE_PACKAGE_URL: http://package-service:8080
       SERVICE_AUTH_URL: http://auth-service:8081
     depends_on:
       reservation-db:
         condition: service_healthy
       redis:
         condition: service_healthy
+      package-service:
+        condition: service_started
     networks:
       - vhl-network
     healthcheck:
@@ -161,13 +163,15 @@ services:
       retries: 3
       start_period: 40s
 
-  # Package Service (placeholder)
+  # Package Service mock for reservation backend tests
   package-service:
-    image: alpine:latest
+    image: wiremock/wiremock:3.9.1
     container_name: package-service
-    command: sleep 1000
+    command: ["--global-response-templating"]
     ports:
-      - "8083:8083"
+      - "8085:8080"
+    volumes:
+      - ./docker/wiremock:/home/wiremock
     networks:
       - vhl-network
 
