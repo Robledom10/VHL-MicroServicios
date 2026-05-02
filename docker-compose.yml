@@ -1,0 +1,77 @@
+﻿services:
+  mysql-reservas:
+    image: mysql:8.0
+    container_name: mysql-reservas
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: vhl_reservas
+      MYSQL_USER: usuario
+      MYSQL_PASSWORD: password123
+    ports:
+      - '3306:3306'
+    volumes:
+      - mysql-reservas-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    image: vhlmicroservicios-auth-service:latest
+    container_name: auth-service
+    ports:
+      - '8081:8081'
+    depends_on:
+      mysql-reservas:
+        condition: service_healthy
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-reservas:3306/vhl_reservas?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=usuario
+      - SPRING_DATASOURCE_PASSWORD=password123
+    volumes:
+      - auth-service-data:/app/data
+
+  reservation-service:
+    build:
+      context: .
+      dockerfile: reservation-service/Dockerfile
+    image: vhlmicroservicios-reservation-service:latest
+    container_name: reservation-service
+    ports:
+      - '8082:8082'
+    depends_on:
+      mysql-reservas:
+        condition: service_healthy
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-reservas:3306/vhl_reservas?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=usuario
+      - SPRING_DATASOURCE_PASSWORD=password123
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    volumes:
+      - reservation-service-data:/app/data
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    image: vhlmicroservicios-api-gateway:latest
+    container_name: api-gateway
+    ports:
+      - '8080:8080'
+    depends_on:
+      - auth-service
+      - reservation-service
+    environment:
+      - MICROSERVICES_AUTH_SERVICE_URL=http://auth-service:8081
+      - MICROSERVICES_RESERVATION_SERVICE_URL=http://reservation-service:8082
+    volumes:
+      - api-gateway-data:/app/data
+
+volumes:
+  auth-service-data:
+  api-gateway-data:
+  reservation-service-data:
+  mysql-reservas-data:
