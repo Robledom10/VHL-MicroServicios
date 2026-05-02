@@ -36,8 +36,8 @@
 
   reservation-service:
     build:
-      context: .
-      dockerfile: reservation-service/Dockerfile
+      context: ./reservation-service
+      dockerfile: Dockerfile
     image: vhlmicroservicios-reservation-service:latest
     container_name: reservation-service
     ports:
@@ -55,8 +55,8 @@
 
   api-gateway:
     build:
-      context: .
-      dockerfile: api-gateway/Dockerfile
+      context: ./api-gateway
+      dockerfile: Dockerfile
     image: vhlmicroservicios-api-gateway:latest
     container_name: api-gateway
     ports:
