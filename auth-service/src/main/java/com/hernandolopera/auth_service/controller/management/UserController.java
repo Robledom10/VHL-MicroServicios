@@ -1,4 +1,4 @@
-package com.hernandolopera.auth_service.controller;
+package com.hernandolopera.auth_service.controller.management;
 
 import java.util.Map;
 

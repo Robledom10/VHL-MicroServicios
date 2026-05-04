@@ -1,4 +1,4 @@
-package com.hernandolopera.auth_service.controller;
+package com.hernandolopera.auth_service.controller.auth;
 
 import java.util.Map;
 
@@ -14,6 +14,8 @@ import com.hernandolopera.auth_service.dto.request.auth.RegisterRequest;
 import com.hernandolopera.auth_service.dto.response.AuthResponse;
 import com.hernandolopera.auth_service.service.auth.AuthService;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -33,7 +35,23 @@ public class AuthEntryPointController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
-        return ResponseEntity.ok(authService.login(request));
+    public ResponseEntity<AuthResponse> login(
+            @Valid @RequestBody LoginRequest request,
+            HttpServletResponse response) {
+
+        AuthResponse auth = authService.login(request);
+
+        Cookie refreshCookie = new Cookie("refreshToken", auth.getRefreshToken());
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setSecure(false); // true en producción (HTTPS)
+        refreshCookie.setPath("/api/auth/tokens");
+        refreshCookie.setMaxAge(7 * 24 * 60 * 60); // 7 días
+
+        response.addCookie(refreshCookie);
+
+        // ❗ NO enviar refresh token en body
+        auth.setRefreshToken(null);
+
+        return ResponseEntity.ok(auth);
     }
 }

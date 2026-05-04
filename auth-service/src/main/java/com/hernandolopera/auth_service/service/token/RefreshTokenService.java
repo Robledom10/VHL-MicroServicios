@@ -10,7 +10,6 @@ import org.springframework.web.server.ResponseStatusException;
 import com.hernandolopera.auth_service.entity.auth.User;
 import com.hernandolopera.auth_service.entity.token.RefreshToken;
 import com.hernandolopera.auth_service.repository.token.RefreshTokenRepository;
-import com.hernandolopera.auth_service.security.jwt.JwtTokenProvider;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,22 +18,14 @@ import lombok.RequiredArgsConstructor;
 public class RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
-    private final JwtTokenProvider jwtTokenProvider;
-    private final BlacklistedTokenService blacklistedTokenService;
 
-    /**
-     * Crea y guarda un nuevo refresh token para el usuario
-     * 
-     * @param user
-     * @return retorna el token refrescado
-     */
+    // 🔹 Crear refresh token
     public RefreshToken createRefreshToken(User user) {
 
         refreshTokenRepository.findByUser(user)
-                .ifPresent(existingToken -> refreshTokenRepository.delete(existingToken));
+                .ifPresent(refreshTokenRepository::delete);
 
         RefreshToken refreshToken = new RefreshToken();
-
         refreshToken.setUser(user);
         refreshToken.setToken(UUID.randomUUID().toString());
         refreshToken.setExpiryDate(LocalDateTime.now().plusDays(7));
@@ -42,21 +33,37 @@ public class RefreshTokenService {
         return refreshTokenRepository.save(refreshToken);
     }
 
-    /**
-     * Busca un refresh token por su valor String
-     * 
-     * @param token
-     */
-    public RefreshToken findByToken(String token) {
-        return refreshTokenRepository.findByToken(token)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh token inválido"));
+    // 🔹 Validar refresh token
+    public User validateRefreshToken(String refreshToken) {
+
+        RefreshToken token = refreshTokenRepository.findByToken(refreshToken)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED,
+                        "Refresh token inválido"));
+
+        if (token.getExpiryDate().isBefore(LocalDateTime.now())) {
+            refreshTokenRepository.delete(token);
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Refresh token expirado");
+        }
+
+        return token.getUser();
     }
 
-    /**
-     * Verifica si el token expiro
-     * 
-     * @param token
-     */
+    // 🔹 Eliminar refresh token
+    public void deleteByToken(String refreshToken) {
+        refreshTokenRepository.findByToken(refreshToken)
+                .ifPresent(refreshTokenRepository::delete);
+    }
+
+    public RefreshToken findByToken(String token) {
+        return refreshTokenRepository.findByToken(token)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED,
+                        "Refresh token inválido"));
+    }
+
     public void verifyExpiration(RefreshToken token) {
         if (token.getExpiryDate().isBefore(LocalDateTime.now())) {
             refreshTokenRepository.delete(token);
@@ -66,27 +73,4 @@ public class RefreshTokenService {
                     "Refresh token expirado");
         }
     }
-
-    /**
-     * Elimina refresh token al cerrar sesión
-     * 
-     * @param user
-     */
-    public void deleteByUser(User user) {
-        refreshTokenRepository.deleteByUser(user);
-    }
-
-    public void logout(String refreshToken, String accessToken) {
-
-        RefreshToken token = refreshTokenRepository
-                .findByToken(refreshToken)
-                .orElseThrow(() -> new RuntimeException("Refresh token no válido"));
-
-        LocalDateTime expirationDate = jwtTokenProvider.getExpirationDate(accessToken);
-
-        blacklistedTokenService.blacklistToken(accessToken, expirationDate);
-
-        refreshTokenRepository.delete(token);
-    }
-
 }
