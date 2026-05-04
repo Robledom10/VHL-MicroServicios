@@ -1,14 +1,16 @@
 spring:
   application:
     name: auth-service
+  profiles:
+    active: dev
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/vhl_reservas?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC}
-    username: ${SPRING_DATASOURCE_USERNAME:usuario}
-    password: ${SPRING_DATASOURCE_PASSWORD:password123}
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update
 
-server:
-  port: 8081
+# Tus configuraciones personalizadas separadas de las de Spring
+app:
+  jwt:
+    secret: oH+9q7wdTI5MPQmt5wRelMhO70B6FmEGOanhAPEAGbM=
+    expiration: 300000

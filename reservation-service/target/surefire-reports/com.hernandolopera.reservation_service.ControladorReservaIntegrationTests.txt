@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.hernandolopera.reservation_service.ControladorReservaIntegrationTests
+-------------------------------------------------------------------------------
+Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 12.99 s -- in com.hernandolopera.reservation_service.ControladorReservaIntegrationTests

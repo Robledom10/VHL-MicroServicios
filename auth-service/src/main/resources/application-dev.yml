@@ -1,0 +1,22 @@
+spring:
+  # 1. Configuración correcta de la conexión
+  datasource:
+    url: jdbc:mysql://mysql-db:3306/auth_db
+    # url: jdbc:mysql://localhost:3306/auth_service
+    username: root
+    password: root # ¡Asegúrate de que esta coincida con tu docker-compose!
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # 2. Configuración de JPA/Hibernate
+  jpa:
+    # Cambia a 'update' si quieres que Java cree/modifique las tablas automáticamente
+    # Cambia a 'validate' si prefieres que tu archivo .sql sea la única fuente de verdad
+    hibernate:
+      ddl-auto: update 
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+
+server:
+  port: 8081
