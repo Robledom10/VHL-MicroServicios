@@ -31,10 +31,10 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/auth/login",
                                 "/api/auth/register",
-                                "/api/auth/refresh",
-                                "/api/auth/logout",
+                                "/api/auth/tokens/**",
                                 "/api/auth/check-blacklist")
                         .permitAll()
+                        .requestMatchers("/api/auth/check-blacklist").permitAll()
                         // 👈 clave
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

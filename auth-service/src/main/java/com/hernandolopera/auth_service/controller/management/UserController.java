@@ -1,82 +1,56 @@
 package com.hernandolopera.auth_service.controller.management;
 
+import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.hernandolopera.auth_service.dto.request.admin.AssignRoleRequest;
+import com.hernandolopera.auth_service.entity.auth.User;
 import com.hernandolopera.auth_service.security.details.CustomUserDetails;
 import com.hernandolopera.auth_service.service.auth.RoleService;
 
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class UserController {
 
     private final RoleService roleService;
 
-    // 🔹 Perfil del usuario autenticado
     @GetMapping("/me")
-    public ResponseEntity<Map<String, Object>> getProfile(Authentication authentication) {
+    public ResponseEntity<?> getProfile(Authentication authentication) {
+        if (authentication == null)
+            return ResponseEntity.status(401).build();
 
-        if (authentication == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("message", "Usuario no autenticado"));
-        }
+        CustomUserDetails customUser = (CustomUserDetails) authentication.getPrincipal();
+        User user = customUser.getUser();
 
-        Object principal = authentication.getPrincipal();
+        // 🛡️ Construimos un JSON plano y seguro
+        Map<String, Object> body = new HashMap<>();
+        body.put("email", user.getEmail());
+        body.put("firstName", user.getFirstName());
+        body.put("lastName", user.getLastName());
+        body.put("role", user.getRole() != null ? user.getRole().getName() : "USER");
+        body.put("profileCompleted", user.getProfileCompleted());
 
-        if (!(principal instanceof CustomUserDetails user)) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("message", "Error en el contexto de seguridad"));
-        }
+        // Solo enviamos los nombres de los permisos como Strings
+        body.put("authorities", authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList());
 
-        return ResponseEntity.ok(Map.of(
-                "email", user.getUsername(),
-                "role", user.getUser().getRole().getName(),
-                "profileCompleted", user.isProfileCompleted(),
-                "permissions", user.getAuthorities()
-                        .stream()
-                        .map(auth -> auth.getAuthority())
-                        .toList()));
+        return ResponseEntity.ok(body);
     }
 
-    // 🔥 ASIGNAR ROL A USUARIO (IMPORTANTE)
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/{id}/role")
-    public ResponseEntity<Map<String, String>> assignRole(
-            @PathVariable Integer id,
-            @RequestBody AssignRoleRequest request) {
-
-        request.setUserId(id);
-        roleService.assignRole(request);
-
-        return ResponseEntity.ok(Map.of(
-                "message", "Rol asignado correctamente"));
-    }
-
-    // 🔹 Test ADMIN
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/admin-test")
+    @GetMapping("/admin")
     public ResponseEntity<Map<String, String>> adminTest() {
         return ResponseEntity.ok(Map.of("message", "Acceso autorizado para ADMIN"));
-    }
-
-    // 🔹 Test USER
-    @PreAuthorize("hasAnyRole('ADMIN','CLIENT')")
-    @GetMapping("/user-test")
-    public ResponseEntity<Map<String, String>> userTest() {
-        return ResponseEntity.ok(Map.of("message", "Acceso autorizado para usuario autenticado"));
     }
 }
