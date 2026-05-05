@@ -1,5 +1,6 @@
 package com.hernandolopera.reservation_service.servicios;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -79,7 +80,7 @@ public class ServicioReserva {
 
 		reserva.setNumeroReserva(generarNumeroReserva());
 		reserva.setEstado(EstadoReserva.PENDIENTE);
-		reserva.setFechaCreacion(LocalDateTime.now());
+		reserva.setFechaCreacion(LocalDate.now());
 		reserva.setPagoVerificado(false);
 
 		Reserva reservaGuardada = repositorioReserva.save(reserva);
@@ -161,7 +162,7 @@ public class ServicioReserva {
 				.cantidadPasajeros(reserva.getCantidadPasajeros()).precioTotal(reserva.getPrecioTotal())
 				.fechaInicioViaje(reserva.getFechaInicioViaje()).fechaFinViaje(reserva.getFechaFinViaje())
 				.estado(reserva.getEstado()).pagoVerificado(reserva.getPagoVerificado())
-				.fechaCreacion(reserva.getFechaCreacion()).fechaActualizacion(reserva.getFechaActualizacion())
+				.fechaCreacion(reserva.getFechaCreacion().atStartOfDay()).fechaActualizacion(reserva.getFechaActualizacion())
 				.fechaConfirmacion(reserva.getFechaConfirmacion()).notas(reserva.getNotas()).build();
 	}
 
