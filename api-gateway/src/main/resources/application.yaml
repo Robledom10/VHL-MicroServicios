@@ -16,6 +16,11 @@ spring:
           predicates:
             - Path=/api/auth/**
 
+        - id: reservation_service
+          uri: http://reservation-service:8082
+          predicates:
+            - path=/api/reservation/**
+
       globalcors:
         corsConfigurations:
           "[/**]":
