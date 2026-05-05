@@ -47,7 +47,7 @@ public class JwtFilter implements GlobalFilter, Ordered {
         List<String> publicRoutes = List.of(
                 "/api/auth/login",
                 "/api/auth/register",
-                "/api/auth/refresh",
+                "/api/auth/tokens/refresh",
                 "/api/auth/logout",
                 "/api/auth/check-blacklist");
 
@@ -80,6 +80,10 @@ public class JwtFilter implements GlobalFilter, Ordered {
                 .header("Authorization", authHeader)
                 .retrieve()
                 .bodyToMono(Boolean.class)
+                .onErrorResume(e -> {
+                    System.err.println("Error calling auth-service check-blacklist: " + e.getMessage());
+                    return Mono.just(true); // Si falla, asumimos que está en blacklist por seguridad
+                })
                 .flatMap(isBlacklisted -> {
 
                     if (Boolean.TRUE.equals(isBlacklisted)) {
