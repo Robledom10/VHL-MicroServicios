@@ -2,20 +2,21 @@ package com.hernandolopera.reservation_service.entidades;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,7 +24,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Entity
-@Table(name = "reservas")
+@Table(name = "reservation")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -35,43 +36,44 @@ public class Reserva implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id_reservation")
 	private Long id;
 
-	@Column(name = "numero_reserva", unique = true, nullable = false)
+	@Column(name = "reservation_code", unique = true, nullable = false, length = 50)
 	private String numeroReserva;
 
-	@Column(name = "id_paquete", nullable = false)
+	@Column(name = "package_id", nullable = false)
 	private Long idPaquete;
 
-	@Column(name = "id_usuario", nullable = false)
+	@Column(name = "id_user", nullable = false)
 	private Long idUsuario;
 
-	@Column(name = "cantidad_pasajeros", nullable = false)
+	@Transient
 	private Integer cantidadPasajeros;
 
-	@Column(name = "precio_total", precision = 10, scale = 2, nullable = false)
+	@Column(name = "total_amount", precision = 10, scale = 2, nullable = false)
 	private BigDecimal precioTotal;
 
-	@Column(name = "fecha_inicio_viaje", nullable = false)
+	@Transient
 	private LocalDateTime fechaInicioViaje;
 
-	@Column(name = "fecha_fin_viaje", nullable = false)
+	@Transient
 	private LocalDateTime fechaFinViaje;
 
-	@Enumerated(EnumType.STRING)
-	@Column(name = "estado", nullable = false)
+	@Convert(converter = EstadoReservaConverter.class)
+	@Column(name = "status", nullable = false)
 	private EstadoReserva estado;
 
-	@Column(name = "pago_verificado", nullable = false)
+	@Transient
 	private Boolean pagoVerificado;
 
-	@Column(name = "fecha_creacion", nullable = false, updatable = false)
-	private LocalDateTime fechaCreacion;
+	@Column(name = "reservation_date", nullable = false, updatable = false)
+	private LocalDate fechaCreacion;
 
-	@Column(name = "fecha_actualizacion")
+	@Transient
 	private LocalDateTime fechaActualizacion;
 
-	@Column(name = "fecha_confirmacion")
+	@Transient
 	private LocalDateTime fechaConfirmacion;
 
 	@OneToMany(mappedBy = "reserva", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -80,7 +82,7 @@ public class Reserva implements Serializable {
 	@OneToMany(mappedBy = "reserva", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<Archivo> archivos;
 
-	@Column(name = "notas")
+	@Transient
 	private String notas;
 
 }
