@@ -19,7 +19,7 @@ spring:
         - id: reservation_service
           uri: http://reservation-service:8082
           predicates:
-            - path=/api/reservation/**
+            - Path=/api/reservation/**
 
       globalcors:
         corsConfigurations:
