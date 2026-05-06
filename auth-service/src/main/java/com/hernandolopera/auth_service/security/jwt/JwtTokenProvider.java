@@ -3,6 +3,7 @@ package com.hernandolopera.auth_service.security.jwt;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
 
 import javax.crypto.SecretKey;
 
@@ -40,11 +41,11 @@ public class JwtTokenProvider {
      * @param email Email a incrustar en el token
      * @return El token en formato String
      */
-    public String generateToken(Integer userId, String email, String role) {
+    public String generateToken(Integer userId, String email, List<String> roles) {
         return Jwts.builder()
                 .subject(email)
                 .claim("userId", userId)
-                .claim("role", role)
+                .claim("role", roles)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + JWT_EXPIRATION))
                 .signWith(getSigningKey())

@@ -1,5 +1,7 @@
 package com.hernandolopera.auth_service.service.token;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -39,10 +41,14 @@ public class RefreshAuthService {
         refreshTokenService.deleteByToken(refreshTokenValue);
         RefreshToken newToken = refreshTokenService.createRefreshToken(user);
 
+        List<String> roles = user.getRoles().stream()
+                .map(role -> role.getName())
+                .toList();
+
         String newAccessToken = jwtTokenProvider.generateToken(
                 user.getId(),
                 user.getEmail(),
-                user.getRole().getName());
+                roles);
 
         return new AuthResponse(newAccessToken, newToken.getToken());
     }

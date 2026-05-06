@@ -2,6 +2,7 @@ package com.hernandolopera.auth_service.service.auth;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import java.util.List;
 
 import com.hernandolopera.auth_service.dto.request.auth.LoginRequest;
 import com.hernandolopera.auth_service.dto.response.AuthResponse;
@@ -79,13 +80,17 @@ public class LoginService {
                  */
                 loginAttemptService.resetFailedAttemps(user);
 
+                List<String> roles = user.getRoles().stream()
+                                .map(role -> role.getName())
+                                .toList();
+
                 /**
                  * Generar Access Token (JWT)
                  */
                 String accessToken = jwtTokenProvider.generateToken(
                                 user.getId(),
                                 user.getEmail(),
-                                user.getRole().getName());
+                                roles);
 
                 /**
                  * Generar Refresh Token

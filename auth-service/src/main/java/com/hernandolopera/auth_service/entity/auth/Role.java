@@ -17,9 +17,9 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
 
-@Data
 @Entity
 @Table(name = "role")
+@Data
 public class Role {
 
     @Id
@@ -34,10 +34,5 @@ public class Role {
     private Boolean status = true;
 
     @OneToMany(mappedBy = "role")
-    @JsonIgnore
     private Set<User> users;
-
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "role_permission", joinColumns = @JoinColumn(name = "fk_id_rol"), inverseJoinColumns = @JoinColumn(name = "fk_id_permission"))
-    private Set<Permission> permissions;
 }

@@ -1,8 +1,6 @@
 package com.hernandolopera.auth_service.service.auth;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -11,10 +9,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.hernandolopera.auth_service.dto.request.admin.AssignRoleRequest;
 import com.hernandolopera.auth_service.dto.request.admin.RoleRequest;
-import com.hernandolopera.auth_service.entity.auth.Permission;
+import com.hernandolopera.auth_service.dto.response.RoleResponse;
 import com.hernandolopera.auth_service.entity.auth.Role;
 import com.hernandolopera.auth_service.entity.auth.User;
-import com.hernandolopera.auth_service.repository.auth.PermissionRepository;
 import com.hernandolopera.auth_service.repository.auth.RoleRepository;
 import com.hernandolopera.auth_service.repository.auth.UserRepository;
 
@@ -25,48 +22,71 @@ import lombok.RequiredArgsConstructor;
 public class RoleService {
 
     private final RoleRepository roleRepository;
-    private final PermissionRepository permissionRepository;
     private final UserRepository userRepository;
 
-    public List<Role> getAllRoles() {
-        return roleRepository.findAll();
+    // 🔹 Obtener todos los roles
+    public List<RoleResponse> getAllRoles() {
+        return roleRepository.findAll()
+                .stream()
+                .map(this::map)
+                .toList();
     }
 
-    public Role getRoleById(Integer roleId) {
-        return roleRepository.findById(roleId)
+    // 🔹 Obtener rol por ID
+    public RoleResponse getRoleById(Integer roleId) {
+        Role role = roleRepository.findById(roleId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Rol no encontrado"));
+
+        return map(role);
     }
 
     // 🔥 Crear rol
     @Transactional
     public Role createRole(RoleRequest request) {
-        if (roleRepository.findByName(request.getName()).isPresent()) {
+
+        String roleName = normalize(request.getName());
+
+        if (roleRepository.findByName(roleName).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El rol ya existe");
         }
 
         Role role = new Role();
-        role.setName(request.getName());
+        role.setName(roleName);
 
-        role.setPermissions(getPermissions(request.getPermissions()));
         return roleRepository.save(role);
     }
 
     // 🔥 Actualizar rol
     @Transactional
     public Role updateRole(Integer roleId, RoleRequest request) {
+
         Role role = roleRepository.findById(roleId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Rol no encontrado"));
 
-        role.setName(request.getName());
+        String roleName = normalize(request.getName());
 
-        role.setPermissions(getPermissions(request.getPermissions()));
+        if (roleRepository.findByName(roleName)
+                .filter(r -> !r.getId().equals(roleId))
+                .isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Ya existe otro rol con ese nombre");
+        }
+
+        role.setName(roleName);
+
         return roleRepository.save(role);
     }
 
     // 🔥 Eliminar rol
     public void deleteRole(Integer roleId) {
+
         Role role = roleRepository.findById(roleId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Rol no encontrado"));
+
+        if (role.getUsers() != null && !role.getUsers().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "No se puede eliminar un rol asignado a usuarios");
+        }
 
         roleRepository.delete(role);
     }
@@ -74,38 +94,34 @@ public class RoleService {
     // 🔥 Asignar rol a usuario
     @Transactional
     public void assignRoleToUser(Integer userId, AssignRoleRequest request) {
-        User user = userRepository.findById(request.getUserId())
+
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
         Role role = roleRepository.findByName(normalize(request.getRoleName()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Rol no encontrado"));
 
-        user.setRole(role);
+        boolean isOnlyClient = user.getRoles().size() == 1 &&
+                user.getRoles().stream().anyMatch(r -> r.getName().equals("ROLE_CLIENT"));
+
+        boolean isPrivilegedRole = role.getName().equals("ROLE_ADMIN")
+                || role.getName().equals("ROLE_GUIDE");
+
+        if (isOnlyClient && isPrivilegedRole) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Un cliente no puede ser promovido sin validación administrativa");
+        }
+
+        if (user.getRoles().contains(role)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "El usuario ya tiene este rol");
+        }
+
+        user.getRoles().add(role);
         userRepository.save(user);
     }
 
-    // 🔧 Helper: obtener permisos
-    private Set<Permission> getPermissions(Set<String> permissionNames) {
-
-        if (permissionNames == null || permissionNames.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debe enviar al menos un permiso");
-        }
-
-        Set<Permission> permissions = new HashSet<>();
-
-        for (String permName : permissionNames) {
-            Permission permission = permissionRepository.findByName(normalize(permName))
-                    .orElseThrow(() -> new ResponseStatusException(
-                            HttpStatus.NOT_FOUND,
-                            "Permiso no encontrado: " + permName));
-
-            permissions.add(permission);
-        }
-
-        return permissions;
-    }
-
-    // 🔧 Helper: normalizar nombres
+    // 🔧 Normalizar nombres
     private String normalize(String value) {
         if (value == null || value.trim().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nombre inválido");
@@ -113,4 +129,14 @@ public class RoleService {
         return value.trim().toUpperCase();
     }
 
+    // 🔹 Mapper DTO
+    public RoleResponse map(Role role) {
+        RoleResponse dto = new RoleResponse();
+
+        dto.setId(role.getId());
+        dto.setName(role.getName());
+        dto.setStatus(role.getStatus());
+
+        return dto;
+    }
 }
