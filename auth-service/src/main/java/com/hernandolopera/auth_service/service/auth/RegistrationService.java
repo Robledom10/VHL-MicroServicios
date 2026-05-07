@@ -1,7 +1,5 @@
 package com.hernandolopera.auth_service.service.auth;
 
-import java.util.HashSet;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -77,7 +75,7 @@ public class RegistrationService {
                         HttpStatus.INTERNAL_SERVER_ERROR,
                         "Rol no encontrado"));
 
-        user.getRoles().add(role);
+        user.setRoles(role);
 
         return userRepository.save(user);
     }

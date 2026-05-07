@@ -2,8 +2,6 @@ package com.hernandolopera.auth_service.entity.auth;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
 import com.hernandolopera.auth_service.enums.DocumentType;
 
@@ -16,7 +14,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -77,9 +74,10 @@ public class User {
     private Boolean active = true;
 
     // 🔥 CAMBIO CRÍTICO: FetchType.EAGER para evitar el Error 500 en /me
+    // Cambia todo ese bloque por esto:
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Set<Role> roles = new HashSet<>();
+    @JoinColumn(name = "fk_id_rol") // Nombre real de la columna en tu BD
+    private Role roles; // Le dejamos la 's' para que no tengas que cambiar el service
 
     @Column(name = "profile_completed", nullable = false)
     private Boolean profileCompleted = false;

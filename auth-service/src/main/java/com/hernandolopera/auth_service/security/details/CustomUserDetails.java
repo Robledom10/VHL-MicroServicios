@@ -27,11 +27,15 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+        // Obtenemos el nombre del rol desde la base de datos (ej: "ADMIN")
+        String roleName = user.getRoles().getName();
 
-        // 🔥 SOLO ROLES (SIN PERMISOS)
-        return user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName()))
-                .toList();
+        // 🔥 IMPORTANTE: Spring Security requiere el prefijo ROLE_ para usar hasRole()
+        if (!roleName.startsWith("ROLE_")) {
+            roleName = "ROLE_" + roleName;
+        }
+
+        return List.of(new SimpleGrantedAuthority(roleName));
     }
 
     @Override

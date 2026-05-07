@@ -79,45 +79,50 @@ public class RoleService {
 
     // 🔥 Eliminar rol
     public void deleteRole(Integer roleId) {
-
         Role role = roleRepository.findById(roleId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Rol no encontrado"));
 
-        if (role.getUsers() != null && !role.getUsers().isEmpty()) {
+        // Usamos el repositorio de usuarios para contar cuántos tienen este rol
+        long userCount = userRepository.countByRoles(role);
+
+        if (userCount > 0) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "No se puede eliminar un rol asignado a usuarios");
+                    "No se puede eliminar un rol asignado a " + userCount + " usuarios");
         }
 
         roleRepository.delete(role);
     }
 
     // 🔥 Asignar rol a usuario
+    // 🔥 Asignar rol a usuario (CORREGIDO PARA OBJETO ÚNICO)
     @Transactional
     public void assignRoleToUser(Integer userId, AssignRoleRequest request) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
-        Role role = roleRepository.findByName(normalize(request.getRoleName()))
+        Role newRole = roleRepository.findByName(normalize(request.getRoleName()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Rol no encontrado"));
 
-        boolean isOnlyClient = user.getRoles().size() == 1 &&
-                user.getRoles().stream().anyMatch(r -> r.getName().equals("ROLE_CLIENT"));
+        // 1. Ya no usamos .stream(), accedemos directamente al nombre
+        boolean isClient = user.getRoles().getName().equals("ROLE_CLIENT");
 
-        boolean isPrivilegedRole = role.getName().equals("ROLE_ADMIN")
-                || role.getName().equals("ROLE_GUIDE");
+        boolean isPrivilegedRole = newRole.getName().equals("ROLE_ADMIN")
+                || newRole.getName().equals("ROLE_GUIDE");
 
-        if (isOnlyClient && isPrivilegedRole) {
+        if (isClient && isPrivilegedRole) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                     "Un cliente no puede ser promovido sin validación administrativa");
         }
 
-        if (user.getRoles().contains(role)) {
+        // 2. Comparación directa de objetos
+        if (user.getRoles().equals(newRole)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "El usuario ya tiene este rol");
         }
 
-        user.getRoles().add(role);
+        // 3. Ya no usamos .add(), usamos el setter del objeto
+        user.setRoles(newRole);
         userRepository.save(user);
     }
 
