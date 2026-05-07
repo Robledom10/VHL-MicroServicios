@@ -1,7 +1,9 @@
 services:
+
   db-auth:
     image: mysql:8
     container_name: db-auth
+    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: auth_db
