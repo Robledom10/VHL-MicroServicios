@@ -10,7 +10,7 @@ services:
     ports:
       - "3307:3306"
     volumes:
-      - ./docker/auth_service.sql:/docker-entrypoint-initdb.d/auth_service.sql
+      - ./Docker/auth_service.sql:/docker-entrypoint-initdb.d/auth_service.sql
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       interval: 5s
@@ -29,7 +29,7 @@ services:
     ports:
       - "3308:3306"
     volumes:
-      - ./Docker/reservation_service.sql:/docker-entrypoint-initdb.d/reservation_service
+      - ./Docker/reservation_service.sql:/docker-entrypoint-initdb.d/reservation_service.sql
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       interval: 5s
@@ -47,7 +47,7 @@ services:
       db-auth:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db-auth:3306/auth_db
+      SPRING_DATASOURCE_URL: jdbc:mysql://db-auth:3306/auth_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
     ports:
@@ -63,7 +63,7 @@ services:
       db-reservation:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db-reservation:3306/reservation_db
+      SPRING_DATASOURCE_URL: jdbc:mysql://db-reservation:3306/reservation_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
     ports:
