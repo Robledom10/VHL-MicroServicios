@@ -1,0 +1,30 @@
+spring:
+  application:
+    nombre: operation-servicio
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3309/trip_operations_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC}
+    usernombre: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:root}
+    driver-class-nombre: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+
+server:
+  port: 8083
+  servlet:
+    context-path: /
+
+logging:
+  level:
+    root: INFO
+    com.hernandolopera.operation_servicio: DEBUG
+    org.springframework.web: INFO
+    org.hibernate: INFO
