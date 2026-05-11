@@ -39,6 +39,25 @@ services:
     networks:
       - microservices-net
 
+  db-operation:
+    image: mysql:8
+    container_name: db-operation
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: trip_operations_db
+    ports:
+      - "3309:3306"
+    volumes:
+      - ./Docker/operation_service.sql:/docker-entrypoint-initdb.d/operation_service.sql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    networks:
+      - microservices-net
+
   auth-service:
     build: ./auth-service
     container_name: auth-service
@@ -71,6 +90,22 @@ services:
     networks:
       - microservices-net
 
+  operation-service:
+    build: ./operation-service
+    container_name: operation-service
+    restart: always
+    depends_on:
+      db-operation:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db-operation:3306/trip_operations_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    ports:
+      - "8083:8083"
+    networks:
+      - microservices-net
+
   api-gateway:
     build: ./api-gateway
     container_name: api-gateway
@@ -78,6 +113,7 @@ services:
     depends_on:
       - auth-service
       - reservation-service
+      - operation-service
     ports:
       - "8080:8080"
     networks:
