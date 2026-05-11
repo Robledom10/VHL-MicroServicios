@@ -104,18 +104,36 @@ public class ServicioPaqueteTuristico {
 
     private void aplicarSolicitud(PaqueteTuristico paquete, SolicitudPaqueteTuristico solicitud, boolean nuevo) {
         validarItinerario(solicitud.itinerario());
+        validarCupoEnEdicion(paquete, solicitud.cupoTotal(), nuevo);
         paquete.nombre = solicitud.nombre().trim();
         paquete.categoria = solicitud.categoria().trim();
         paquete.destino = solicitud.destino().trim();
         paquete.descripcion = solicitud.descripcion().trim();
         paquete.precioBase = solicitud.precioBase();
+        int cupoDisponible = nuevo ? solicitud.cupoTotal() : calcularCupoDisponibleEditado(paquete, solicitud.cupoTotal());
         paquete.cupoTotal = solicitud.cupoTotal();
-        if (nuevo) {
-            paquete.cupoDisponible = solicitud.cupoTotal();
-        }
+        paquete.cupoDisponible = cupoDisponible;
         List<ActividadItinerario> actividades = solicitud.itinerario() == null ? List.of()
             : solicitud.itinerario().stream().map(mapeador::aEntidadActividad).toList();
         paquete.reemplazarItinerario(actividades);
+    }
+
+    private void validarCupoEnEdicion(PaqueteTuristico paquete, Integer cupoTotal, boolean nuevo) {
+        if (nuevo) {
+            return;
+        }
+        int reservasActivas = paquete.reservasActivas == null ? 0 : paquete.reservasActivas;
+        if (cupoTotal < reservasActivas) {
+            throw new ExcepcionReglaNegocio("El cupo total no puede ser menor a las reservas activas");
+        }
+    }
+
+    private int calcularCupoDisponibleEditado(PaqueteTuristico paquete, Integer nuevoCupoTotal) {
+        int cupoTotalActual = paquete.cupoTotal == null ? 0 : paquete.cupoTotal;
+        int cupoDisponibleActual = paquete.cupoDisponible == null ? 0 : paquete.cupoDisponible;
+        int reservasActivas = paquete.reservasActivas == null ? 0 : paquete.reservasActivas;
+        int ocupados = Math.max(cupoTotalActual - cupoDisponibleActual, reservasActivas);
+        return Math.max(nuevoCupoTotal - ocupados, 0);
     }
 
     private void validarItinerario(List<SolicitudActividadItinerario> itinerario) {

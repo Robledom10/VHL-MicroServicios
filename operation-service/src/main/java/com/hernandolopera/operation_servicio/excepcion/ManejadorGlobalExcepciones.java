@@ -6,7 +6,9 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -28,6 +30,11 @@ public class ManejadorGlobalExcepciones {
         Map<String, String> campos = new LinkedHashMap<>();
         excepcion.getBindingResult().getFieldErrors().forEach(error -> campos.put(error.getField(), error.getDefaultMessage()));
         return construir(HttpStatus.BAD_REQUEST, "La solicitud tiene campos invalidos", solicitud, campos);
+    }
+
+    @ExceptionHandler({MethodArgumentTypeMismatchException.class, HttpMessageNotReadableException.class})
+    public ResponseEntity<RespuestaErrorApi> manejarSolicitudInvalida(Exception excepcion, HttpServletRequest solicitud) {
+        return construir(HttpStatus.BAD_REQUEST, "La solicitud tiene un formato invalido", solicitud, Map.of());
     }
 
     private ResponseEntity<RespuestaErrorApi> construir(HttpStatus codigo, String mensaje, HttpServletRequest solicitud, Map<String, String> campos) {

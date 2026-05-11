@@ -33,13 +33,15 @@ public class ServicioSeguro {
 
     @Transactional
     public RespuestaSeguro actualizar(Integer id, SolicitudSeguro solicitud) {
-        SeguroCobertura seguro = repositorio.findById(id).orElseThrow(() -> new RecursoNoEncontradoExcepcion("No existe el seguro"));
+        SeguroCobertura seguro = repositorio.findByIdAndActivoTrue(id)
+            .orElseThrow(() -> new RecursoNoEncontradoExcepcion("No existe el seguro"));
         return mapeador.aRespuestaSeguro(repositorio.save(aplicar(seguro, solicitud)));
     }
 
     @Transactional
     public void eliminar(Integer id) {
-        SeguroCobertura seguro = repositorio.findById(id).orElseThrow(() -> new RecursoNoEncontradoExcepcion("No existe el seguro"));
+        SeguroCobertura seguro = repositorio.findByIdAndActivoTrue(id)
+            .orElseThrow(() -> new RecursoNoEncontradoExcepcion("No existe el seguro"));
         seguro.activo = false;
         repositorio.save(seguro);
     }

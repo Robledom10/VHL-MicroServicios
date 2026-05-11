@@ -34,13 +34,15 @@ public class ServicioPlanPrecio {
 
     @Transactional
     public RespuestaPlanPrecio actualizar(Integer id, SolicitudPlanPrecio solicitud) {
-        PlanPrecio plan = repositorio.findById(id).orElseThrow(() -> new RecursoNoEncontradoExcepcion("No existe el plan de precio"));
+        PlanPrecio plan = repositorio.findByIdAndActivoTrue(id)
+            .orElseThrow(() -> new RecursoNoEncontradoExcepcion("No existe el plan de precio"));
         return mapeador.aRespuestaPlan(repositorio.save(aplicar(plan, solicitud)));
     }
 
     @Transactional
     public void eliminar(Integer id) {
-        PlanPrecio plan = repositorio.findById(id).orElseThrow(() -> new RecursoNoEncontradoExcepcion("No existe el plan de precio"));
+        PlanPrecio plan = repositorio.findByIdAndActivoTrue(id)
+            .orElseThrow(() -> new RecursoNoEncontradoExcepcion("No existe el plan de precio"));
         plan.activo = false;
         repositorio.save(plan);
     }
