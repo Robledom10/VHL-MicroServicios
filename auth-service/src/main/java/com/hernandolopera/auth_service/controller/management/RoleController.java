@@ -14,38 +14,43 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.hernandolopera.auth_service.dto.request.admin.AssignRoleRequest;
 import com.hernandolopera.auth_service.dto.request.admin.RoleRequest;
-import com.hernandolopera.auth_service.entity.auth.Role;
-import com.hernandolopera.auth_service.repository.auth.RoleRepository;
+import com.hernandolopera.auth_service.dto.response.RoleResponse;
 import com.hernandolopera.auth_service.service.auth.RoleService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/roles")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasRole('ADMIN')") // 🔥 lo subimos a nivel de clase
 public class RoleController {
 
     private final RoleService roleService;
-    private final RoleRepository roleRepository;
 
-    // 🔹 Listar roles
+    // 🔹 Obtener todos los roles
     @GetMapping
-    public List<Role> getAllRoles() {
-        return roleRepository.findAll();
+    public List<RoleResponse> getAllRoles() {
+        return roleService.getAllRoles();
+    }
+
+    // 🔹 Obtener rol por ID
+    @GetMapping("/{id}")
+    public RoleResponse getRoleById(@PathVariable Integer id) {
+        return roleService.getRoleById(id);
     }
 
     // 🔹 Crear rol
     @PostMapping
-    public Role createRole(@RequestBody RoleRequest request) {
-        return roleService.createRole(request);
+    public RoleResponse createRole(@Valid @RequestBody RoleRequest request) {
+        return roleService.map(roleService.createRole(request));
     }
 
     // 🔹 Actualizar rol
     @PutMapping("/{id}")
-    public Role updateRole(@PathVariable Integer id,
-                           @RequestBody RoleRequest request) {
-        return roleService.updateRole(id, request);
+    public RoleResponse updateRole(@PathVariable Integer id,
+            @RequestBody RoleRequest request) {
+        return roleService.map(roleService.updateRole(id, request));
     }
 
     // 🔹 Eliminar rol
@@ -55,8 +60,9 @@ public class RoleController {
     }
 
     // 🔹 Asignar rol a usuario
-    @PostMapping("/assign")
-    public void assignRole(@RequestBody AssignRoleRequest request) {
-        roleService.assignRole(request);
+    @PostMapping("/users/{userId}")
+    public void assignRoleToUser(@PathVariable Integer userId,
+            @RequestBody AssignRoleRequest request) {
+        roleService.assignRoleToUser(userId, request);
     }
 }

@@ -65,7 +65,7 @@ CREATE TABLE `refresh_token` (
 
 LOCK TABLES `refresh_token` WRITE;
 /*!40000 ALTER TABLE `refresh_token` DISABLE KEYS */;
-INSERT INTO `refresh_token` VALUES (1,'b50d60bc-15f5-4005-9a22-e12487951a22','2026-05-14 02:10:19',3);
+INSERT INTO `refresh_token` VALUES (1,'e2cf39a5-e800-4139-b00f-275d58d34036','2026-05-14 00:39:24',2);
 /*!40000 ALTER TABLE `refresh_token` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -81,7 +81,7 @@ CREATE TABLE `role` (
   `name` varchar(255) NOT NULL,
   `status` bit(1) NOT NULL,
   PRIMARY KEY (`id_rol`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -90,7 +90,7 @@ CREATE TABLE `role` (
 
 LOCK TABLES `role` WRITE;
 /*!40000 ALTER TABLE `role` DISABLE KEYS */;
-INSERT INTO `role` VALUES (1,'CLIENT',_binary ''),(2,'ADMIN',_binary ''),(3,'ROLE_CLIENT',_binary ''),(4,'ROLE_ADMIN',_binary ''),(5,'ROLE_GUIDE',_binary '');
+INSERT INTO `role` VALUES (1,'CLIENT',_binary ''),(2,'ADMIN',_binary '');
 /*!40000 ALTER TABLE `role` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -128,7 +128,7 @@ CREATE TABLE `user` (
   UNIQUE KEY `UKob8kqyqqgmefl0aco34akdtpe` (`email`),
   KEY `FK3gd57fmfubx2birsarn5fjbdw` (`fk_id_rol`),
   CONSTRAINT `FK3gd57fmfubx2birsarn5fjbdw` FOREIGN KEY (`fk_id_rol`) REFERENCES `role` (`id_rol`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -137,7 +137,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,NULL,NULL,NULL,'12345678','CEDULA_CIUDADANIA','juan@test.com',_binary '\0','Juan','Perez','$2a$10$FgWmVYmlvdDW2NGcbMsCd.pvnqHOiUZq4pKIBTQ8CAOmHudbClyNu',NULL,_binary '\0',NULL,1,0,1,NULL,1,0,_binary '\0'),(2,NULL,NULL,NULL,'123498','CEDULA_CIUDADANIA','admin@test.com',_binary '\0','Admin','test','$2a$10$8PKyreyL1IdjYr.k76b1vel9It.UxjBXpVfrrTLo/niz/Y6z.kTNi',NULL,_binary '\0',NULL,2,0,1,NULL,1,0,_binary '\0'),(3,NULL,NULL,NULL,'1234567','CEDULA_CIUDADANIA','client@test.com',_binary '\0','client','test','$2a$10$.DWrJez7m38.Dx1/oIc1w.j1nkPM9xvylXTff5rU1D48KJdMOrv2m',NULL,_binary '\0',NULL,3,0,1,NULL,1,0,_binary '\0');
+INSERT INTO `user` VALUES (1,NULL,NULL,NULL,'12345678','CEDULA_CIUDADANIA','juan@test.com',_binary '\0','Juan','Perez','$2a$10$FgWmVYmlvdDW2NGcbMsCd.pvnqHOiUZq4pKIBTQ8CAOmHudbClyNu',NULL,_binary '\0',NULL,1,0,1,NULL,1,0,_binary '\0'),(2,NULL,NULL,NULL,'123498','CEDULA_CIUDADANIA','admin@test.com',_binary '\0','Admin','test','$2a$10$8PKyreyL1IdjYr.k76b1vel9It.UxjBXpVfrrTLo/niz/Y6z.kTNi',NULL,_binary '\0',NULL,2,0,1,NULL,1,0,_binary '\0');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -176,4 +176,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-06 21:11:36
+-- Dump completed on 2026-05-06 19:40:10
