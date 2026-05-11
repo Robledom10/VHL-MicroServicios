@@ -28,16 +28,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                   HttpServletResponse response,
-                                   FilterChain filterChain)
+            HttpServletResponse response,
+            FilterChain filterChain)
             throws ServletException, IOException {
 
         String path = request.getServletPath();
 
         // 🔓 Rutas públicas
         if (path.contains("/login") ||
-            path.contains("/register") ||
-            path.contains("/tokens/")) {
+                path.contains("/register") ||
+                path.contains("/tokens/") ||
+                path.contains("/check-blacklist")) {
 
             filterChain.doFilter(request, response);
             return;
@@ -66,15 +67,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 String email = jwtTokenProvider.getEmailFromToken(token);
 
-                CustomUserDetails userDetails =
-                        (CustomUserDetails) userDetailsService.loadUserByUsername(email);
+                CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(email);
 
-                UsernamePasswordAuthenticationToken auth =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
-                        );
+                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities());
 
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(auth);
@@ -84,8 +82,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         && !path.contains("/complete-profile")
                         && !path.contains("/auth/tokens/")
                         && !path.equals("/api/auth/me")
-                        && !path.equals("auth/tokens/logout")
-                        && !path.equals("/api/auth/admin")) {
+                        && !path.equals("/auth/tokens/logout")
+                        && !path.equals("/api/auth/admin")
+                        && !path.startsWith("/api/users")) {
 
                     enviarErrorPerfilIncompleto(response);
                     return;
