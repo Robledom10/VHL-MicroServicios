@@ -1,6 +1,7 @@
 package com.hernandolopera.auth_service.controller.management;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
@@ -37,7 +38,11 @@ public class UserController {
         body.put("email", user.getEmail());
         body.put("firstName", user.getFirstName());
         body.put("lastName", user.getLastName());
-        body.put("role", user.getRole() != null ? user.getRole().getName() : "USER");
+
+        // 🔥 CORRECCIÓN: Como getRoles() es un solo objeto, lo metemos en una lista
+        // manual para el JSON
+        body.put("roles", user.getRoles() != null ? List.of(user.getRoles().getName()) : List.of("ROLE_USER"));
+
         body.put("profileCompleted", user.getProfileCompleted());
 
         // Solo enviamos los nombres de los permisos como Strings
