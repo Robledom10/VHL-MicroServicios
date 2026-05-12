@@ -16,7 +16,7 @@ import com.hernandolopera.auth_service.service.auth.UserManagementService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/admin/users")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
 public class UserManagementController {

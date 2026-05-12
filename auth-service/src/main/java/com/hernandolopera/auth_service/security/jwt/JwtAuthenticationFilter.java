@@ -84,7 +84,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         && !path.equals("/api/auth/me")
                         && !path.equals("/auth/tokens/logout")
                         && !path.equals("/api/auth/admin")
-                        && !path.startsWith("/api/users")) {
+                        && !path.startsWith("/api/admin/")) {
 
                     enviarErrorPerfilIncompleto(response);
                     return;
