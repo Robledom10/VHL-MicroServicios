@@ -79,10 +79,9 @@ public class ServicioReserva {
 		log.info("Creando nueva reserva para el usuario: {}", reserva.getIdUsuario());
 
 		reserva.setNumeroReserva(generarNumeroReserva());
-		reserva.setEstado(EstadoReserva.BLOQUEADA);
+		reserva.setEstado(EstadoReserva.PENDIENTE);
 		reserva.setFechaCreacion(LocalDate.now());
 		reserva.setPagoVerificado(false);
-		reserva.setExpiresAt(LocalDateTime.now().plusMinutes(10));
 
 		Reserva reservaGuardada = repositorioReserva.save(reserva);
 		log.info("Reserva creada con número: {}", reservaGuardada.getNumeroReserva());
@@ -164,7 +163,7 @@ public class ServicioReserva {
 				.fechaInicioViaje(reserva.getFechaInicioViaje()).fechaFinViaje(reserva.getFechaFinViaje())
 				.estado(reserva.getEstado()).pagoVerificado(reserva.getPagoVerificado())
 				.fechaCreacion(reserva.getFechaCreacion().atStartOfDay()).fechaActualizacion(reserva.getFechaActualizacion())
-				.fechaConfirmacion(reserva.getFechaConfirmacion()).viajeros(List.of()).notas(reserva.getNotas()).build();
+				.fechaConfirmacion(reserva.getFechaConfirmacion()).notas(reserva.getNotas()).build();
 	}
 
 }
