@@ -4,8 +4,10 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,8 +16,6 @@ import com.hernandolopera.auth_service.dto.request.auth.RegisterRequest;
 import com.hernandolopera.auth_service.dto.response.AuthResponse;
 import com.hernandolopera.auth_service.service.auth.AuthService;
 import com.hernandolopera.auth_service.service.token.BlacklistedTokenService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -60,7 +60,8 @@ public class AuthEntryPointController {
     }
 
     @GetMapping("/check-blacklist")
-    public ResponseEntity<Boolean> checkBlacklist(@RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<Boolean> checkBlacklist(
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.ok(false);
         }

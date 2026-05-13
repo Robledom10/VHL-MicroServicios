@@ -14,12 +14,12 @@ spring:
         - id: auth-service
           uri: http://auth-service:8081
           predicates:
-            - Path=/api/auth/**
+            - Path=/api/auth/**, /api/users/**
 
         - id: reservation_service
           uri: http://reservation-service:8082
           predicates:
-            - path=/api/reservation/**
+            - Path=/api/reservation/**
 
       globalcors:
         corsConfigurations:
@@ -45,4 +45,4 @@ spring:
 app:
   jwt:
     secret: oH+9q7wdTI5MPQmt5wRelMhO70B6FmEGOanhAPEAGbM=
-    expiration: 900000
+    expiration: 300000
