@@ -11,27 +11,28 @@ CREATE TABLE reservation (
     total_amount        DECIMAL(10,2)   NOT NULL,
     travel_start_date   DATETIME        NULL,
     travel_end_date     DATETIME        NULL,
-    status              ENUM('PENDIENTE','CONFIRMADA','CANCELADA') NOT NULL DEFAULT 'PENDIENTE',
+    status              ENUM('bloqueada','pendiente','confirmada','cancelada') NOT NULL DEFAULT 'bloqueada',
     payment_verified    BOOLEAN         NOT NULL DEFAULT FALSE,
     reservation_date    DATE            NOT NULL,
+    expires_at          DATETIME        NULL,
     updated_at          DATETIME        NULL,
     confirmation_date   DATETIME        NULL,
     notes               VARCHAR(500)    NULL
 );
 
 CREATE TABLE cancellation (
-    id_cancellation     INT AUTO_INCREMENT PRIMARY KEY,
-    fk_id_reservation   INT             NOT NULL,
-    reason              VARCHAR(255)    NOT NULL,
-    refund_amount       DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
-    status              ENUM('PENDIENTE','APROBADA','RECHAZADA') NOT NULL DEFAULT 'PENDIENTE',
+    id_cancellation   INT AUTO_INCREMENT PRIMARY KEY,
+    fk_id_reservation INT             NOT NULL,
+    reason            VARCHAR(255)    NOT NULL,
+    refund_amount     DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
+    status            ENUM('pendiente','aprobada','rechazada') NOT NULL DEFAULT 'pendiente',
     FOREIGN KEY (fk_id_reservation) REFERENCES reservation(id_reservation)
 );
 
 CREATE TABLE voucher (
-    id_voucher          INT AUTO_INCREMENT PRIMARY KEY,
-    fk_id_reservation   INT             NOT NULL,
-    voucher_code        VARCHAR(50)     NOT NULL UNIQUE,
-    file_url            VARCHAR(255)    NOT NULL,
+    id_voucher        INT AUTO_INCREMENT PRIMARY KEY,
+    fk_id_reservation INT             NOT NULL,
+    voucher_code      VARCHAR(50)     NOT NULL UNIQUE,
+    file_url          VARCHAR(255)    NOT NULL,
     FOREIGN KEY (fk_id_reservation) REFERENCES reservation(id_reservation)
 );
