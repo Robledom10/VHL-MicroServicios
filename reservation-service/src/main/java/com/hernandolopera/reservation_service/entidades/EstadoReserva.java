@@ -3,7 +3,6 @@ package com.hernandolopera.reservation_service.entidades;
 import java.io.Serializable;
 
 public enum EstadoReserva implements Serializable {
-	BLOQUEADA("Bloqueada"),
 	PENDIENTE("Pendiente"),
 	CONFIRMADA("Confirmada"),
 	CANCELADA("Cancelada"),

@@ -26,44 +26,28 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // 1. Desactivar CSRF es vital para microservicios con JWT
                 .csrf(csrf -> csrf.disable())
-
-                // 2. Configurar permisos
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/login",
                                 "/api/auth/register",
-                                "/api/auth/logout",
                                 "/api/auth/tokens/**",
                                 "/api/auth/check-blacklist")
                         .permitAll()
+                        .requestMatchers("/api/auth/check-blacklist").permitAll()
+                        // 👈 clave
                         .anyRequest().authenticated())
-
-                // 3. Manejo de sesión sin estado
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-                // 4. Desactivar formularios por defecto
                 .formLogin(form -> form.disable())
                 .httpBasic(httpBasic -> httpBasic.disable())
-
-                // 5. El filtro JWT debe ir antes del de usuario/contraseña
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    // 🔥 AGREGA ESTO: A veces el 403 ocurre porque el servicio de login
-    // no puede inyectar el manager correctamente
-    @Bean
-    public org.springframework.security.authentication.AuthenticationManager authenticationManager(
-            org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration config)
-            throws Exception {
-        return config.getAuthenticationManager();
     }
 }

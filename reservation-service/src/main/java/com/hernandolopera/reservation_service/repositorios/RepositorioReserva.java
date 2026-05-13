@@ -1,6 +1,5 @@
 package com.hernandolopera.reservation_service.repositorios;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,7 +21,5 @@ public interface RepositorioReserva extends JpaRepository<Reserva, Long> {
 	List<Reserva> findByIdPaquete(Long idPaquete);
 
 	List<Reserva> findByEstadoAndIdUsuario(EstadoReserva estado, Long idUsuario);
-
-	List<Reserva> findByEstadoAndExpiresAtBefore(EstadoReserva estado, LocalDateTime fecha);
 
 }
