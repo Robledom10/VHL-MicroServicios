@@ -1,8 +1,8 @@
 -- MySQL dump 10.13  Distrib 8.0.44, for Win64 (x86_64)
 --
--- Host: 127.0.0.1    Database: auth_db
+-- Host: localhost    Database: auth_service
 -- ------------------------------------------------------
--- Server version	8.4.9
+-- Server version	8.0.44
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -41,6 +41,33 @@ LOCK TABLES `blacklisted_token` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `permission`
+--
+
+DROP TABLE IF EXISTS `permission`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `permission` (
+  `id_permission` int NOT NULL AUTO_INCREMENT,
+  `description` varchar(150) DEFAULT NULL,
+  `module` varchar(255) NOT NULL,
+  `status` bit(1) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id_permission`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `permission`
+--
+
+LOCK TABLES `permission` WRITE;
+/*!40000 ALTER TABLE `permission` DISABLE KEYS */;
+/*!40000 ALTER TABLE `permission` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `refresh_token`
 --
 
@@ -56,7 +83,7 @@ CREATE TABLE `refresh_token` (
   UNIQUE KEY `token` (`token`),
   UNIQUE KEY `fk_id_user` (`fk_id_user`),
   CONSTRAINT `refresh_token_ibfk_1` FOREIGN KEY (`fk_id_user`) REFERENCES `user` (`id_user`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -65,7 +92,6 @@ CREATE TABLE `refresh_token` (
 
 LOCK TABLES `refresh_token` WRITE;
 /*!40000 ALTER TABLE `refresh_token` DISABLE KEYS */;
-INSERT INTO `refresh_token` VALUES (2,'8e430c9d-a703-41a7-816b-c66a575cbe71','2026-05-19 20:37:31',3),(4,'8f6cfc72-04fe-4fc0-8662-658b174c7621','2026-05-20 01:05:04',2);
 /*!40000 ALTER TABLE `refresh_token` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -81,7 +107,7 @@ CREATE TABLE `role` (
   `name` varchar(255) NOT NULL,
   `status` bit(1) NOT NULL,
   PRIMARY KEY (`id_rol`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -90,8 +116,34 @@ CREATE TABLE `role` (
 
 LOCK TABLES `role` WRITE;
 /*!40000 ALTER TABLE `role` DISABLE KEYS */;
-INSERT INTO `role` VALUES (1,'CLIENT',_binary ''),(2,'ADMIN',_binary ''),(3,'ROLE_CLIENT',_binary ''),(4,'ROLE_ADMIN',_binary ''),(5,'ROLE_GUIDE',_binary '');
+INSERT INTO `role` VALUES (1,'CLIENT',_binary ''),(2,'ADMIN',_binary '');
 /*!40000 ALTER TABLE `role` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `role_permission`
+--
+
+DROP TABLE IF EXISTS `role_permission`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `role_permission` (
+  `fk_id_rol` int NOT NULL,
+  `fk_id_permission` int NOT NULL,
+  PRIMARY KEY (`fk_id_rol`,`fk_id_permission`),
+  KEY `FK9kses3lyc38lrsfch5drqur53` (`fk_id_permission`),
+  CONSTRAINT `FK2t4ulnw7voqwhp1d2ft9j0o3h` FOREIGN KEY (`fk_id_rol`) REFERENCES `role` (`id_rol`),
+  CONSTRAINT `FK9kses3lyc38lrsfch5drqur53` FOREIGN KEY (`fk_id_permission`) REFERENCES `permission` (`id_permission`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `role_permission`
+--
+
+LOCK TABLES `role_permission` WRITE;
+/*!40000 ALTER TABLE `role_permission` DISABLE KEYS */;
+/*!40000 ALTER TABLE `role_permission` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -121,14 +173,12 @@ CREATE TABLE `user` (
   `account_non_locked` tinyint(1) NOT NULL DEFAULT '1',
   `lock_time` datetime DEFAULT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
-  `failed_attemps` int NOT NULL,
-  `profile_completed` bit(1) NOT NULL,
   PRIMARY KEY (`id_user`),
   UNIQUE KEY `UKckltqnf47mr90fw56edpewrk8` (`document_number`),
   UNIQUE KEY `UKob8kqyqqgmefl0aco34akdtpe` (`email`),
   KEY `FK3gd57fmfubx2birsarn5fjbdw` (`fk_id_rol`),
   CONSTRAINT `FK3gd57fmfubx2birsarn5fjbdw` FOREIGN KEY (`fk_id_rol`) REFERENCES `role` (`id_rol`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -137,7 +187,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,NULL,NULL,NULL,'12345678','CEDULA_CIUDADANIA','juan@test.com',_binary '\0','Juan','Perez','$2a$10$FgWmVYmlvdDW2NGcbMsCd.pvnqHOiUZq4pKIBTQ8CAOmHudbClyNu',NULL,_binary '\0',NULL,1,0,1,NULL,1,0,_binary '\0'),(2,NULL,NULL,NULL,'123498','CEDULA_CIUDADANIA','admin@test.com',_binary '\0','Admin','test','$2a$10$8PKyreyL1IdjYr.k76b1vel9It.UxjBXpVfrrTLo/niz/Y6z.kTNi',NULL,_binary '\0',NULL,2,0,1,NULL,1,0,_binary '\0'),(3,NULL,NULL,NULL,'1234567','CEDULA_CIUDADANIA','client@test.com',_binary '\0','client','test','$2a$10$.DWrJez7m38.Dx1/oIc1w.j1nkPM9xvylXTff5rU1D48KJdMOrv2m',NULL,_binary '\0',NULL,3,0,1,NULL,1,0,_binary '\0');
+INSERT INTO `user` VALUES (1,NULL,NULL,NULL,'12345678','CEDULA_CIUDADANIA','juan@test.com',_binary '\0','Juan','Perez','$2a$10$FgWmVYmlvdDW2NGcbMsCd.pvnqHOiUZq4pKIBTQ8CAOmHudbClyNu',NULL,_binary '\0',NULL,1,0,1,NULL,1),(2,NULL,NULL,NULL,'123498','CEDULA_CIUDADANIA','admin@test.com',_binary '\0','Admin','test','$2a$10$8PKyreyL1IdjYr.k76b1vel9It.UxjBXpVfrrTLo/niz/Y6z.kTNi',NULL,_binary '\0',NULL,2,0,1,NULL,1);
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -150,4 +200,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-13  0:06:34
+-- Dump completed on 2026-04-30 16:32:50

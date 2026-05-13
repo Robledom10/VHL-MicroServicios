@@ -1,7 +1,6 @@
 package com.hernandolopera.api_gateway.security;
 
 import java.util.Date;
-import java.util.List;
 
 import javax.crypto.SecretKey;
 
@@ -11,6 +10,10 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+/**
+ * Proveedor utilitario para la generación y validación de tokens JWT en el API
+ * Gateway.
+ */
 @Component
 public class JwtTokenProvider {
 
@@ -28,24 +31,38 @@ public class JwtTokenProvider {
         return Keys.hmacShaKeyFor(JWT_SECRET.getBytes());
     }
 
-    public String getEmailFromToken(String token) {
-        return Jwts.parser()
-                .verifyWith(getSigningKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .getSubject();
+    /**
+     * Genera un nuevo token JWT para un usuario en específico.
+     *
+     * @param email El correo electrónico del usuario, que se utilizará como
+     *              "subject" del token
+     * @return El token JWT generado y firmado
+     */
+    public String generateToken(String email) {
+        return Jwts.builder()
+                .subject(email)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + JWT_EXPIRATION))
+                .signWith(getSigningKey())
+                .compact();
     }
 
-    // 🔥 NUEVO: obtener roles correctamente
-    @SuppressWarnings("unchecked")
-    public List<String> getRolesFromToken(String token) {
-        return (List<String>) Jwts.parser()
-                .verifyWith(getSigningKey())
+    /**
+     * Extrae el correo electrónico (subject) contenido dentro del token JWT.
+     * También verifica que el token esté correctamente firmado y no haya expirado.
+     *
+     * @param token El token JWT codificado a evaluar
+     * @return El correo electrónico extraído del token
+     * @throws io.jsonwebtoken.JwtException si el token es inválido, está expirado o
+     *                                      malformado
+     */
+    public String getEmailFromToken(String token) {
+        return Jwts.parser()
+                .verifyWith(getSigningKey()) // Nuevo método de verificación
                 .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .get("roles");
+                .parseSignedClaims(token) // Parseo moderno
+                .getPayload() // Obtenemos el cuerpo (payload)
+                .getSubject();
     }
 
     public boolean validateToken(String token) {
@@ -58,14 +75,5 @@ public class JwtTokenProvider {
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
-    }
-
-    public Integer getUserIdFromToken(String token) {
-        return Jwts.parser()
-                .verifyWith(getSigningKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .get("userId", Integer.class);
     }
 }
