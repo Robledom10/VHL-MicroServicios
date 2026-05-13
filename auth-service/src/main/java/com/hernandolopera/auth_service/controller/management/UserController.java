@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.hernandolopera.auth_service.dto.request.user.CompleteProfileRequest;
 import com.hernandolopera.auth_service.entity.auth.User;
 import com.hernandolopera.auth_service.security.details.CustomUserDetails;
-import com.hernandolopera.auth_service.service.auth.RoleService;
 import com.hernandolopera.auth_service.service.auth.UserService;
+import com.hernandolopera.auth_service.service.auth.RoleService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -66,9 +66,6 @@ public class UserController {
         return ResponseEntity.ok(body);
     }
 
-    /**
-     * Completar perfil del usuario autenticado
-     */
     @PutMapping("/complete-profile")
     public ResponseEntity<Map<String, Object>> completeProfile(
             @Valid @RequestBody CompleteProfileRequest request,

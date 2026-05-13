@@ -53,6 +53,9 @@ public class Reserva implements Serializable {
     @Column(name = "reservation_date", nullable = false, updatable = false)
     private LocalDate fechaCreacion;
 
+    @Column(name = "expires_at")
+    private LocalDateTime expiresAt;
+
     @Column(name = "updated_at")
     private LocalDateTime fechaActualizacion;
 
