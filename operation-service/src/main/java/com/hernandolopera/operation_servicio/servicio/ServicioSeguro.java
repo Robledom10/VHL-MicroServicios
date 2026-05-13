@@ -1,70 +1,54 @@
 package com.hernandolopera.operation_servicio.servicio;
 
-import com.hernandolopera.operation_servicio.transferencia.SolicitudSeguro;
-import com.hernandolopera.operation_servicio.transferencia.RespuestaSeguro;
 import com.hernandolopera.operation_servicio.excepcion.RecursoNoEncontradoExcepcion;
-import com.hernandolopera.operation_servicio.modelo.SeguroCobertura;
-import com.hernandolopera.operation_servicio.modelo.PaqueteTuristico;
+import com.hernandolopera.operation_servicio.entidades.SeguroCobertura;
 import com.hernandolopera.operation_servicio.repositorio.RepositorioSeguroCobertura;
+import com.hernandolopera.operation_servicio.transferencia.DatosOperacion.*;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ServicioSeguro {
-
-    private final RepositorioSeguroCobertura repositorioSeguro;
+    private final RepositorioSeguroCobertura repositorio;
     private final ServicioPaqueteTuristico servicioPaquete;
-    private final MapeadorOperaciones mapper;
+    private final MapeadorOperaciones mapeador;
 
-    public ServicioSeguro(
-        RepositorioSeguroCobertura repositorioSeguro,
-        ServicioPaqueteTuristico servicioPaquete,
-        MapeadorOperaciones mapper
-    ) {
-        this.repositorioSeguro = repositorioSeguro;
+    public ServicioSeguro(RepositorioSeguroCobertura repositorio, ServicioPaqueteTuristico servicioPaquete, MapeadorOperaciones mapeador) {
+        this.repositorio = repositorio;
         this.servicioPaquete = servicioPaquete;
-        this.mapper = mapper;
+        this.mapeador = mapeador;
     }
 
     @Transactional
-    public RespuestaSeguro create(SolicitudSeguro solicitud) {
-        PaqueteTuristico paqueteTuristico = servicioPaquete.buscarPaqueteActivo(solicitud.idPaquete());
-        return mapper.toRespuestaSeguro(repositorioSeguro.save(mapper.aEntidadSeguro(solicitud, paqueteTuristico)));
+    public RespuestaSeguro crear(SolicitudSeguro solicitud) {
+        return mapeador.aRespuestaSeguro(repositorio.save(aplicar(new SeguroCobertura(), solicitud)));
     }
 
     @Transactional(readOnly = true)
     public List<RespuestaSeguro> buscarPorPaquete(Integer idPaquete) {
-        servicioPaquete.buscarPaqueteActivo(idPaquete);
-        return repositorioSeguro.findByPaqueteTuristicoIdAndActiveTrue(idPaquete).stream()
-            .map(mapper::toRespuestaSeguro)
-            .toList();
+        servicioPaquete.buscarActivo(idPaquete);
+        return repositorio.findByPaqueteTuristicoIdAndActivoTrue(idPaquete).stream().map(mapeador::aRespuestaSeguro).toList();
     }
 
     @Transactional
-    public RespuestaSeguro update(Integer id, SolicitudSeguro solicitud) {
-        SeguroCobertura seguro = buscarSeguroActivo(id);
-        PaqueteTuristico paqueteTuristico = servicioPaquete.buscarPaqueteActivo(solicitud.idPaquete());
-        seguro.setPaqueteTuristico(paqueteTuristico);
-        seguro.setNombre(solicitud.nombre().trim());
-        seguro.setDetalleCobertura(solicitud.detalleCobertura().trim());
-        seguro.setMontoCobertura(solicitud.montoCobertura());
-        return mapper.toRespuestaSeguro(repositorioSeguro.save(seguro));
+    public RespuestaSeguro actualizar(Integer id, SolicitudSeguro solicitud) {
+        SeguroCobertura seguro = repositorio.findById(id).orElseThrow(() -> new RecursoNoEncontradoExcepcion("No existe el seguro"));
+        return mapeador.aRespuestaSeguro(repositorio.save(aplicar(seguro, solicitud)));
     }
 
     @Transactional
-    public void delete(Integer id) {
-        SeguroCobertura seguro = buscarSeguroActivo(id);
-        seguro.setActivo(false);
-        repositorioSeguro.save(seguro);
+    public void eliminar(Integer id) {
+        SeguroCobertura seguro = repositorio.findById(id).orElseThrow(() -> new RecursoNoEncontradoExcepcion("No existe el seguro"));
+        seguro.activo = false;
+        repositorio.save(seguro);
     }
 
-    private SeguroCobertura buscarSeguroActivo(Integer id) {
-        SeguroCobertura seguro = repositorioSeguro.findById(id)
-            .orElseThrow(() -> new RecursoNoEncontradoExcepcion("No existe el seguro con id " + id));
-        if (!Boolean.TRUE.equals(seguro.getActivo())) {
-            throw new RecursoNoEncontradoExcepcion("No existe el seguro con id " + id);
-        }
+    private SeguroCobertura aplicar(SeguroCobertura seguro, SolicitudSeguro solicitud) {
+        seguro.paqueteTuristico = servicioPaquete.buscarActivo(solicitud.idPaquete());
+        seguro.nombre = solicitud.nombre().trim();
+        seguro.detalleCobertura = solicitud.detalleCobertura().trim();
+        seguro.montoCobertura = solicitud.montoCobertura();
         return seguro;
     }
 }

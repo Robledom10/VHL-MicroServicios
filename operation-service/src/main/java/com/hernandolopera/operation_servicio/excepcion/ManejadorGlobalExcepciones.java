@@ -1,6 +1,6 @@
 package com.hernandolopera.operation_servicio.excepcion;
 
-import com.hernandolopera.operation_servicio.transferencia.RespuestaErrorApi;
+import com.hernandolopera.operation_servicio.transferencia.DatosOperacion.RespuestaErrorApi;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -13,44 +13,25 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class ManejadorGlobalExcepciones {
-
     @ExceptionHandler(RecursoNoEncontradoExcepcion.class)
-    public ResponseEntity<RespuestaErrorApi> handleNotFound(RecursoNoEncontradoExcepcion excepcion, HttpServletRequest solicitud) {
-        return build(HttpStatus.NOT_FOUND, excepcion.getMessage(), solicitud, Map.of());
+    public ResponseEntity<RespuestaErrorApi> manejarNoEncontrado(RecursoNoEncontradoExcepcion excepcion, HttpServletRequest solicitud) {
+        return construir(HttpStatus.NOT_FOUND, excepcion.getMessage(), solicitud, Map.of());
     }
 
     @ExceptionHandler(ExcepcionReglaNegocio.class)
-    public ResponseEntity<RespuestaErrorApi> handleBusiness(ExcepcionReglaNegocio excepcion, HttpServletRequest solicitud) {
-        return build(HttpStatus.CONFLICT, excepcion.getMessage(), solicitud, Map.of());
+    public ResponseEntity<RespuestaErrorApi> manejarReglaNegocio(ExcepcionReglaNegocio excepcion, HttpServletRequest solicitud) {
+        return construir(HttpStatus.CONFLICT, excepcion.getMessage(), solicitud, Map.of());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<RespuestaErrorApi> handleValidation(MethodArgumentNotValidException excepcion, HttpServletRequest solicitud) {
-        Map<String, String> fields = new LinkedHashMap<>();
-        excepcion.getBindingResult().getFieldErrors()
-            .forEach(error -> fields.put(error.getField(), error.getDefaultMessage()));
-        return build(HttpStatus.BAD_REQUEST, "La solicitud tiene campos invalidos", solicitud, fields);
+    public ResponseEntity<RespuestaErrorApi> manejarValidacion(MethodArgumentNotValidException excepcion, HttpServletRequest solicitud) {
+        Map<String, String> campos = new LinkedHashMap<>();
+        excepcion.getBindingResult().getFieldErrors().forEach(error -> campos.put(error.getField(), error.getDefaultMessage()));
+        return construir(HttpStatus.BAD_REQUEST, "La solicitud tiene campos invalidos", solicitud, campos);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<RespuestaErrorApi> handleUnexpected(Exception excepcion, HttpServletRequest solicitud) {
-        return build(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno del servicio de operaciones", solicitud, Map.of());
-    }
-
-    private ResponseEntity<RespuestaErrorApi> build(
-        HttpStatus estado,
-        String message,
-        HttpServletRequest solicitud,
-        Map<String, String> fields
-    ) {
-        RespuestaErrorApi respuesta = new RespuestaErrorApi(
-            LocalDateTime.now(),
-            estado.value(),
-            estado.getReasonPhrase(),
-            message,
-            solicitud.getRequestURI(),
-            fields
-        );
-        return ResponseEntity.status(estado).body(respuesta);
+    private ResponseEntity<RespuestaErrorApi> construir(HttpStatus codigo, String mensaje, HttpServletRequest solicitud, Map<String, String> campos) {
+        return ResponseEntity.status(codigo).body(new RespuestaErrorApi(LocalDateTime.now(), codigo.value(),
+            codigo.getReasonPhrase(), mensaje, solicitud.getRequestURI(), campos));
     }
 }

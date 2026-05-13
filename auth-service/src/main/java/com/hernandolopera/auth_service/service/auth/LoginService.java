@@ -2,6 +2,7 @@ package com.hernandolopera.auth_service.service.auth;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import java.util.List;
 
 import com.hernandolopera.auth_service.dto.request.auth.LoginRequest;
 import com.hernandolopera.auth_service.dto.response.AuthResponse;
@@ -14,13 +15,6 @@ import com.hernandolopera.auth_service.service.token.RefreshTokenService;
 
 import lombok.RequiredArgsConstructor;
 
-/**
- * Servicio encargado del inicio de sesión:
- * - validación de credenciales
- * - control de intentos fallidos
- * - bloqueo temporal
- * - generación de Access Token + Refresh Token
- */
 @Service
 @RequiredArgsConstructor
 public class LoginService {
@@ -31,9 +25,6 @@ public class LoginService {
         private final RefreshTokenService refreshTokenService;
         private final LoginAttemptService loginAttemptService;
 
-        /**
-         * Procesa el login del usuario
-         */
         public AuthResponse login(LoginRequest request) {
 
                 String emailLimpio = request.getEmail()
@@ -43,53 +34,42 @@ public class LoginService {
                 User user = userRepository.findByEmail(emailLimpio)
                                 .orElseThrow(() -> new RuntimeException("Credenciales inválidas"));
 
-                if (!user.getActive()) {
-                        throw new RuntimeException(
-                                        "La cuenta se encuentra inactiva. Contacte al administrador.");
+                // 🔒 Validar estado de cuenta
+                if (Boolean.FALSE.equals(user.getActive())) {
+                        throw new RuntimeException("La cuenta se encuentra inactiva.");
                 }
 
-                /**
-                 * Validar si la cuenta está bloqueada
-                 */
-                if (!user.getAccountNonLocked()) {
+                // 🔒 Validar bloqueo
+                if (Boolean.FALSE.equals(user.getAccountNonLocked())) {
 
-                        boolean unlocked = loginAttemptService
-                                        .unlockWhenTimeExpired(user);
+                        boolean unlocked = loginAttemptService.unlockWhenTimeExpired(user);
 
                         if (!unlocked) {
-                                throw new RuntimeException(
-                                                "Cuenta bloqueada temporalmente. Intenta nuevamente más tarde.");
+                                throw new RuntimeException("Cuenta bloqueada temporalmente.");
                         }
                 }
 
-                /**
-                 * Validar contraseña
-                 */
-                if (!passwordEncoder.matches(
-                                request.getPassword(),
-                                user.getPassword())) {
+                // 🔑 Validar contraseña
+                if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
 
                         loginAttemptService.increaseFailedAttemps(user);
 
                         throw new RuntimeException("Credenciales inválidas");
                 }
 
-                /**
-                 * Login exitoso → resetear intentos
-                 */
+                // ✅ Login OK → reset intentos
                 loginAttemptService.resetFailedAttemps(user);
 
-                /**
-                 * Generar Access Token (JWT)
-                 */
+                // 🔥 ROLES (clave para todo tu sistema)
+                String roles = user.getRoles().getName();
+
+                // 🔐 JWT
                 String accessToken = jwtTokenProvider.generateToken(
                                 user.getId(),
                                 user.getEmail(),
-                                user.getRole().getName());
+                                roles);
 
-                /**
-                 * Generar Refresh Token
-                 */
+                // 🔁 Refresh Token
                 RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
                 return new AuthResponse(
