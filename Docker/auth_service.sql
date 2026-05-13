@@ -92,8 +92,9 @@ CREATE TABLE `refresh_token` (
 
 LOCK TABLES `refresh_token` WRITE;
 /*!40000 ALTER TABLE `refresh_token` DISABLE KEYS */;
-/*!40000 ALTER TABLE `refresh_token` ENABLE KEYS */;
-UNLOCK TABLES;
+
+INSERT INTO `refresh_token` VALUES (2,'8e430c9d-a703-41a7-816b-c66a575cbe71','2026-05-19 20:37:31',3),(4,'8f6cfc72-04fe-4fc0-8662-658b174c7621','2026-05-20 01:05:04',2);
+
 
 --
 -- Table structure for table `role`
@@ -201,3 +202,4 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2026-04-30 16:32:50
+

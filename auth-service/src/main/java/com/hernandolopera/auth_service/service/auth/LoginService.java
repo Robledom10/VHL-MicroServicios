@@ -3,8 +3,13 @@ package com.hernandolopera.auth_service.service.auth;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
+
 import com.hernandolopera.auth_service.dto.request.auth.LoginRequest;
 import com.hernandolopera.auth_service.dto.response.AuthResponse;
+import com.hernandolopera.auth_service.dto.response.UserLoginResponse;
+import com.hernandolopera.auth_service.dto.response.UserResponse;
 import com.hernandolopera.auth_service.entity.auth.User;
 import com.hernandolopera.auth_service.entity.token.RefreshToken;
 import com.hernandolopera.auth_service.repository.auth.UserRepository;
@@ -79,21 +84,30 @@ public class LoginService {
                  */
                 loginAttemptService.resetFailedAttemps(user);
 
-                /**
-                 * Generar Access Token (JWT)
-                 */
+                // 🔥 ROLES (clave para todo tu sistema)
+                String role = user.getRoles().getName();
+
+                // 🔐 JWT
                 String accessToken = jwtTokenProvider.generateToken(
                                 user.getId(),
                                 user.getEmail(),
-                                user.getRole().getName());
-
+                                role);
+          
                 /**
                  * Generar Refresh Token
                  */
                 RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
+                // 👤 DTO seguro del usuario
+                UserLoginResponse userLoginResponse = new UserLoginResponse(
+                                user.getId(),
+                                user.getFirstName(),
+                                user.getLastName(),
+                                user.getEmail(),
+                                role);
+
                 return new AuthResponse(
                                 accessToken,
-                                refreshToken.getToken());
+                                refreshToken.getToken(), userLoginResponse);
         }
 }
