@@ -81,7 +81,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 if (!userDetails.isProfileCompleted()
                         && !path.contains("/complete-profile")
                         && !path.contains("/auth/tokens/")
-                        && !path.equals("/api/auth/me")
+                        && !path.equals("/api/auth/profile")
                         && !path.equals("/auth/tokens/logout")
                         && !path.equals("/api/auth/admin")
                         && !path.startsWith("/api/admin/")) {

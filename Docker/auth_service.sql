@@ -56,7 +56,7 @@ CREATE TABLE `refresh_token` (
   UNIQUE KEY `token` (`token`),
   UNIQUE KEY `fk_id_user` (`fk_id_user`),
   CONSTRAINT `refresh_token_ibfk_1` FOREIGN KEY (`fk_id_user`) REFERENCES `user` (`id_user`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -65,7 +65,7 @@ CREATE TABLE `refresh_token` (
 
 LOCK TABLES `refresh_token` WRITE;
 /*!40000 ALTER TABLE `refresh_token` DISABLE KEYS */;
-INSERT INTO `refresh_token` VALUES (1,'b50d60bc-15f5-4005-9a22-e12487951a22','2026-05-14 02:10:19',3);
+INSERT INTO `refresh_token` VALUES (2,'8e430c9d-a703-41a7-816b-c66a575cbe71','2026-05-19 20:37:31',3),(4,'8f6cfc72-04fe-4fc0-8662-658b174c7621','2026-05-20 01:05:04',2);
 /*!40000 ALTER TABLE `refresh_token` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -140,32 +140,6 @@ LOCK TABLES `user` WRITE;
 INSERT INTO `user` VALUES (1,NULL,NULL,NULL,'12345678','CEDULA_CIUDADANIA','juan@test.com',_binary '\0','Juan','Perez','$2a$10$FgWmVYmlvdDW2NGcbMsCd.pvnqHOiUZq4pKIBTQ8CAOmHudbClyNu',NULL,_binary '\0',NULL,1,0,1,NULL,1,0,_binary '\0'),(2,NULL,NULL,NULL,'123498','CEDULA_CIUDADANIA','admin@test.com',_binary '\0','Admin','test','$2a$10$8PKyreyL1IdjYr.k76b1vel9It.UxjBXpVfrrTLo/niz/Y6z.kTNi',NULL,_binary '\0',NULL,2,0,1,NULL,1,0,_binary '\0'),(3,NULL,NULL,NULL,'1234567','CEDULA_CIUDADANIA','client@test.com',_binary '\0','client','test','$2a$10$.DWrJez7m38.Dx1/oIc1w.j1nkPM9xvylXTff5rU1D48KJdMOrv2m',NULL,_binary '\0',NULL,3,0,1,NULL,1,0,_binary '\0');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
-
---
--- Table structure for table `user_roles`
---
-
-DROP TABLE IF EXISTS `user_roles`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `user_roles` (
-  `user_id` int NOT NULL,
-  `role_id` int NOT NULL,
-  PRIMARY KEY (`user_id`,`role_id`),
-  KEY `fk_role` (`role_id`),
-  CONSTRAINT `fk_role` FOREIGN KEY (`role_id`) REFERENCES `role` (`id_rol`),
-  CONSTRAINT `fk_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id_user`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `user_roles`
---
-
-LOCK TABLES `user_roles` WRITE;
-/*!40000 ALTER TABLE `user_roles` DISABLE KEYS */;
-/*!40000 ALTER TABLE `user_roles` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -176,4 +150,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-06 21:11:36
+-- Dump completed on 2026-05-13  0:06:34
