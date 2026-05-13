@@ -40,14 +40,6 @@ public class RegistrationService {
     @Transactional
     public User registerUser(RegisterRequest request) {
 
-        if (request.getEmail() == null || request.getEmail().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email requerido");
-        }
-
-        if (request.getPassword() == null || request.getPassword().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Contraseña requerida");
-        }
-
         String email = request.getEmail().trim().toLowerCase();
 
         if (userRepository.findByEmail(email).isPresent()) {
@@ -68,14 +60,15 @@ public class RegistrationService {
         user.setState(request.getState());
         user.setCity(request.getCity());
         user.setAddress(request.getAddress());
+
         user.setProfileCompleted(false);
 
-        Role role = roleRepository.findByName("ROLE_CLIENT")
+        Role role = roleRepository.findByName("CLIENT")
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.INTERNAL_SERVER_ERROR,
                         "Rol no encontrado"));
 
-        user.setRoles(role);
+        user.setRole(role);
 
         return userRepository.save(user);
     }

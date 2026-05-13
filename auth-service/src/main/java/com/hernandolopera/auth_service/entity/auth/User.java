@@ -74,10 +74,9 @@ public class User {
     private Boolean active = true;
 
     // 🔥 CAMBIO CRÍTICO: FetchType.EAGER para evitar el Error 500 en /me
-    // Cambia todo ese bloque por esto:
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "fk_id_rol") // Nombre real de la columna en tu BD
-    private Role roles; // Le dejamos la 's' para que no tengas que cambiar el service
+    @JoinColumn(name = "fk_id_rol", nullable = false)
+    private Role role;
 
     @Column(name = "profile_completed", nullable = false)
     private Boolean profileCompleted = false;

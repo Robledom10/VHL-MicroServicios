@@ -1,7 +1,10 @@
+version: "3.9"
+
 services:
+
   db-auth:
     image: mysql:8
-    container_name: db-auth
+    container_name: mysql-db
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -32,6 +35,7 @@ services:
     volumes:
       - reservation_data:/var/lib/mysql
       - ./Docker/reservation_service.sql:/docker-entrypoint-initdb.d/reservation_service.sql
+
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 5s
@@ -46,11 +50,12 @@ services:
     container_name: auth-service
     restart: always
     depends_on:
-      db-auth:
+      mysql:
         condition: service_healthy
     env_file:
       - .env
     environment:
+
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:mysql://db-auth:3306/${AUTH_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
@@ -68,15 +73,17 @@ services:
     container_name: reservation-service
     restart: always
     depends_on:
-      db-reservation:
+      mysql:
         condition: service_healthy
     env_file:
       - .env
 
     environment:
+
       SPRING_DATASOURCE_URL: jdbc:mysql://db-reservation:3306/${RESERVATION_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+
     ports:
       - "${RESERVATION_SERVICE_PORT}:8082"
     networks:

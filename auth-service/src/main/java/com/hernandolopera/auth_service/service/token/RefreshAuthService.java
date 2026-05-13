@@ -40,6 +40,7 @@ public class RefreshAuthService {
         refreshTokenService.deleteByToken(refreshTokenValue);
         RefreshToken newToken = refreshTokenService.createRefreshToken(user);
 
+
         // Antes: user.getRoles().stream().map(...)
         String role = user.getRoles().getName();
 
@@ -47,6 +48,7 @@ public class RefreshAuthService {
                 user.getId(),
                 user.getEmail(),
                 role);
+
 
                 UserLoginResponse userLoginResponse = new UserLoginResponse(
                 user.getId(),

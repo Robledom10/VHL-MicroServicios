@@ -13,8 +13,10 @@ spring:
 
     properties:
       hibernate:
+
         dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
+
 
 logging:
   level:

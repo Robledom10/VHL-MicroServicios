@@ -6,38 +6,36 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "role")
-public class Role {
+@Table(name = "permission")
+public class Permission {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_rol")
+    @Column(name = "id_permission")
     private Integer id;
 
     @Column(nullable = false)
-    private String name;
+    private String module;
+
+    @Column(nullable = false, unique = true)
+    private String name; // 🔥 IMPORTANTE (para seguridad)
+
+    @Column(length = 150)
+    private String description;
 
     @Column(nullable = false)
-    private Boolean status = true;
+    private boolean status = true;
 
-    @OneToMany(mappedBy = "role")
+    @ManyToMany(mappedBy = "permissions")
     @JsonIgnore
-    private Set<User> users;
-
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "role_permission", joinColumns = @JoinColumn(name = "fk_id_rol"), inverseJoinColumns = @JoinColumn(name = "fk_id_permission"))
-    private Set<Permission> permissions;
+    private Set<Role> roles;
 }
