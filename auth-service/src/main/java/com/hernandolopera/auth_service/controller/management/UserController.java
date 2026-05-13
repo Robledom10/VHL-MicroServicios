@@ -8,11 +8,15 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.hernandolopera.auth_service.dto.request.user.CompleteProfileRequest;
 import com.hernandolopera.auth_service.entity.auth.User;
 import com.hernandolopera.auth_service.security.details.CustomUserDetails;
+import com.hernandolopera.auth_service.service.auth.RegistrationService;
 import com.hernandolopera.auth_service.service.auth.RoleService;
 
 import lombok.RequiredArgsConstructor;
@@ -23,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
 
     private final RoleService roleService;
+    private final RegistrationService registrationService;
 
     @GetMapping("/me")
     public ResponseEntity<?> getProfile(Authentication authentication) {
@@ -46,6 +51,22 @@ public class UserController {
                 .toList());
 
         return ResponseEntity.ok(body);
+    }
+
+    @PostMapping("/complete-profile")
+    public ResponseEntity<Map<String, Object>> completeProfile(
+            Authentication authentication,
+            @RequestBody CompleteProfileRequest request) {
+
+        if (authentication == null)
+            return ResponseEntity.status(401).build();
+
+        CustomUserDetails customUser = (CustomUserDetails) authentication.getPrincipal();
+        registrationService.completeProfile(customUser.getUsername(), request);
+
+        return ResponseEntity.ok(Map.of(
+                "message", "Perfil completado correctamente",
+                "profileCompleted", true));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
