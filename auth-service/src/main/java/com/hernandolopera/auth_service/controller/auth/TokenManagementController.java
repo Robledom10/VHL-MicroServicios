@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -65,7 +66,7 @@ public class TokenManagementController {
         Cookie newCookie = new Cookie("refreshToken", auth.getRefreshToken());
         newCookie.setHttpOnly(true);
         newCookie.setSecure(false); // true en producción con HTTPS
-        newCookie.setPath("/"); // 👈 Crucial para consistencia
+        newCookie.setPath("/");    // 👈 Crucial para consistencia
         newCookie.setMaxAge(7 * 24 * 60 * 60);
 
         response.addCookie(newCookie);

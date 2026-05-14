@@ -14,7 +14,7 @@ spring:
         - id: auth-service
           uri: http://auth-service:8081
           predicates:
-            - Path=/api/auth/**, /api/users/**
+            - Path=/api/auth/**, /api/admin/**, /api/roles/**
 
         - id: reservation_service
           uri: http://reservation-service:8082
@@ -45,4 +45,4 @@ spring:
 app:
   jwt:
     secret: oH+9q7wdTI5MPQmt5wRelMhO70B6FmEGOanhAPEAGbM=
-    expiration: 300000
+    expiration: 900000

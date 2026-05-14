@@ -86,7 +86,6 @@ public class ServicioReserva {
 		reserva.setEstado(EstadoReserva.PENDIENTE);
 		reserva.setFechaCreacion(LocalDate.now());
 		reserva.setPagoVerificado(false);
-		reserva.setExpiresAt(LocalDateTime.now().plusMinutes(10));
 
 		Reserva reservaGuardada = repositorioReserva.save(reserva);
 		log.info("Reserva creada con número: {}", reservaGuardada.getNumeroReserva());

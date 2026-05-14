@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -27,14 +28,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final BlacklistedTokenService blacklistedTokenService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
         String path = request.getServletPath();
 
-        // 🔓 Rutas públicas
+        // 🔓 1. RUTAS PÚBLICAS Y EXCEPCIONES
+        // Permitimos login, register y cualquier endpoint de gestión de tokens
         if (path.contains("/login") ||
                 path.contains("/register") ||
                 path.contains("/tokens/") ||
@@ -46,11 +46,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String header = request.getHeader("Authorization");
 
+        // 🛡️ 2. PROCESAMIENTO DE TOKEN DE ACCESO (Bearer)
         if (header != null && header.startsWith("Bearer ")) {
-
             String token = header.substring(7);
 
-            // 🚫 Token en blacklist
             if (blacklistedTokenService.isBlacklisted(token)) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setContentType("application/json");
@@ -59,32 +58,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             try {
-
-                // ✅ VALIDAR TOKEN COMPLETO (esto es lo importante)
-                if (!jwtTokenProvider.validateToken(token)) {
-                    throw new RuntimeException("Token inválido");
-                }
-
                 String email = jwtTokenProvider.getEmailFromToken(token);
+                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+                CustomUserDetails customUser = (CustomUserDetails) userDetails;
 
-                CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(email);
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities());
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities());
+                // 🚫 3. VALIDACIÓN DE PERFIL INCOMPLETO (Excluyendo rutas de token y /me)
+                if (!customUser.isProfileCompleted()
+                        && !path.contains("/api/auth/complete-profile")
 
-                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(auth);
-
-                // 🔒 Perfil incompleto
-                if (!userDetails.isProfileCompleted()
-                        && !path.contains("/complete-profile")
                         && !path.contains("/auth/tokens/")
-                        && !path.equals("/api/auth/me")
+                        && !path.contains("admin")
+                        && !path.equals("/api/auth/profile")
                         && !path.equals("/auth/tokens/logout")
-                        && !path.equals("/api/auth/admin")
-                        && !path.startsWith("/api/admin/")) {
+                        && !path.startsWith("/api/admin/users")) {
 
                     enviarErrorPerfilIncompleto(response);
                     return;
@@ -92,8 +83,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             } catch (Exception e) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.setContentType("application/json");
-                response.getWriter().write("{\"error\": \"TOKEN_INVALID\"}");
+                response.getWriter().write("Token invalido o expirado");
                 return;
             }
         }

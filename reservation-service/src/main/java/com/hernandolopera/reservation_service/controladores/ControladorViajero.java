@@ -1,9 +1,11 @@
 package com.hernandolopera.reservation_service.controladores;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,19 +35,33 @@ public class ControladorViajero {
 			@PathVariable("idReserva") Long idReserva,
 			@Valid @RequestBody ViajeroDTO viajeroDTO) {
 		log.info("POST /api/v1/viajeros/reserva/{} - Registrando viajero", idReserva);
-		RespuestaRegistroViajeroDTO respuesta = servicioViajero.registrarViajero(idReserva, viajeroDTO);
-		if (Boolean.TRUE.equals(respuesta.getExito())) {
-			return ResponseEntity.status(HttpStatus.CREATED).body(respuesta);
+
+		try {
+			ViajeroDTO viajeroRegistrado = servicioViajero.registrarViajero(idReserva, viajeroDTO);
+			return ResponseEntity.status(HttpStatus.CREATED)
+					.body(RespuestaRegistroViajeroDTO.builder()
+							.exito(true)
+							.mensaje("Viajero registrado exitosamente")
+							.idViajero(viajeroRegistrado.getId())
+							.idReserva(idReserva)
+							.build());
+		} catch (RuntimeException e) {
+			log.error("Error al registrar el viajero: {}", e.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+					.body(RespuestaRegistroViajeroDTO.builder()
+							.exito(false)
+							.mensaje("Error al registrar viajero")
+							.detalleError(e.getMessage())
+							.idReserva(idReserva)
+							.build());
 		}
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(respuesta);
 	}
 
 	@GetMapping("/{idViajero}")
 	public ResponseEntity<ViajeroDTO> obtenerViajero(@PathVariable("idViajero") Long idViajero) {
 		log.info("GET /api/v1/viajeros/{} - Obteniendo viajero", idViajero);
-		return servicioViajero.obtenerViajeroPorId(idViajero)
-				.map(ResponseEntity::ok)
-				.orElseGet(() -> ResponseEntity.notFound().build());
+		Optional<ViajeroDTO> viajero = servicioViajero.obtenerViajero(idViajero);
+		return viajero.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
 	}
 
 	@GetMapping("/reserva/{idReserva}")
@@ -57,10 +73,27 @@ public class ControladorViajero {
 	@PutMapping("/{idViajero}")
 	public ResponseEntity<ViajeroDTO> actualizarViajero(
 			@PathVariable("idViajero") Long idViajero,
-			@RequestBody ViajeroDTO viajeroDTO) {
+			@Valid @RequestBody ViajeroDTO viajeroDTO) {
 		log.info("PUT /api/v1/viajeros/{} - Actualizando viajero", idViajero);
-		return servicioViajero.actualizarViajero(idViajero, viajeroDTO)
-				.map(ResponseEntity::ok)
-				.orElseGet(() -> ResponseEntity.notFound().build());
+
+		try {
+			return ResponseEntity.ok(servicioViajero.actualizarViajero(idViajero, viajeroDTO));
+		} catch (RuntimeException e) {
+			log.error("Error al actualizar el viajero: {}", e.getMessage());
+			return ResponseEntity.notFound().build();
+		}
+	}
+
+	@DeleteMapping("/{idViajero}")
+	public ResponseEntity<Void> eliminarViajero(@PathVariable("idViajero") Long idViajero) {
+		log.info("DELETE /api/v1/viajeros/{} - Eliminando viajero", idViajero);
+
+		try {
+			servicioViajero.eliminarViajero(idViajero);
+			return ResponseEntity.noContent().build();
+		} catch (RuntimeException e) {
+			log.error("Error al eliminar el viajero: {}", e.getMessage());
+			return ResponseEntity.notFound().build();
+		}
 	}
 }

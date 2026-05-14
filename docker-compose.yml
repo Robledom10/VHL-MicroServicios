@@ -2,17 +2,18 @@ services:
 
   db-auth:
     image: mysql:8
-    container_name: db-auth
+    container_name: mysql-db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: auth_db
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${AUTH_DB_NAME}
     ports:
-      - "3307:3306"
+      - "${AUTH_DB_PORT}:3306"
     volumes:
+      - auth_data:/var/lib/mysql
       - ./Docker/auth_service.sql:/docker-entrypoint-initdb.d/auth_service.sql
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -23,19 +24,21 @@ services:
   db-reservation:
     image: mysql:8
     container_name: db-reservation
+    restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: reservation_db
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${RESERVATION_DB_NAME}
     ports:
-      - "3308:3306"
+      - "${RESERVATION_DB_PORT}:3306"
     volumes:
+      - reservation_data:/var/lib/mysql
       - ./Docker/reservation_service.sql:/docker-entrypoint-initdb.d/reservation_service.sql
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 5s
       timeout: 3s
       retries: 5
-      start_period: 10s
+      start_period: 20s
     networks:
       - microservices-net
 
@@ -44,14 +47,19 @@ services:
     container_name: auth-service
     restart: always
     depends_on:
-      db-auth:
+      db-auth: # <-- Cambiado de 'mysql' a 'db-auth'
         condition: service_healthy
+    env_file:
+      - .env
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db-auth:3306/auth_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:mysql://db-auth:3306/${AUTH_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root # Usamos root ya que es el que tiene password definido
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      APP_JWT_SECRET: ${JWT_SECRET}
+      APP_JWT_EXPIRATION: ${JWT_EXPIRATION}
     ports:
-      - "8081:8081"
+      - "${AUTH_SERVICE_PORT}:8081"
     networks:
       - microservices-net
 
@@ -60,14 +68,16 @@ services:
     container_name: reservation-service
     restart: always
     depends_on:
-      db-reservation:
+      db-reservation: # <-- Cambiado de 'mysql' a 'db-reservation'
         condition: service_healthy
+    env_file:
+      - .env
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db-reservation:3306/reservation_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_URL: jdbc:mysql://db-reservation:3306/${RESERVATION_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     ports:
-      - "8082:8082"
+      - "${RESERVATION_SERVICE_PORT}:8082"
     networks:
       - microservices-net
 
@@ -78,10 +88,19 @@ services:
     depends_on:
       - auth-service
       - reservation-service
+    env_file:
+      - .env
+    environment:
+      APP_JWT_SECRET: ${JWT_SECRET}
+      APP_JWT_EXPIRATION: ${JWT_EXPIRATION}
     ports:
-      - "8080:8080"
+      - "${API_GATEWAY_PORT}:8080"
     networks:
       - microservices-net
 
 networks:
   microservices-net:
+
+volumes:
+  auth_data:
+  reservation_data:

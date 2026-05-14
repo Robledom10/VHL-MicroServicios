@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -99,14 +98,8 @@ public class ControladorReserva {
 	 * Crea una nueva reserva
 	 */
 	@PostMapping
-	public ResponseEntity<ReservaDTO> crearReserva(
-			@RequestBody Reserva reserva,
-			@RequestHeader(value = "X-User-Id", required = false) Long idUsuarioAutenticado) {
+	public ResponseEntity<ReservaDTO> crearReserva(@RequestBody Reserva reserva) {
 		log.info("POST /api/v1/reservas - Creando nueva reserva");
-		if (reserva.getIdUsuario() == null && idUsuarioAutenticado != null) {
-			reserva.setIdUsuario(idUsuarioAutenticado);
-		}
-
 		ReservaDTO reservaCreada = servicioReserva.crearReserva(reserva);
 		return ResponseEntity.status(HttpStatus.CREATED).body(reservaCreada);
 	}

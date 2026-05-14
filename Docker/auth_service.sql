@@ -28,7 +28,7 @@ CREATE TABLE `blacklisted_token` (
   `logout_at` datetime NOT NULL,
   `expires_at` datetime NOT NULL,
   PRIMARY KEY (`id_blacklisted_token`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -37,7 +37,35 @@ CREATE TABLE `blacklisted_token` (
 
 LOCK TABLES `blacklisted_token` WRITE;
 /*!40000 ALTER TABLE `blacklisted_token` DISABLE KEYS */;
+INSERT INTO `blacklisted_token` VALUES (1,'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjbGllbnRAdGVzdC5jb20iLCJ1c2VySWQiOjMsInJvbGUiOiJST0xFX0NMSUVOVCIsImlhdCI6MTc3ODcwNDAyNywiZXhwIjoxNzc4NzA0OTI3fQ.hEijSMHfV4KjJ6I2aHaJNdljs80LvCrGNwEnsbVdXV4','2026-05-13 20:27:21','2026-05-13 20:42:07'),(2,'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjbGllbnRAdGVzdC5jb20iLCJ1c2VySWQiOjMsInJvbGUiOiJDTElFTlQiLCJpYXQiOjE3Nzg3MjAyNjUsImV4cCI6MTc3ODcyMTE2NX0.WAGAy63VbyNk_wXOh9o3T64mCZB17_In7K7aU2vkC1U','2026-05-14 00:58:27','2026-05-14 01:12:45'),(3,'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkB0ZXN0LmNvbSIsInVzZXJJZCI6Miwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzc4NzIwODI3LCJleHAiOjE3Nzg3MjE3Mjd9.4IGsHXBOwbQsJ3eQZOqSE4GGdJOCIjClErEH5_Cti9g','2026-05-14 01:08:10','2026-05-14 01:22:07');
 /*!40000 ALTER TABLE `blacklisted_token` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `permission`
+--
+
+DROP TABLE IF EXISTS `permission`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `permission` (
+  `id_permission` int NOT NULL AUTO_INCREMENT,
+  `description` varchar(150) DEFAULT NULL,
+  `module` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `status` bit(1) NOT NULL,
+  PRIMARY KEY (`id_permission`),
+  UNIQUE KEY `UK2ojme20jpga3r4r79tdso17gi` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `permission`
+--
+
+LOCK TABLES `permission` WRITE;
+/*!40000 ALTER TABLE `permission` DISABLE KEYS */;
+/*!40000 ALTER TABLE `permission` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -56,7 +84,7 @@ CREATE TABLE `refresh_token` (
   UNIQUE KEY `token` (`token`),
   UNIQUE KEY `fk_id_user` (`fk_id_user`),
   CONSTRAINT `refresh_token_ibfk_1` FOREIGN KEY (`fk_id_user`) REFERENCES `user` (`id_user`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=52 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -65,7 +93,7 @@ CREATE TABLE `refresh_token` (
 
 LOCK TABLES `refresh_token` WRITE;
 /*!40000 ALTER TABLE `refresh_token` DISABLE KEYS */;
-INSERT INTO `refresh_token` VALUES (1,'b50d60bc-15f5-4005-9a22-e12487951a22','2026-05-14 02:10:19',3);
+INSERT INTO `refresh_token` VALUES (51,'a604633b-b750-4830-857e-674f91014f14','2026-05-21 01:31:31',2);
 /*!40000 ALTER TABLE `refresh_token` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -81,7 +109,7 @@ CREATE TABLE `role` (
   `name` varchar(255) NOT NULL,
   `status` bit(1) NOT NULL,
   PRIMARY KEY (`id_rol`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -90,8 +118,34 @@ CREATE TABLE `role` (
 
 LOCK TABLES `role` WRITE;
 /*!40000 ALTER TABLE `role` DISABLE KEYS */;
-INSERT INTO `role` VALUES (1,'CLIENT',_binary ''),(2,'ADMIN',_binary ''),(3,'ROLE_CLIENT',_binary ''),(4,'ROLE_ADMIN',_binary ''),(5,'ROLE_GUIDE',_binary '');
+INSERT INTO `role` VALUES (1,'CLIENT',_binary ''),(2,'ADMIN',_binary ''),(3,'GUIDE',_binary '');
 /*!40000 ALTER TABLE `role` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `role_permission`
+--
+
+DROP TABLE IF EXISTS `role_permission`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `role_permission` (
+  `fk_id_rol` int NOT NULL,
+  `fk_id_permission` int NOT NULL,
+  PRIMARY KEY (`fk_id_rol`,`fk_id_permission`),
+  KEY `FK9kses3lyc38lrsfch5drqur53` (`fk_id_permission`),
+  CONSTRAINT `FK2t4ulnw7voqwhp1d2ft9j0o3h` FOREIGN KEY (`fk_id_rol`) REFERENCES `role` (`id_rol`),
+  CONSTRAINT `FK9kses3lyc38lrsfch5drqur53` FOREIGN KEY (`fk_id_permission`) REFERENCES `permission` (`id_permission`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `role_permission`
+--
+
+LOCK TABLES `role_permission` WRITE;
+/*!40000 ALTER TABLE `role_permission` DISABLE KEYS */;
+/*!40000 ALTER TABLE `role_permission` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -137,34 +191,8 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,NULL,NULL,NULL,'12345678','CEDULA_CIUDADANIA','juan@test.com',_binary '\0','Juan','Perez','$2a$10$FgWmVYmlvdDW2NGcbMsCd.pvnqHOiUZq4pKIBTQ8CAOmHudbClyNu',NULL,_binary '\0',NULL,1,0,1,NULL,1,0,_binary '\0'),(2,NULL,NULL,NULL,'123498','CEDULA_CIUDADANIA','admin@test.com',_binary '\0','Admin','test','$2a$10$8PKyreyL1IdjYr.k76b1vel9It.UxjBXpVfrrTLo/niz/Y6z.kTNi',NULL,_binary '\0',NULL,2,0,1,NULL,1,0,_binary '\0'),(3,NULL,NULL,NULL,'1234567','CEDULA_CIUDADANIA','client@test.com',_binary '\0','client','test','$2a$10$.DWrJez7m38.Dx1/oIc1w.j1nkPM9xvylXTff5rU1D48KJdMOrv2m',NULL,_binary '\0',NULL,3,0,1,NULL,1,0,_binary '\0');
+INSERT INTO `user` VALUES (1,NULL,NULL,NULL,'12345678','CEDULA_CIUDADANIA','juan@test.com',_binary '\0','Juan','Perez','$2a$10$FgWmVYmlvdDW2NGcbMsCd.pvnqHOiUZq4pKIBTQ8CAOmHudbClyNu',NULL,_binary '\0',NULL,3,0,1,NULL,1,0,_binary '\0'),(2,'Barrio Centro','2005-10-15','Armenia','123498','CEDULA_CIUDADANIA','admin@test.com',_binary '\0','Admin','test','$2a$10$8PKyreyL1IdjYr.k76b1vel9It.UxjBXpVfrrTLo/niz/Y6z.kTNi','3001234567',_binary '\0','Quindio',2,0,1,NULL,1,0,_binary ''),(3,'Barrio Centro','2005-10-15','Armenia','1234567','CEDULA_CIUDADANIA','client@test.com',_binary '\0','client','test','$2a$10$.DWrJez7m38.Dx1/oIc1w.j1nkPM9xvylXTff5rU1D48KJdMOrv2m','3001234567',_binary '\0','Quindio',1,0,1,NULL,1,0,_binary '');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `user_roles`
---
-
-DROP TABLE IF EXISTS `user_roles`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `user_roles` (
-  `user_id` int NOT NULL,
-  `role_id` int NOT NULL,
-  PRIMARY KEY (`user_id`,`role_id`),
-  KEY `fk_role` (`role_id`),
-  CONSTRAINT `fk_role` FOREIGN KEY (`role_id`) REFERENCES `role` (`id_rol`),
-  CONSTRAINT `fk_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id_user`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `user_roles`
---
-
-LOCK TABLES `user_roles` WRITE;
-/*!40000 ALTER TABLE `user_roles` DISABLE KEYS */;
-/*!40000 ALTER TABLE `user_roles` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -176,4 +204,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-06 21:11:36
+-- Dump completed on 2026-05-13 20:39:04

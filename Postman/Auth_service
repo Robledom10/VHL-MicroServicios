@@ -148,16 +148,6 @@
             {
               "name": "Logout",
               "request": {
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqdWFuQHRlc3QuY29tIiwidXNlcklkIjoxLCJyb2xlIjoiQ0xJRU5UIiwiaWF0IjoxNzc3OTE4MDY1LCJleHAiOjE3Nzc5MTgzNjV9.az3izk7_rmGqX5MqW_lWMK2EvrYLjkWzaCdtiIX-k2c",
-                      "type": "string"
-                    }
-                  ]
-                },
                 "method": "POST",
                 "header": [],
                 "body": {
@@ -201,7 +191,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqdWFuQHRlc3QuY29tIiwidXNlcklkIjoxLCJyb2xlIjoiQ0xJRU5UIiwiaWF0IjoxNzc3OTMxMjAyLCJleHAiOjE3Nzc5MzE1MDJ9.zWPc6oCiR0GHkOVKr8_8gnFxKJnVVdTObc3GicJjAFc",
+                      "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqdWFuQHRlc3QuY29tIiwidXNlcklkIjoxLCJyb2xlIjoiQ0xJRU5UIiwiaWF0IjoxNzc3NDAxMDkxLCJleHAiOjE3Nzc0MDEzOTF9.SrrwXc4il_DTXOwU57gVRRUaKwRC9Lk8ZmezOIMPwJ4",
                       "type": "string"
                     }
                   ]
@@ -279,7 +269,6 @@
             }
           ]
         }
-        
       ]
     }
   ]

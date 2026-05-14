@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.hernandolopera.reservation_service.dto.RespuestaRegistroViajeroDTO;
 import com.hernandolopera.reservation_service.dto.ViajeroDTO;
 import com.hernandolopera.reservation_service.entidades.Reserva;
 import com.hernandolopera.reservation_service.entidades.Viajero;
@@ -27,27 +26,15 @@ public class ServicioViajero {
 	private final RepositorioViajero repositorioViajero;
 	private final RepositorioReserva repositorioReserva;
 
-	public RespuestaRegistroViajeroDTO registrarViajero(Long idReserva, ViajeroDTO viajeroDTO) {
+	public ViajeroDTO registrarViajero(Long idReserva, ViajeroDTO viajeroDTO) {
 		log.info("Registrando viajero para reserva: {}", idReserva);
 
-		Optional<Reserva> reservaOpcional = repositorioReserva.findById(idReserva);
-		if (reservaOpcional.isEmpty()) {
-			return RespuestaRegistroViajeroDTO.builder()
-					.exito(false)
-					.mensaje("Reserva no encontrada")
-					.detalleError("No existe una reserva con el ID proporcionado")
-					.build();
-		}
+		Reserva reserva = repositorioReserva.findById(idReserva)
+				.orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
 
-		Reserva reserva = reservaOpcional.get();
 		long viajerosRegistrados = repositorioViajero.countByIdReserva(idReserva);
 		if (reserva.getCantidadPasajeros() != null && viajerosRegistrados >= reserva.getCantidadPasajeros()) {
-			return RespuestaRegistroViajeroDTO.builder()
-					.exito(false)
-					.idReserva(idReserva)
-					.mensaje("No se pueden registrar mas viajeros")
-					.detalleError("La reserva permite maximo " + reserva.getCantidadPasajeros() + " viajeros")
-					.build();
+			throw new RuntimeException("Se ha alcanzado el maximo numero de viajeros para esta reserva");
 		}
 
 		Viajero viajero = convertirAEntidad(viajeroDTO);
@@ -57,16 +44,13 @@ public class ServicioViajero {
 		viajero.setFechaCreacion(LocalDateTime.now());
 
 		Viajero viajeroGuardado = repositorioViajero.save(viajero);
-		return RespuestaRegistroViajeroDTO.builder()
-				.exito(true)
-				.mensaje("Viajero registrado exitosamente")
-				.idViajero(viajeroGuardado.getId())
-				.idReserva(idReserva)
-				.build();
+		log.info("Viajero registrado exitosamente con ID: {}", viajeroGuardado.getId());
+
+		return convertirADTO(viajeroGuardado);
 	}
 
 	@Transactional(readOnly = true)
-	public Optional<ViajeroDTO> obtenerViajeroPorId(Long idViajero) {
+	public Optional<ViajeroDTO> obtenerViajero(Long idViajero) {
 		return repositorioViajero.findById(idViajero).map(this::convertirADTO);
 	}
 
@@ -77,13 +61,26 @@ public class ServicioViajero {
 				.collect(Collectors.toList());
 	}
 
-	public Optional<ViajeroDTO> actualizarViajero(Long idViajero, ViajeroDTO viajeroDTO) {
-		return repositorioViajero.findById(idViajero).map(viajero -> {
-			actualizarCampos(viajero, viajeroDTO);
-			viajero.setDatosCompletos(tieneDatosObligatorios(viajero));
-			viajero.setFechaActualizacion(LocalDateTime.now());
-			return convertirADTO(repositorioViajero.save(viajero));
-		});
+	public ViajeroDTO actualizarViajero(Long idViajero, ViajeroDTO viajeroDTO) {
+		Viajero viajero = repositorioViajero.findById(idViajero)
+				.orElseThrow(() -> new RuntimeException("Viajero no encontrado"));
+
+		actualizarCampos(viajero, viajeroDTO);
+		viajero.setDatosCompletos(tieneDatosObligatorios(viajero));
+		viajero.setFechaActualizacion(LocalDateTime.now());
+
+		Viajero viajeroActualizado = repositorioViajero.save(viajero);
+		log.info("Viajero actualizado exitosamente: {}", viajeroActualizado.getId());
+
+		return convertirADTO(viajeroActualizado);
+	}
+
+	public void eliminarViajero(Long idViajero) {
+		log.info("Eliminando viajero con ID: {}", idViajero);
+		if (!repositorioViajero.existsById(idViajero)) {
+			throw new RuntimeException("Viajero no encontrado");
+		}
+		repositorioViajero.deleteById(idViajero);
 	}
 
 	private void actualizarCampos(Viajero viajero, ViajeroDTO viajeroDTO) {
