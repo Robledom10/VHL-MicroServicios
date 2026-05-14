@@ -11,9 +11,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.hernandolopera.reservation_service.dto.ReservaDTO;
+import com.hernandolopera.reservation_service.dto.ViajeroDTO;
 import com.hernandolopera.reservation_service.entidades.EstadoReserva;
 import com.hernandolopera.reservation_service.entidades.Reserva;
+import com.hernandolopera.reservation_service.entidades.Viajero;
 import com.hernandolopera.reservation_service.repositorios.RepositorioReserva;
+import com.hernandolopera.reservation_service.repositorios.RepositorioViajero;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ServicioReserva {
 
 	private final RepositorioReserva repositorioReserva;
+	private final RepositorioViajero repositorioViajero;
 
 	/**
 	 * SCRUM-704: Crear servicio para obtener reservas
@@ -113,6 +117,26 @@ public class ServicioReserva {
 			reserva.setCantidadPasajeros(reservaActualizar.getCantidadPasajeros());
 		}
 
+		if (reservaActualizar.getFechaInicioViaje() != null) {
+			reserva.setFechaInicioViaje(reservaActualizar.getFechaInicioViaje());
+		}
+
+		if (reservaActualizar.getFechaFinViaje() != null) {
+			reserva.setFechaFinViaje(reservaActualizar.getFechaFinViaje());
+		}
+
+		if (reservaActualizar.getEstado() != null) {
+			reserva.setEstado(reservaActualizar.getEstado());
+		}
+
+		if (reservaActualizar.getPagoVerificado() != null) {
+			reserva.setPagoVerificado(reservaActualizar.getPagoVerificado());
+		}
+
+		if (reservaActualizar.getFechaConfirmacion() != null) {
+			reserva.setFechaConfirmacion(reservaActualizar.getFechaConfirmacion());
+		}
+
 		if (reservaActualizar.getNotas() != null) {
 			reserva.setNotas(reservaActualizar.getNotas());
 		}
@@ -157,13 +181,37 @@ public class ServicioReserva {
 	 * Convierte una entidad Reserva a DTO
 	 */
 	private ReservaDTO convertirADTO(Reserva reserva) {
+		List<ViajeroDTO> viajeros = repositorioViajero.findByIdReserva(reserva.getId()).stream()
+				.map(this::convertirViajeroADTO)
+				.collect(Collectors.toList());
+
 		return ReservaDTO.builder().id(reserva.getId()).numeroReserva(reserva.getNumeroReserva())
 				.idPaquete(reserva.getIdPaquete()).idUsuario(reserva.getIdUsuario())
 				.cantidadPasajeros(reserva.getCantidadPasajeros()).precioTotal(reserva.getPrecioTotal())
 				.fechaInicioViaje(reserva.getFechaInicioViaje()).fechaFinViaje(reserva.getFechaFinViaje())
 				.estado(reserva.getEstado()).pagoVerificado(reserva.getPagoVerificado())
-				.fechaCreacion(reserva.getFechaCreacion().atStartOfDay()).fechaActualizacion(reserva.getFechaActualizacion())
-				.fechaConfirmacion(reserva.getFechaConfirmacion()).notas(reserva.getNotas()).build();
+				.fechaCreacion(reserva.getFechaCreacion() != null ? reserva.getFechaCreacion().atStartOfDay() : null)
+				.fechaActualizacion(reserva.getFechaActualizacion())
+				.fechaConfirmacion(reserva.getFechaConfirmacion()).viajeros(viajeros).notas(reserva.getNotas()).build();
+	}
+
+	private ViajeroDTO convertirViajeroADTO(Viajero viajero) {
+		return ViajeroDTO.builder()
+				.id(viajero.getId())
+				.nombre(viajero.getNombre())
+				.apellido(viajero.getApellido())
+				.documento(viajero.getDocumento())
+				.tipoDocumento(viajero.getTipoDocumento())
+				.fechaNacimiento(viajero.getFechaNacimiento())
+				.email(viajero.getEmail())
+				.telefono(viajero.getTelefono())
+				.genero(viajero.getGenero())
+				.nacionalidad(viajero.getNacionalidad())
+				.datosCompletos(viajero.getDatosCompletos())
+				.documentosVerificados(viajero.getDocumentosVerificados())
+				.fechaCreacion(viajero.getFechaCreacion())
+				.fechaActualizacion(viajero.getFechaActualizacion())
+				.build();
 	}
 
 }

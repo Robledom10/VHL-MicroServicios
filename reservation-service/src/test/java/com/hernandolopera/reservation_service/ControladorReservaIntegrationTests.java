@@ -84,12 +84,20 @@ class ControladorReservaIntegrationTests {
                                 {
                                   "precioTotal": 1400.00,
                                   "cantidadPasajeros": 3,
+                                  "fechaInicioViaje": "2026-06-15T08:00:00",
+                                  "fechaFinViaje": "2026-06-22T18:00:00",
+                                  "estado": "PENDIENTE",
+                                  "pagoVerificado": true,
                                   "notas": "Cambio solicitado por el usuario"
                                 }
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.precioTotal").value(1400.00))
                 .andExpect(jsonPath("$.cantidadPasajeros").value(3))
+                .andExpect(jsonPath("$.fechaInicioViaje").value("2026-06-15T08:00:00"))
+                .andExpect(jsonPath("$.fechaFinViaje").value("2026-06-22T18:00:00"))
+                .andExpect(jsonPath("$.estado").value("PENDIENTE"))
+                .andExpect(jsonPath("$.pagoVerificado").value(true))
                 .andExpect(jsonPath("$.notas").value("Cambio solicitado por el usuario"));
     }
 
@@ -122,7 +130,7 @@ class ControladorReservaIntegrationTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.exito").value(true))
                 .andExpect(jsonPath("$.mensaje").value("Reserva confirmada exitosamente"))
-                .andExpect(jsonPath("$.estadoReserva").value("Confirmada"));
+                .andExpect(jsonPath("$.estadoReserva").value("CONFIRMADA"));
 
         mockMvc.perform(get("/api/v1/reservas/{id}", reservaId))
                 .andExpect(status().isOk())
