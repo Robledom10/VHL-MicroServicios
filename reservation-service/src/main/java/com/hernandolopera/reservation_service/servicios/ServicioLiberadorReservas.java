@@ -24,13 +24,13 @@ public class ServicioLiberadorReservas {
 
         /**
          * Se ejecuta cada minuto.
-         * Busca reservas BLOQUEADAS cuyo tiempo de pago expiró y las cancela,
+         * Busca reservas PENDIENTES cuyo tiempo de pago expiro y las cancela,
          * dejando el paquete disponible para otros usuarios.
          */
         @Scheduled(fixedDelay = 60_000)
         public void liberarReservasExpiradas() {
                 List<Reserva> expiradas = repositorioReserva.findByEstadoAndExpiresAtBefore(
-                        EstadoReserva.BLOQUEADA, LocalDateTime.now());
+                        EstadoReserva.PENDIENTE, LocalDateTime.now());
 
                 if (expiradas.isEmpty()) return;
 

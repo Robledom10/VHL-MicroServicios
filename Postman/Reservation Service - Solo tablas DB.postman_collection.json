@@ -6,7 +6,81 @@
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "44648543"
   },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
   "item": [
+    {
+      "name": "00 AUTH - Login",
+      "item": [
+        {
+          "name": "00 POST Login - Obtener token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Login responde 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "const token = json.accessToken || json.token || json.jwt;",
+                  "pm.test('La respuesta contiene accessToken', function () {",
+                  "  pm.expect(token).to.be.a('string').and.not.empty;",
+                  "});",
+                  "",
+                  "pm.collectionVariables.set('token', token);",
+                  "console.log('Token guardado en variable collection token');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{loginEmail}}\",\n  \"password\": \"{{loginPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
     {
       "name": "Health",
       "item": [
@@ -256,6 +330,15 @@
                   "pm.test('fechaActualizacion no es null', function () {",
                   "  pm.expect(json.fechaActualizacion).to.not.be.null;",
                   "});",
+                  "",
+                  "pm.test('Campos enviados quedan actualizados', function () {",
+                  "  pm.expect(json.precioTotal).to.eql(1800.00);",
+                  "  pm.expect(json.cantidadPasajeros).to.eql(3);",
+                  "  pm.expect(json.fechaInicioViaje).to.include('2026-06-15T08:00:00');",
+                  "  pm.expect(json.fechaFinViaje).to.include('2026-06-22T18:00:00');",
+                  "  pm.expect(json.estado).to.eql('PENDIENTE');",
+                  "  pm.expect(json.pagoVerificado).to.eql(true);",
+                  "});",
                   "if (json.precioTotal) pm.collectionVariables.set('precioTotal', json.precioTotal);"
                 ],
                 "type": "text/javascript"
@@ -273,7 +356,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"precioTotal\": 1800.00,\n  \"cantidadPasajeros\": 3,\n  \"notas\": \"Reserva actualizada desde Postman\"\n}",
+              "raw": "{\n  \"precioTotal\": 1800.00,\n  \"cantidadPasajeros\": 3,\n  \"fechaInicioViaje\": \"2026-06-15T08:00:00\",\n  \"fechaFinViaje\": \"2026-06-22T18:00:00\",\n  \"estado\": \"PENDIENTE\",\n  \"pagoVerificado\": true,\n  \"notas\": \"Reserva actualizada desde Postman\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -339,7 +422,204 @@
       "name": "Confirmaciones",
       "item": [
         {
-          "name": "08 POST Confirmar reserva",
+          "name": "08 POST Crear reserva para confirmar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Reserva para confirmacion creada', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "if (json.id) pm.collectionVariables.set('reservaId', json.id);",
+                  "if (json.numeroReserva) pm.collectionVariables.set('numeroReserva', json.numeroReserva);",
+                  "if (json.precioTotal) pm.collectionVariables.set('precioTotal', json.precioTotal);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idUsuario\": 10,\n  \"idPaquete\": 5,\n  \"cantidadPasajeros\": 2,\n  \"precioTotal\": 1500.00,\n  \"fechaInicioViaje\": \"2026-07-01T08:00:00\",\n  \"fechaFinViaje\": \"2026-07-10T18:00:00\",\n  \"notas\": \"Reserva para confirmar desde Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reservas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reservas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "09 POST Registrar viajero 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Viajero 1 registrado', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Juan\",\n  \"apellido\": \"Perez\",\n  \"documento\": \"12345678\",\n  \"tipoDocumento\": \"CEDULA\",\n  \"fechaNacimiento\": \"1990-05-15\",\n  \"email\": \"juan.perez@email.com\",\n  \"telefono\": \"3001234567\",\n  \"genero\": \"MASCULINO\",\n  \"nacionalidad\": \"COLOMBIA\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/viajeros/reserva/{{reservaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "viajeros",
+                "reserva",
+                "{{reservaId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "10 POST Registrar viajero 2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Viajero 2 registrado', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Maria\",\n  \"apellido\": \"Gomez\",\n  \"documento\": \"87654321\",\n  \"tipoDocumento\": \"CEDULA\",\n  \"fechaNacimiento\": \"1992-08-20\",\n  \"email\": \"maria.gomez@email.com\",\n  \"telefono\": \"3007654321\",\n  \"genero\": \"FEMENINO\",\n  \"nacionalidad\": \"COLOMBIA\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/viajeros/reserva/{{reservaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "viajeros",
+                "reserva",
+                "{{reservaId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "11 GET Viajeros por reserva",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Viajeros encontrados', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "pm.test('La reserva tiene 2 viajeros registrados', function () {",
+                  "  pm.expect(json).to.be.an('array');",
+                  "  pm.expect(json.length).to.eql(2);",
+                  "});",
+                  "",
+                  "pm.test('Los viajeros tienen datos completos', function () {",
+                  "  json.forEach(function(viajero) {",
+                  "    pm.expect(viajero.datosCompletos).to.eql(true);",
+                  "    pm.expect(viajero.documentosVerificados).to.eql(false);",
+                  "  });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/viajeros/reserva/{{reservaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "viajeros",
+                "reserva",
+                "{{reservaId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "12 POST Confirmar reserva",
           "event": [
             {
               "listen": "test",
@@ -394,6 +674,51 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "13 GET Reserva confirmada",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Reserva consultada despues de confirmar', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "pm.test('La reserva queda CONFIRMADA y pagoVerificado true', function () {",
+                  "  pm.expect(json.estado).to.eql('CONFIRMADA');",
+                  "  pm.expect(json.pagoVerificado).to.eql(true);",
+                  "  pm.expect(json.fechaConfirmacion).to.not.be.null;",
+                  "});",
+                  "",
+                  "pm.test('La reserva incluye sus viajeros', function () {",
+                  "  pm.expect(json.viajeros).to.be.an('array');",
+                  "  pm.expect(json.viajeros.length).to.eql(2);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reservas/{{reservaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reservas",
+                "{{reservaId}}"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     }
@@ -401,7 +726,19 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:8082"
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "loginEmail",
+      "value": "juan@test.com"
+    },
+    {
+      "key": "loginPassword",
+      "value": "123456"
     },
     {
       "key": "reservaId",

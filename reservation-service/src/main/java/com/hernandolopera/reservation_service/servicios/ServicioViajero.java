@@ -1,0 +1,167 @@
+package com.hernandolopera.reservation_service.servicios;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.hernandolopera.reservation_service.dto.RespuestaRegistroViajeroDTO;
+import com.hernandolopera.reservation_service.dto.ViajeroDTO;
+import com.hernandolopera.reservation_service.entidades.Reserva;
+import com.hernandolopera.reservation_service.entidades.Viajero;
+import com.hernandolopera.reservation_service.repositorios.RepositorioReserva;
+import com.hernandolopera.reservation_service.repositorios.RepositorioViajero;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Service
+@Transactional
+@RequiredArgsConstructor
+@Slf4j
+public class ServicioViajero {
+
+	private final RepositorioViajero repositorioViajero;
+	private final RepositorioReserva repositorioReserva;
+
+	public RespuestaRegistroViajeroDTO registrarViajero(Long idReserva, ViajeroDTO viajeroDTO) {
+		log.info("Registrando viajero para reserva: {}", idReserva);
+
+		Optional<Reserva> reservaOpcional = repositorioReserva.findById(idReserva);
+		if (reservaOpcional.isEmpty()) {
+			return RespuestaRegistroViajeroDTO.builder()
+					.exito(false)
+					.mensaje("Reserva no encontrada")
+					.detalleError("No existe una reserva con el ID proporcionado")
+					.build();
+		}
+
+		Reserva reserva = reservaOpcional.get();
+		long viajerosRegistrados = repositorioViajero.countByIdReserva(idReserva);
+		if (reserva.getCantidadPasajeros() != null && viajerosRegistrados >= reserva.getCantidadPasajeros()) {
+			return RespuestaRegistroViajeroDTO.builder()
+					.exito(false)
+					.idReserva(idReserva)
+					.mensaje("No se pueden registrar mas viajeros")
+					.detalleError("La reserva permite maximo " + reserva.getCantidadPasajeros() + " viajeros")
+					.build();
+		}
+
+		Viajero viajero = convertirAEntidad(viajeroDTO);
+		viajero.setIdReserva(idReserva);
+		viajero.setDatosCompletos(tieneDatosObligatorios(viajero));
+		viajero.setDocumentosVerificados(false);
+		viajero.setFechaCreacion(LocalDateTime.now());
+
+		Viajero viajeroGuardado = repositorioViajero.save(viajero);
+		return RespuestaRegistroViajeroDTO.builder()
+				.exito(true)
+				.mensaje("Viajero registrado exitosamente")
+				.idViajero(viajeroGuardado.getId())
+				.idReserva(idReserva)
+				.build();
+	}
+
+	@Transactional(readOnly = true)
+	public Optional<ViajeroDTO> obtenerViajeroPorId(Long idViajero) {
+		return repositorioViajero.findById(idViajero).map(this::convertirADTO);
+	}
+
+	@Transactional(readOnly = true)
+	public List<ViajeroDTO> obtenerViajerosPorReserva(Long idReserva) {
+		return repositorioViajero.findByIdReserva(idReserva).stream()
+				.map(this::convertirADTO)
+				.collect(Collectors.toList());
+	}
+
+	public Optional<ViajeroDTO> actualizarViajero(Long idViajero, ViajeroDTO viajeroDTO) {
+		return repositorioViajero.findById(idViajero).map(viajero -> {
+			actualizarCampos(viajero, viajeroDTO);
+			viajero.setDatosCompletos(tieneDatosObligatorios(viajero));
+			viajero.setFechaActualizacion(LocalDateTime.now());
+			return convertirADTO(repositorioViajero.save(viajero));
+		});
+	}
+
+	private void actualizarCampos(Viajero viajero, ViajeroDTO viajeroDTO) {
+		if (viajeroDTO.getNombre() != null) {
+			viajero.setNombre(viajeroDTO.getNombre());
+		}
+		if (viajeroDTO.getApellido() != null) {
+			viajero.setApellido(viajeroDTO.getApellido());
+		}
+		if (viajeroDTO.getDocumento() != null) {
+			viajero.setDocumento(viajeroDTO.getDocumento());
+		}
+		if (viajeroDTO.getTipoDocumento() != null) {
+			viajero.setTipoDocumento(viajeroDTO.getTipoDocumento());
+		}
+		if (viajeroDTO.getFechaNacimiento() != null) {
+			viajero.setFechaNacimiento(viajeroDTO.getFechaNacimiento());
+		}
+		if (viajeroDTO.getEmail() != null) {
+			viajero.setEmail(viajeroDTO.getEmail());
+		}
+		if (viajeroDTO.getTelefono() != null) {
+			viajero.setTelefono(viajeroDTO.getTelefono());
+		}
+		if (viajeroDTO.getGenero() != null) {
+			viajero.setGenero(viajeroDTO.getGenero());
+		}
+		if (viajeroDTO.getNacionalidad() != null) {
+			viajero.setNacionalidad(viajeroDTO.getNacionalidad());
+		}
+		if (viajeroDTO.getDocumentosVerificados() != null) {
+			viajero.setDocumentosVerificados(viajeroDTO.getDocumentosVerificados());
+		}
+	}
+
+	private Viajero convertirAEntidad(ViajeroDTO viajeroDTO) {
+		return Viajero.builder()
+				.nombre(viajeroDTO.getNombre())
+				.apellido(viajeroDTO.getApellido())
+				.documento(viajeroDTO.getDocumento())
+				.tipoDocumento(viajeroDTO.getTipoDocumento())
+				.fechaNacimiento(viajeroDTO.getFechaNacimiento())
+				.email(viajeroDTO.getEmail())
+				.telefono(viajeroDTO.getTelefono())
+				.genero(viajeroDTO.getGenero())
+				.nacionalidad(viajeroDTO.getNacionalidad())
+				.build();
+	}
+
+	private ViajeroDTO convertirADTO(Viajero viajero) {
+		return ViajeroDTO.builder()
+				.id(viajero.getId())
+				.nombre(viajero.getNombre())
+				.apellido(viajero.getApellido())
+				.documento(viajero.getDocumento())
+				.tipoDocumento(viajero.getTipoDocumento())
+				.fechaNacimiento(viajero.getFechaNacimiento())
+				.email(viajero.getEmail())
+				.telefono(viajero.getTelefono())
+				.genero(viajero.getGenero())
+				.nacionalidad(viajero.getNacionalidad())
+				.datosCompletos(viajero.getDatosCompletos())
+				.documentosVerificados(viajero.getDocumentosVerificados())
+				.fechaCreacion(viajero.getFechaCreacion())
+				.fechaActualizacion(viajero.getFechaActualizacion())
+				.build();
+	}
+
+	private boolean tieneDatosObligatorios(Viajero viajero) {
+		return tieneTexto(viajero.getNombre())
+				&& tieneTexto(viajero.getApellido())
+				&& tieneTexto(viajero.getDocumento())
+				&& tieneTexto(viajero.getTipoDocumento())
+				&& viajero.getFechaNacimiento() != null
+				&& tieneTexto(viajero.getEmail());
+	}
+
+	private boolean tieneTexto(String valor) {
+		return valor != null && !valor.isBlank();
+	}
+}

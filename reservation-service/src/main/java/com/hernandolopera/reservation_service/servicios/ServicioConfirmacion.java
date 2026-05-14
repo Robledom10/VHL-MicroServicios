@@ -11,6 +11,7 @@ import com.hernandolopera.reservation_service.dto.SolicitudConfirmacionReservaDT
 import com.hernandolopera.reservation_service.entidades.EstadoReserva;
 import com.hernandolopera.reservation_service.entidades.Reserva;
 import com.hernandolopera.reservation_service.repositorios.RepositorioReserva;
+import com.hernandolopera.reservation_service.repositorios.RepositorioViajero;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ServicioConfirmacion {
 
 	private final RepositorioReserva repositorioReserva;
+	private final RepositorioViajero repositorioViajero;
 
 	public RespuestaConfirmacionDTO confirmarReserva(SolicitudConfirmacionReservaDTO solicitud) {
 		log.info("Iniciando proceso de confirmacion de reserva: {}", solicitud.getNumeroReserva());
@@ -41,12 +43,12 @@ public class ServicioConfirmacion {
 			Reserva reserva = reservaOpcional.get();
 
 			// Verificar pago
-			if (!solicitud.getPagoVerificado()) {
+			if (!Boolean.TRUE.equals(solicitud.getPagoVerificado())) {
 				log.warn("Pago no verificado para la reserva: {}", reserva.getNumeroReserva());
 				return RespuestaConfirmacionDTO.builder()
 						.exito(false)
 						.numeroReserva(reserva.getNumeroReserva())
-						.estadoReserva(reserva.getEstado().getDescripcion())
+						.estadoReserva(reserva.getEstado().name())
 						.mensaje("El pago no ha sido verificado")
 						.detalleError("Debe completar el pago antes de confirmar la reserva")
 						.build();
@@ -58,7 +60,7 @@ public class ServicioConfirmacion {
 				return RespuestaConfirmacionDTO.builder()
 						.exito(false)
 						.numeroReserva(reserva.getNumeroReserva())
-						.estadoReserva(reserva.getEstado().getDescripcion())
+						.estadoReserva(reserva.getEstado().name())
 						.mensaje("El monto del pago no coincide")
 						.detalleError("Monto esperado: " + reserva.getPrecioTotal()
 								+ ", Monto recibido: " + solicitud.getMontoPago())
@@ -72,9 +74,22 @@ public class ServicioConfirmacion {
 				return RespuestaConfirmacionDTO.builder()
 						.exito(false)
 						.numeroReserva(reserva.getNumeroReserva())
-						.estadoReserva(reserva.getEstado().getDescripcion())
+						.estadoReserva(reserva.getEstado().name())
 						.mensaje("Cantidad de pasajeros insuficiente")
 						.detalleError("Pasajeros registrados: " + cantidadPasajeros
+								+ ", Requeridos: " + solicitud.getCantidadPasajeros())
+						.build();
+			}
+
+			long viajerosRegistrados = repositorioViajero.countByIdReservaAndDatosCompletosTrue(reserva.getId());
+			if (viajerosRegistrados < solicitud.getCantidadPasajeros()) {
+				log.warn("Viajeros registrados insuficientes para la reserva: {}", reserva.getNumeroReserva());
+				return RespuestaConfirmacionDTO.builder()
+						.exito(false)
+						.numeroReserva(reserva.getNumeroReserva())
+						.estadoReserva(reserva.getEstado().name())
+						.mensaje("No hay suficientes viajeros registrados")
+						.detalleError("Viajeros registrados: " + viajerosRegistrados
 								+ ", Requeridos: " + solicitud.getCantidadPasajeros())
 						.build();
 			}
@@ -85,7 +100,7 @@ public class ServicioConfirmacion {
 				return RespuestaConfirmacionDTO.builder()
 						.exito(false)
 						.numeroReserva(reserva.getNumeroReserva())
-						.estadoReserva(reserva.getEstado().getDescripcion())
+						.estadoReserva(reserva.getEstado().name())
 						.mensaje("La reserva no se puede confirmar")
 						.detalleError("La reserva ya ha sido "
 								+ reserva.getEstado().getDescripcion().toLowerCase())
@@ -104,7 +119,7 @@ public class ServicioConfirmacion {
 			return RespuestaConfirmacionDTO.builder()
 					.exito(true)
 					.numeroReserva(reservaConfirmada.getNumeroReserva())
-					.estadoReserva(reservaConfirmada.getEstado().getDescripcion())
+					.estadoReserva(reservaConfirmada.getEstado().name())
 					.mensaje("Reserva confirmada exitosamente")
 					.build();
 

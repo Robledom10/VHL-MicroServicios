@@ -11,13 +11,32 @@ CREATE TABLE reservation (
     total_amount        DECIMAL(10,2)   NOT NULL,
     travel_start_date   DATETIME        NULL,
     travel_end_date     DATETIME        NULL,
-    status              ENUM('bloqueada','pendiente','confirmada','cancelada') NOT NULL DEFAULT 'bloqueada',
+    status              ENUM('bloqueada','pendiente','confirmada','cancelada','completada') NOT NULL DEFAULT 'pendiente',
     payment_verified    BOOLEAN         NOT NULL DEFAULT FALSE,
     reservation_date    DATE            NOT NULL,
     expires_at          DATETIME        NULL,
     updated_at          DATETIME        NULL,
     confirmation_date   DATETIME        NULL,
     notes               VARCHAR(500)    NULL
+);
+
+CREATE TABLE traveler (
+    id_traveler        INT AUTO_INCREMENT PRIMARY KEY,
+    fk_id_reservation  INT          NOT NULL,
+    first_name         VARCHAR(100) NOT NULL,
+    last_name          VARCHAR(100) NOT NULL,
+    document_number    VARCHAR(50)  NOT NULL,
+    document_type      VARCHAR(50)  NOT NULL,
+    birth_date         DATE         NOT NULL,
+    email              VARCHAR(150) NOT NULL,
+    phone              VARCHAR(30)  NULL,
+    gender             VARCHAR(50)  NULL,
+    nationality        VARCHAR(80)  NULL,
+    data_completed     BOOLEAN      NOT NULL DEFAULT TRUE,
+    documents_verified BOOLEAN      NOT NULL DEFAULT FALSE,
+    created_at         DATETIME     NOT NULL,
+    updated_at         DATETIME     NULL,
+    FOREIGN KEY (fk_id_reservation) REFERENCES reservation(id_reservation)
 );
 
 CREATE TABLE cancellation (
