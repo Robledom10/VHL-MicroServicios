@@ -6,75 +6,69 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @Entity
-@Table(name = "viajeros")
+@Table(name = "traveler")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(exclude = "reserva")
 public class Viajero implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id_traveler")
 	private Long id;
 
-	@Column(name = "nombre", nullable = false)
+	@Column(name = "fk_id_reservation", nullable = false)
+	private Long idReserva;
+
+	@Column(name = "first_name", nullable = false, length = 100)
 	private String nombre;
 
-	@Column(name = "apellido", nullable = false)
+	@Column(name = "last_name", nullable = false, length = 100)
 	private String apellido;
 
-	@Column(name = "documento", nullable = false)
+	@Column(name = "document_number", nullable = false, length = 50)
 	private String documento;
 
-	@Column(name = "tipo_documento", nullable = false)
+	@Column(name = "document_type", nullable = false, length = 50)
 	private String tipoDocumento;
 
-	@Column(name = "fecha_nacimiento", nullable = false)
+	@Column(name = "birth_date", nullable = false)
 	private LocalDate fechaNacimiento;
 
-	@Column(name = "email", nullable = false)
+	@Column(name = "email", nullable = false, length = 150)
 	private String email;
 
-	@Column(name = "telefono")
+	@Column(name = "phone", length = 30)
 	private String telefono;
 
-	@Column(name = "genero")
+	@Column(name = "gender", length = 50)
 	private String genero;
 
-	@Column(name = "nacionalidad")
+	@Column(name = "nationality", length = 80)
 	private String nacionalidad;
 
-	@Column(name = "datos_completos", nullable = false)
+	@Column(name = "data_completed", nullable = false)
 	private Boolean datosCompletos;
 
-	@Column(name = "documentos_verificados", nullable = false)
+	@Column(name = "documents_verified", nullable = false)
 	private Boolean documentosVerificados;
 
-	@Column(name = "fecha_creacion", nullable = false, updatable = false)
+	@Column(name = "created_at", nullable = false, updatable = false)
 	private LocalDateTime fechaCreacion;
 
-	@Column(name = "fecha_actualizacion")
+	@Column(name = "updated_at")
 	private LocalDateTime fechaActualizacion;
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "reserva_id", nullable = false)
-	private Reserva reserva;
-
 }

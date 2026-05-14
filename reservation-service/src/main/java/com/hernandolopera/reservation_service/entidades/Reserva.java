@@ -4,24 +4,18 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @Entity
 @Table(name = "reservation")
@@ -29,7 +23,6 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(exclude = "viajeros")
 public class Reserva implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -48,41 +41,37 @@ public class Reserva implements Serializable {
 	@Column(name = "id_user", nullable = false)
 	private Long idUsuario;
 
-	@Transient
+	@Column(name = "passenger_count")
 	private Integer cantidadPasajeros;
 
 	@Column(name = "total_amount", precision = 10, scale = 2, nullable = false)
 	private BigDecimal precioTotal;
 
-	@Transient
+	@Column(name = "travel_start_date")
 	private LocalDateTime fechaInicioViaje;
 
-	@Transient
+	@Column(name = "travel_end_date")
 	private LocalDateTime fechaFinViaje;
 
 	@Convert(converter = EstadoReservaConverter.class)
 	@Column(name = "status", nullable = false)
 	private EstadoReserva estado;
 
-	@Transient
+	@Column(name = "payment_verified")
 	private Boolean pagoVerificado;
 
 	@Column(name = "reservation_date", nullable = false, updatable = false)
 	private LocalDate fechaCreacion;
 
-	@Transient
+	@Column(name = "expires_at")
+	private LocalDateTime expiresAt;
+
+	@Column(name = "updated_at")
 	private LocalDateTime fechaActualizacion;
 
-	@Transient
+	@Column(name = "confirmation_date")
 	private LocalDateTime fechaConfirmacion;
 
-	@OneToMany(mappedBy = "reserva", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private List<Viajero> viajeros;
-
-	@OneToMany(mappedBy = "reserva", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private List<Archivo> archivos;
-
-	@Transient
+	@Column(name = "notes", length = 500)
 	private String notas;
-
 }
