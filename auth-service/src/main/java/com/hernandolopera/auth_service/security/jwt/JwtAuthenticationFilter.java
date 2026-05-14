@@ -69,14 +69,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 // 🚫 3. VALIDACIÓN DE PERFIL INCOMPLETO (Excluyendo rutas de token y /me)
                 if (!customUser.isProfileCompleted()
-                        && !path.contains("/complete-profile")
+                        && !path.contains("/api/auth/complete-profile")
 
                         && !path.contains("/auth/tokens/")
+                        && !path.contains("admin")
                         && !path.equals("/api/auth/profile")
                         && !path.equals("/auth/tokens/logout")
-
-                        && !path.equals("/api/auth/admin")
-                        && !path.equals("/admin")) {
+                        && !path.startsWith("/api/admin/users")) {
 
                     enviarErrorPerfilIncompleto(response);
                     return;

@@ -12,7 +12,8 @@ import com.hernandolopera.auth_service.entity.auth.User;
 
 /**
  * Implementación de UserDetails para Spring Security.
- * Incluye validaciones contra valores nulos en la base de datos para evitar errores 401/403.
+ * Incluye validaciones contra valores nulos en la base de datos para evitar
+ * errores 401/403.
  */
 public class CustomUserDetails implements UserDetails {
 
@@ -39,17 +40,12 @@ public class CustomUserDetails implements UserDetails {
         List<GrantedAuthority> authorities = new ArrayList<>();
 
         if (user.getRole() != null) {
-            // 🛡️ Agregamos el Rol con el prefijo ROLE_ (Indispensable para hasRole('ADMIN'))
-            // Convertimos a Mayúsculas para evitar errores de Case Sensitivity
             String roleName = user.getRole().getName().toUpperCase();
-            authorities.add(new SimpleGrantedAuthority("ROLE_" + roleName));
 
-            // 🛡️ Agregamos los permisos individuales si el rol los tiene
-            if (user.getRole().getPermissions() != null) {
-                user.getRole().getPermissions().stream()
-                    .filter(p -> p != null && p.isStatus())
-                    .forEach(p -> authorities.add(new SimpleGrantedAuthority(p.getName())));
-            }
+            // 🛡️ Solo agregamos ROLE_ si no lo tiene ya incorporado
+            String finalRoleName = roleName.startsWith("ROLE_") ? roleName : "ROLE_" + roleName;
+            authorities.add(new SimpleGrantedAuthority(finalRoleName));
+
         }
 
         return authorities;
