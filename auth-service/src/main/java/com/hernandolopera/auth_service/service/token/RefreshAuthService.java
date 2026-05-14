@@ -42,7 +42,7 @@ public class RefreshAuthService {
 
 
         // Antes: user.getRoles().stream().map(...)
-        String role = user.getRoles().getName();
+        String role = user.getRole().getName();
 
         String newAccessToken = jwtTokenProvider.generateToken(
                 user.getId(),

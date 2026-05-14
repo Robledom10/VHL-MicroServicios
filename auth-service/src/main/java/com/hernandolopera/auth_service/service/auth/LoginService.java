@@ -3,13 +3,9 @@ package com.hernandolopera.auth_service.service.auth;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
-
 import com.hernandolopera.auth_service.dto.request.auth.LoginRequest;
 import com.hernandolopera.auth_service.dto.response.AuthResponse;
 import com.hernandolopera.auth_service.dto.response.UserLoginResponse;
-import com.hernandolopera.auth_service.dto.response.UserResponse;
 import com.hernandolopera.auth_service.entity.auth.User;
 import com.hernandolopera.auth_service.entity.token.RefreshToken;
 import com.hernandolopera.auth_service.repository.auth.UserRepository;
@@ -85,7 +81,7 @@ public class LoginService {
                 loginAttemptService.resetFailedAttemps(user);
 
                 // 🔥 ROLES (clave para todo tu sistema)
-                String role = user.getRoles().getName();
+                String role = user.getRole().getName();
 
                 // 🔐 JWT
                 String accessToken = jwtTokenProvider.generateToken(

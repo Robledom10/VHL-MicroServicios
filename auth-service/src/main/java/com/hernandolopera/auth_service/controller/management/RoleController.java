@@ -21,7 +21,7 @@ import com.hernandolopera.auth_service.service.auth.RoleService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/roles")
+@RequestMapping("/api/admin/roles")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
 public class RoleController {

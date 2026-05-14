@@ -14,6 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.hernandolopera.auth_service.entity.auth.User;
 import com.hernandolopera.auth_service.security.details.CustomUserDetails;
 import com.hernandolopera.auth_service.service.auth.RoleService;
+import com.hernandolopera.auth_service.service.auth.RegistrationService;
+import com.hernandolopera.auth_service.dto.request.user.CompleteProfileRequest;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import jakarta.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,8 +28,9 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
 
     private final RoleService roleService;
+    private final RegistrationService registrationService;
 
-    @GetMapping("/me")
+    @GetMapping("/profile")
     public ResponseEntity<?> getProfile(Authentication authentication) {
         if (authentication == null)
             return ResponseEntity.status(401).build();
@@ -46,6 +52,19 @@ public class UserController {
                 .toList());
 
         return ResponseEntity.ok(body);
+    }
+
+    @PutMapping("/complete-profile")
+    public ResponseEntity<Map<String, String>> completeProfile(Authentication authentication, @Valid @RequestBody CompleteProfileRequest request) {
+        if (authentication == null)
+            return ResponseEntity.status(401).build();
+
+        CustomUserDetails customUser = (CustomUserDetails) authentication.getPrincipal();
+        User user = customUser.getUser();
+        
+        registrationService.completeProfile(user.getEmail(), request);
+        
+        return ResponseEntity.ok(Map.of("message", "Perfil completado correctamente"));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
