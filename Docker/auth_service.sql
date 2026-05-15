@@ -122,7 +122,6 @@ CREATE TABLE `user` (
   `account_non_locked` tinyint(1) NOT NULL DEFAULT '1',
   `lock_time` datetime DEFAULT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
-  `failed_attemps` int NOT NULL,
   `profile_completed` bit(1) NOT NULL,
   PRIMARY KEY (`id_user`),
   UNIQUE KEY `UKckltqnf47mr90fw56edpewrk8` (`document_number`),
