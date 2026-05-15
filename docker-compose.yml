@@ -2,7 +2,7 @@ services:
 
   db-auth:
     image: mysql:8
-    container_name: mysql-db
+    container_name: auth-db
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
