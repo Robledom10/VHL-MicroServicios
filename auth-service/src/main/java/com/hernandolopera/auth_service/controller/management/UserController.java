@@ -1,21 +1,22 @@
 package com.hernandolopera.auth_service.controller.management;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hernandolopera.auth_service.entity.auth.User;
 import com.hernandolopera.auth_service.security.details.CustomUserDetails;
-import com.hernandolopera.auth_service.service.auth.RoleService;
+import com.hernandolopera.auth_service.service.managment.ProfileService;
 import com.hernandolopera.auth_service.service.auth.RegistrationService;
 import com.hernandolopera.auth_service.dto.request.user.CompleteProfileRequest;
+import com.hernandolopera.auth_service.dto.response.ProfileResponse;
+
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import jakarta.validation.Valid;
@@ -23,48 +24,74 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/auth/profile")
 @RequiredArgsConstructor
 public class UserController {
 
-    private final RoleService roleService;
     private final RegistrationService registrationService;
+    private final ProfileService profileService;
 
-    @GetMapping("/profile")
-    public ResponseEntity<?> getProfile(Authentication authentication) {
-        if (authentication == null)
-            return ResponseEntity.status(401).build();
+    @GetMapping
+    public ResponseEntity<ProfileResponse> getProfile(
+            Authentication authentication) {
 
         CustomUserDetails customUser = (CustomUserDetails) authentication.getPrincipal();
+
         User user = customUser.getUser();
 
-        // 🛡️ Construimos un JSON plano y seguro
-        Map<String, Object> body = new HashMap<>();
-        body.put("email", user.getEmail());
-        body.put("firstName", user.getFirstName());
-        body.put("lastName", user.getLastName());
-        body.put("role", user.getRole() != null ? user.getRole().getName() : "USER");
-        body.put("profileCompleted", user.getProfileCompleted());
+        ProfileResponse response = ProfileResponse.builder()
+                .id(user.getId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .documentType(user.getDocumentType())
+                .documentNumber(user.getDocumentNumber())
+                .birthDate(user.getBirthDate())
+                .state(user.getState())
+                .city(user.getCity())
+                .address(user.getAddress())
+                .emailVerified(user.isEmailVerified())
+                .phoneVerified(user.getPhoneVerified())
+                .active(user.getActive())
+                .role(
+                        user.getRole() != null
+                                ? user.getRole().getName()
+                                : "ROLE_CLIENT")
+                .profileCompleted(user.getProfileCompleted())
+                .build();
 
-        // Solo enviamos los nombres de los permisos como Strings
-        body.put("authorities", authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .toList());
-
-        return ResponseEntity.ok(body);
+        return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/complete-profile")
-    public ResponseEntity<Map<String, String>> completeProfile(Authentication authentication, @Valid @RequestBody CompleteProfileRequest request) {
+    @PutMapping("/complete")
+    public ResponseEntity<Map<String, String>> completeProfile(Authentication authentication,
+            @Valid @RequestBody CompleteProfileRequest request) {
         if (authentication == null)
             return ResponseEntity.status(401).build();
 
         CustomUserDetails customUser = (CustomUserDetails) authentication.getPrincipal();
         User user = customUser.getUser();
-        
+
         registrationService.completeProfile(user.getEmail(), request);
-        
+
         return ResponseEntity.ok(Map.of("message", "Perfil completado correctamente"));
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<ProfileResponse> updateProfile(
+            Authentication authentication,
+            @Valid @RequestBody CompleteProfileRequest request) {
+
+        CustomUserDetails customUser = (CustomUserDetails) authentication.getPrincipal();
+
+        User user = customUser.getUser();
+
+        ProfileResponse response = profileService.updateProfile(
+                user.getEmail(),
+                request);
+
+        return ResponseEntity.ok(response);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
