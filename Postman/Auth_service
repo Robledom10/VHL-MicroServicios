@@ -1,275 +1,581 @@
-{
-  "info": {
-    "_postman_id": "79c3dea3-edda-423a-818c-0cbc0c453a61",
-    "name": "Backend Hernando Lopera",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "44599807",
-    "_collection_link": "https://go.postman.co/collection/44599807-79c3dea3-edda-423a-818c-0cbc0c453a61?source=collection_link"
-  },
-  "item": [
-    {
-      "name": "auth_service",
-      "item": [
-        {
-          "name": "POST",
-          "item": [
-            {
-              "name": "Register",
-              "request": {
-                "method": "POST",
-                "header": [],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n  \"firstName\": \"Admin\",\r\n  \"lastName\": \"test\",\r\n  \"email\": \"admin@test.com\",\r\n  \"password\": \"admin1\",\r\n  \"documentType\": \"Cedula Ciudadania\",\r\n  \"documentNumber\": \"12345\"\r\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "http://localhost:8080/api/auth/register",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "8080",
-                  "path": [
-                    "api",
-                    "auth",
-                    "register"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Login Client",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json",
-                    "type": "text"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n  \"email\": \"juan@test.com \",\r\n  \"password\": \"123456\"\r\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "http://localhost:8080/api/auth/login",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "8080",
-                  "path": [
-                    "api",
-                    "auth",
-                    "login"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Login Admin",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json",
-                    "type": "text"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n  \"email\": \"admin@test.com \",\r\n  \"password\": \"admin1\"\r\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "http://localhost:8080/api/auth/login",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "8080",
-                  "path": [
-                    "api",
-                    "auth",
-                    "login"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Refresh",
-              "request": {
-                "method": "POST",
-                "header": [],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n    \"refreshToken\": \"b7b4154f-2e97-45af-9a2a-d11cd2347843\"\r\n}\r\n",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "http://localhost:8080/api/auth/refresh",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "8080",
-                  "path": [
-                    "api",
-                    "auth",
-                    "refresh"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Logout",
-              "request": {
-                "method": "POST",
-                "header": [],
-                "body": {
-                  "mode": "raw",
-                  "raw": "",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "http://localhost:8080/api/auth/logout",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "8080",
-                  "path": [
-                    "api",
-                    "auth",
-                    "logout"
-                  ]
-                }
-              },
-              "response": []
-            }
-          ]
-        },
-        {
-          "name": "GET",
-          "item": [
-            {
-              "name": "Token ME",
-              "protocolProfileBehavior": {
-                "disableBodyPruning": true
-              },
-              "request": {
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [
+type: collection.insomnia.rest/5.0
+schema_version: "5.1"
+name: Auth-Service
+meta:
+  id: wrk_6f0335933e134ccd9cd20073da8c4f72
+  created: 1778785159507
+  modified: 1778785170482
+  description: ""
+collection:
+  - name: Backend Hernando Lopera
+    meta:
+      id: fld_10e33dd91a474fa5b11e216b6d97c3bb
+      created: 1778785159509
+      modified: 1778785159509
+      sortKey: -1778785157059
+      description: ""
+    children:
+      - name: auth_service
+        meta:
+          id: fld_2884c1ca075c4040b9adfeeb8f6b42c4
+          created: 1778785159510
+          modified: 1778785159510
+          sortKey: -1778785157058
+          description: ""
+        children:
+          - url: http://localhost:8080/api/auth/complete-profile
+            name: Complete Perfil
+            meta:
+              id: req_70782363d6dc45489dc231588f26bb1b
+              created: 1778785456130
+              modified: 1778785499739
+              isPrivate: false
+              description: ""
+              sortKey: -1778785456130
+            method: PUT
+            headers:
+              - name: User-Agent
+                value: insomnia/12.5.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - name: POST
+            meta:
+              id: fld_4771a2a73992425cbdc5ff4845de242f
+              created: 1778785159511
+              modified: 1778785159511
+              sortKey: -1778785157057
+              description: ""
+            children:
+              - url: http://localhost:8080/api/auth/register
+                name: Register
+                meta:
+                  id: req_81466d0104334250b06d0084c92cfb08
+                  created: 1778785159512
+                  modified: 1778785159512
+                  isPrivate: false
+                  description: ""
+                  sortKey: -1778785157056
+                method: POST
+                body:
+                  mimeType: application/json
+                  text: "{\r
+
+                    \  \"firstName\": \"Admin\",\r
+
+                    \  \"lastName\": \"test\",\r
+
+                    \  \"email\": \"admin@test.com\",\r
+
+                    \  \"password\": \"admin1\",\r
+
+                    \  \"documentType\": \"Cedula Ciudadania\",\r
+
+                    \  \"documentNumber\": \"12345\"\r
+
+                    }"
+                headers:
+                  - name: Content-Type
+                    value: application/json
+                settings:
+                  renderRequestBody: true
+                  encodeUrl: true
+                  followRedirects: global
+                  cookies:
+                    send: true
+                    store: true
+                  rebuildPath: true
+              - url: http://localhost:8080/api/auth/login
+                name: Login Client
+                meta:
+                  id: req_f71c9727457d436d9a4f52bade4e9619
+                  created: 1778785159513
+                  modified: 1778785290796
+                  isPrivate: false
+                  description: ""
+                  sortKey: -1778785157055
+                method: POST
+                body:
+                  mimeType: application/json
+                  text: |-
                     {
-                      "key": "token",
-                      "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqdWFuQHRlc3QuY29tIiwidXNlcklkIjoxLCJyb2xlIjoiQ0xJRU5UIiwiaWF0IjoxNzc3NDAxMDkxLCJleHAiOjE3Nzc0MDEzOTF9.SrrwXc4il_DTXOwU57gVRRUaKwRC9Lk8ZmezOIMPwJ4",
-                      "type": "string"
+                      "email": "client@test.com ",
+                      "password": "client1"
                     }
-                  ]
-                },
-                "method": "GET",
-                "header": [],
-                "body": {
-                  "mode": "raw",
-                  "raw": "",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "http://localhost:8080/api/auth/me",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "8080",
-                  "path": [
-                    "api",
-                    "auth",
-                    "me"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Admin",
-              "protocolProfileBehavior": {
-                "disableBodyPruning": true
-              },
-              "request": {
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkB0ZXN0LmNvbSIsImlhdCI6MTc3NzAwMzg5OCwiZXhwIjoxNzc3MDA0Nzk4fQ.eX52ipfHYb2DXQgg1ws_cXGG-_9lyg9ZEisU-JETUIM",
-                      "type": "string"
-                    }
-                  ]
-                },
-                "method": "GET",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json",
-                    "type": "text"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n  \"email\": \"admin@test.com \",\r\n  \"password\": \"admin1\"\r\n}"
-                },
-                "url": {
-                  "raw": "http://localhost:8080/api/auth/admin",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "8080",
-                  "path": [
-                    "api",
-                    "auth",
-                    "admin"
-                  ]
-                }
-              },
-              "response": []
-            }
-          ]
-        }
-      ]
-    }
-  ]
-}
+                headers:
+                  - name: Content-Type
+                    value: application/json
+                settings:
+                  renderRequestBody: true
+                  encodeUrl: true
+                  followRedirects: global
+                  cookies:
+                    send: true
+                    store: true
+                  rebuildPath: true
+              - url: http://localhost:8080/api/auth/login
+                name: Login Admin
+                meta:
+                  id: req_3f2ea118a18347698163945393c0114d
+                  created: 1778785159514
+                  modified: 1778785159514
+                  isPrivate: false
+                  description: ""
+                  sortKey: -1778785157054
+                method: POST
+                body:
+                  mimeType: application/json
+                  text: "{\r
+
+                    \  \"email\": \"admin@test.com \",\r
+
+                    \  \"password\": \"admin1\"\r
+
+                    }"
+                headers:
+                  - name: Content-Type
+                    value: application/json
+                settings:
+                  renderRequestBody: true
+                  encodeUrl: true
+                  followRedirects: global
+                  cookies:
+                    send: true
+                    store: true
+                  rebuildPath: true
+              - url: http://localhost:8080/api/auth/tokens/refresh
+                name: Refresh
+                meta:
+                  id: req_f48b74f0995c46b09c45150fa8dc62be
+                  created: 1778785159515
+                  modified: 1778785357536
+                  isPrivate: false
+                  description: ""
+                  sortKey: -1778785157053
+                method: POST
+                body:
+                  mimeType: application/json
+                  text: "{\r
+
+                    \    \"refreshToken\":
+                    \"b7b4154f-2e97-45af-9a2a-d11cd2347843\"\r
+
+                    }\r\n"
+                headers:
+                  - name: Content-Type
+                    value: application/json
+                settings:
+                  renderRequestBody: true
+                  encodeUrl: true
+                  followRedirects: global
+                  cookies:
+                    send: true
+                    store: true
+                  rebuildPath: true
+              - url: http://localhost:8080/api/auth/tokens/logout
+                name: Logout
+                meta:
+                  id: req_a7888e927b9a4e37b3d7db8d1979d3e3
+                  created: 1778785159516
+                  modified: 1778785367630
+                  isPrivate: false
+                  description: ""
+                  sortKey: -1778785157052
+                method: POST
+                authentication:
+                  type: bearer
+                  disabled: false
+                  token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqdWFuQHRlc3QuY29tIiwidXNlcklkIjoxLCJyb2xlIjoiQ0xJRU5UIiwiaWF0IjoxNzc3OTE4MDY1LCJleHAiOjE3Nzc5MTgzNjV9.az3izk7_rmGqX5MqW_lWMK2EvrYLjkWzaCdtiIX-k2c
+                  prefix: ""
+                settings:
+                  renderRequestBody: true
+                  encodeUrl: true
+                  followRedirects: global
+                  cookies:
+                    send: true
+                    store: true
+                  rebuildPath: true
+          - name: GET
+            meta:
+              id: fld_d2f873c46dcd456eb0cd707fc2097efd
+              created: 1778785159517
+              modified: 1778785159517
+              sortKey: -1778785157051
+              description: ""
+            children:
+              - url: http://localhost:8080/api/auth/profile
+                name: Token ME
+                meta:
+                  id: req_287ef81357ca44aa96c231421505d44a
+                  created: 1778785159518
+                  modified: 1778785447367
+                  isPrivate: false
+                  description: ""
+                  sortKey: -1778785157050
+                method: GET
+                authentication:
+                  type: bearer
+                  disabled: false
+                  token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqdWFuQHRlc3QuY29tIiwidXNlcklkIjoxLCJyb2xlIjoiQ0xJRU5UIiwiaWF0IjoxNzc3OTMxMjAyLCJleHAiOjE3Nzc5MzE1MDJ9.zWPc6oCiR0GHkOVKr8_8gnFxKJnVVdTObc3GicJjAFc
+                  prefix: ""
+                settings:
+                  renderRequestBody: true
+                  encodeUrl: true
+                  followRedirects: global
+                  cookies:
+                    send: true
+                    store: true
+                  rebuildPath: true
+              - url: http://localhost:8080/api/auth/admin
+                name: Admin
+                meta:
+                  id: req_264cb024c5c14f1fb5ec783cc60e54ab
+                  created: 1778785159519
+                  modified: 1778785159519
+                  isPrivate: false
+                  description: ""
+                  sortKey: -1778785157049
+                method: GET
+                body:
+                  mimeType: text/plain
+                  text: "{\r
+
+                    \  \"email\": \"admin@test.com \",\r
+
+                    \  \"password\": \"admin1\"\r
+
+                    }"
+                headers:
+                  - name: Content-Type
+                    value: application/json
+                authentication:
+                  type: bearer
+                  disabled: false
+                  token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkB0ZXN0LmNvbSIsImlhdCI6MTc3NzAwMzg5OCwiZXhwIjoxNzc3MDA0Nzk4fQ.eX52ipfHYb2DXQgg1ws_cXGG-_9lyg9ZEisU-JETUIM
+                  prefix: ""
+                settings:
+                  renderRequestBody: true
+                  encodeUrl: true
+                  followRedirects: global
+                  cookies:
+                    send: true
+                    store: true
+                  rebuildPath: true
+              - url: localhost:8080/api/auth/check-blacklist
+                name: Check Blacklist
+                meta:
+                  id: req_59b6210947504ab09cbe97c0414f4189
+                  created: 1778785309330
+                  modified: 1778785398770
+                  isPrivate: false
+                  description: ""
+                  sortKey: -1778785309330
+                method: GET
+                headers:
+                  - name: User-Agent
+                    value: insomnia/12.5.0
+                    description: ""
+                    disabled: false
+                authentication:
+                  type: bearer
+                settings:
+                  renderRequestBody: true
+                  encodeUrl: true
+                  followRedirects: global
+                  cookies:
+                    send: true
+                    store: true
+                  rebuildPath: true
+      - name: User_Admin
+        meta:
+          id: fld_04032aaa413142538aec6464895801fa
+          created: 1778785704174
+          modified: 1778786335194
+          sortKey: -1778785704174
+          description: ""
+        children:
+          - name: GET
+            meta:
+              id: fld_eb1f8206326a4236ae2d86c72935f18d
+              created: 1778785808337
+              modified: 1778785808337
+              sortKey: -1778785808337
+              description: ""
+            children:
+              - url: localhost:8080/api/admin/users
+                name: Users
+                meta:
+                  id: req_5d1275c2e6f244ad834f97a6b5f08079
+                  created: 1778785715219
+                  modified: 1778785817859
+                  isPrivate: false
+                  description: ""
+                  sortKey: -1778785810825
+                method: GET
+                headers:
+                  - name: User-Agent
+                    value: insomnia/12.5.0
+                    description: ""
+                    disabled: false
+                authentication:
+                  type: bearer
+                settings:
+                  renderRequestBody: true
+                  encodeUrl: true
+                  followRedirects: global
+                  cookies:
+                    send: true
+                    store: true
+                  rebuildPath: true
+              - url: localhost:8080/api/admin/users/1
+                name: User ID
+                meta:
+                  id: req_45def1ec85d746bea7a54f84fb99d792
+                  created: 1778785759617
+                  modified: 1778785810764
+                  isPrivate: false
+                  description: ""
+                  sortKey: -1778785810725
+                method: GET
+                headers:
+                  - name: User-Agent
+                    value: insomnia/12.5.0
+                    description: ""
+                    disabled: false
+                settings:
+                  renderRequestBody: true
+                  encodeUrl: true
+                  followRedirects: global
+                  cookies:
+                    send: true
+                    store: true
+                  rebuildPath: true
+          - name: PUT
+            meta:
+              id: fld_2c85db533afa4517b32f799ffdd4d2fa
+              created: 1778785830853
+              modified: 1778785830853
+              sortKey: -1778785830853
+              description: ""
+            children:
+              - url: localhost:8080/api/admin/users/1/disable
+                name: DISABLE
+                meta:
+                  id: req_c97a68b2bcc54ad68161fa8c152f3478
+                  created: 1778785839585
+                  modified: 1778785917641
+                  isPrivate: false
+                  description: ""
+                  sortKey: -1778785839585
+                method: PUT
+                headers:
+                  - name: User-Agent
+                    value: insomnia/12.5.0
+                    description: ""
+                    disabled: false
+                settings:
+                  renderRequestBody: true
+                  encodeUrl: true
+                  followRedirects: global
+                  cookies:
+                    send: true
+                    store: true
+                  rebuildPath: true
+              - url: localhost:8080/api/admin/users/1/enable
+                name: ENABLE
+                meta:
+                  id: req_55ad139a75d640fd92f78b2ff5628244
+                  created: 1778785887806
+                  modified: 1778785922682
+                  isPrivate: false
+                  description: ""
+                  sortKey: -1778785887806
+                method: PUT
+                headers:
+                  - name: User-Agent
+                    value: insomnia/12.5.0
+                    description: ""
+                    disabled: false
+                settings:
+                  renderRequestBody: true
+                  encodeUrl: true
+                  followRedirects: global
+                  cookies:
+                    send: true
+                    store: true
+                  rebuildPath: true
+      - name: Roles_Admin
+        meta:
+          id: fld_ac635854974c4139b02462e5eaffa725
+          created: 1778786366302
+          modified: 1778786419403
+          sortKey: -1778786366302
+          description: ""
+        children:
+          - name: GET
+            meta:
+              id: fld_06a4ee00c2c54269b2239f5b4c355e4e
+              created: 1778786430280
+              modified: 1778786430280
+              sortKey: -1778786430280
+              description: ""
+            children:
+              - url: localhost:8080/api/admin/roles
+                name: Admin Roles
+                meta:
+                  id: req_90bee202be8d4b5c8f576786f06da2e0
+                  created: 1778786371954
+                  modified: 1778786438088
+                  isPrivate: false
+                  description: ""
+                  sortKey: -1778786438068
+                method: GET
+                headers:
+                  - name: User-Agent
+                    value: insomnia/12.5.0
+                    description: ""
+                    disabled: false
+                settings:
+                  renderRequestBody: true
+                  encodeUrl: true
+                  followRedirects: global
+                  cookies:
+                    send: true
+                    store: true
+                  rebuildPath: true
+          - name: POST
+            meta:
+              id: fld_f3a5648f55324cf1a4eb405ab592d618
+              created: 1778786451207
+              modified: 1778786451207
+              sortKey: -1778786451207
+              description: ""
+            children:
+              - url: localhost:8080/api/admin/roles
+                name: Create Role
+                meta:
+                  id: req_3fa073992626455698b7f64c723d7b21
+                  created: 1778786460688
+                  modified: 1778786639581
+                  isPrivate: false
+                  description: ""
+                  sortKey: -1778786460688
+                method: POST
+                headers:
+                  - name: User-Agent
+                    value: insomnia/12.5.0
+                    description: ""
+                    disabled: false
+                settings:
+                  renderRequestBody: true
+                  encodeUrl: true
+                  followRedirects: global
+                  cookies:
+                    send: true
+                    store: true
+                  rebuildPath: true
+              - url: localhost:8080/api/admin/roles/assign
+                name: New Request
+                meta:
+                  id: req_e4dd61d0ccb1481fbe26805ed7953409
+                  created: 1778786632788
+                  modified: 1778786666285
+                  isPrivate: false
+                  description: ""
+                  sortKey: -1778786632788
+                method: POST
+                headers:
+                  - name: User-Agent
+                    value: insomnia/12.5.0
+                    description: ""
+                    disabled: false
+                settings:
+                  renderRequestBody: true
+                  encodeUrl: true
+                  followRedirects: global
+                  cookies:
+                    send: true
+                    store: true
+                  rebuildPath: true
+          - name: PUT
+            meta:
+              id: fld_955987b9888146069d8b946e3964395c
+              created: 1778786505855
+              modified: 1778786505855
+              sortKey: -1778786505855
+              description: ""
+            children:
+              - url: localhost:8080/api/admin/roles/1
+                name: Actualizar
+                meta:
+                  id: req_23b7786a9afd41c29a64f886138783d9
+                  created: 1778786515143
+                  modified: 1778786624735
+                  isPrivate: false
+                  description: ""
+                  sortKey: -1778786515143
+                method: PUT
+                headers:
+                  - name: User-Agent
+                    value: insomnia/12.5.0
+                    description: ""
+                    disabled: false
+                settings:
+                  renderRequestBody: true
+                  encodeUrl: true
+                  followRedirects: global
+                  cookies:
+                    send: true
+                    store: true
+                  rebuildPath: true
+          - name: DELETE
+            meta:
+              id: fld_a8e6d70612e04334864ea8b760a59650
+              created: 1778786561217
+              modified: 1778786561217
+              sortKey: -1778786561217
+              description: ""
+            children:
+              - url: localhost:8080/api/admin/roles/1
+                name: Eliminar
+                meta:
+                  id: req_d64389708a014aeb903ae219b543d341
+                  created: 1778786568406
+                  modified: 1778786615057
+                  isPrivate: false
+                  description: ""
+                  sortKey: -1778786568406
+                method: DELETE
+                headers:
+                  - name: User-Agent
+                    value: insomnia/12.5.0
+                    description: ""
+                    disabled: false
+                settings:
+                  renderRequestBody: true
+                  encodeUrl: true
+                  followRedirects: global
+                  cookies:
+                    send: true
+                    store: true
+                  rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_e75c1124bae8e3a3d152ac2b47dac62ae2694750
+    created: 1778785159604
+    modified: 1778785159604
+environments:
+  name: Base Environment
+  meta:
+    id: env_e75c1124bae8e3a3d152ac2b47dac62ae2694750
+    created: 1778785159520
+    modified: 1778785159520
+    isPrivate: false
