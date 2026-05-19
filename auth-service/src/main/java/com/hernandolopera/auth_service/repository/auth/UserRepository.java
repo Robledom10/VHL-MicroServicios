@@ -7,5 +7,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.hernandolopera.auth_service.entity.auth.User;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
+
     Optional<User> findByEmail(String email);
+
+    // 🔥 AGREGA ESTA LÍNEA PARA SOLUCIONAR EL ERROR
+    Optional<User> findByDocumentNumber(String documentNumber);
 }
