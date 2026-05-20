@@ -1,0 +1,50 @@
+CREATE DATABASE IF NOT EXISTS catalogo_Turistico_db;
+USE catalogo_Turistico_db;
+
+CREATE TABLE categorie (
+    id_category INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    description VARCHAR(150),
+    status TINYINT(1) NOT NULL DEFAULT 1
+);
+
+CREATE TABLE package (
+    id_package INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(150) NOT NULL,
+    description VARCHAR(255),
+    destination VARCHAR(150) NOT NULL,
+    duration_days INT NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    quota INT NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    status TINYINT(1) NOT NULL DEFAULT 1,
+    fk_id_category INT NOT NULL,
+    FOREIGN KEY (fk_id_category) REFERENCES categorie(id_category)
+);
+
+CREATE TABLE itinerarie (
+    id_itinerary INT AUTO_INCREMENT PRIMARY KEY,
+    day_number INT NOT NULL,
+    title VARCHAR(150) NOT NULL,
+    description VARCHAR(255),
+    fk_id_package INT NOT NULL,
+    FOREIGN KEY (fk_id_package) REFERENCES package(id_package)
+);
+
+CREATE TABLE provider (
+    id_provider INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    type VARCHAR(100) NOT NULL,
+    phone VARCHAR(20),
+    email VARCHAR(150),
+    status TINYINT(1) NOT NULL DEFAULT 1
+);
+
+CREATE TABLE package_provider (
+    id_package_provider INT AUTO_INCREMENT PRIMARY KEY,
+    fk_id_package INT NOT NULL,
+    fk_id_provider INT NOT NULL,
+    FOREIGN KEY (fk_id_package) REFERENCES package(id_package),
+    FOREIGN KEY (fk_id_provider) REFERENCES provider(id_provider)
+);
