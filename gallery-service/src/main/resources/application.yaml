@@ -1,0 +1,15 @@
+server:
+  port: ${SERVER_PORT}
+
+spring:
+  application:
+    name: gallery-service
+
+  data:
+    mongodb:
+      uri: ${SPRING_DATA_MONGODB_URI}
+
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME}
+  api-key: ${CLOUDINARY_API_KEY}
+  api-secret: ${CLOUDINARY_API_SECRET}  
