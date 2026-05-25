@@ -1,6 +1,8 @@
 services:
-
-  db-auth:
+  # =========================================================
+  # AUTH DATABASE
+  # =========================================================
+  auth-db:
     image: mysql:8
     container_name: auth-db
     restart: always
@@ -21,6 +23,9 @@ services:
     networks:
       - microservices-net
 
+  # =========================================================
+  # RESERVATION DATABASE
+  # =========================================================
   db-reservation:
     image: mysql:8
     container_name: db-reservation
@@ -42,6 +47,9 @@ services:
     networks:
       - microservices-net
 
+  # =========================================================
+  # TOURIST CATALOG DATABASE
+  # =========================================================
   db-catalog:
     image: mysql:8
     container_name: db-catalog
@@ -63,19 +71,46 @@ services:
     networks:
       - microservices-net
 
+  # =========================================================
+  # GALLERY DATABASE (MONGODB)
+  # =========================================================
+  db-gallery:
+    image: mongo:7
+    container_name: db-gallery
+    restart: always
+    ports:
+      - "${GALLERY_MONGO_DB_PORT}:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${GALLERY_MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${GALLERY_MONGO_PASSWORD}
+    volumes:
+      - gallery_data:/data/db
+      - ./Docker/gallery-init.js:/docker-entrypoint-initdb.d/gallery-init.js
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - microservices-net
+
+  # =========================================================
+  # AUTH SERVICE
+  # =========================================================
   auth-service:
     build: ./auth-service
     container_name: auth-service
     restart: always
     depends_on:
-      db-auth: # <-- Cambiado de 'mysql' a 'db-auth'
+      auth-db:
         condition: service_healthy
     env_file:
       - .env
     environment:
       SPRING_PROFILES_ACTIVE: dev
-      SPRING_DATASOURCE_URL: jdbc:mysql://db-auth:3306/${AUTH_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
-      SPRING_DATASOURCE_USERNAME: root # Usamos root ya que es el que tiene password definido
+      SPRING_DATASOURCE_URL: jdbc:mysql://auth-db:3306/${AUTH_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       APP_JWT_SECRET: ${JWT_SECRET}
       APP_JWT_EXPIRATION: ${JWT_EXPIRATION}
@@ -84,12 +119,15 @@ services:
     networks:
       - microservices-net
 
+  # =========================================================
+  # RESERVATION SERVICE
+  # =========================================================
   reservation-service:
     build: ./reservation-service
     container_name: reservation-service
     restart: always
     depends_on:
-      db-reservation: # <-- Cambiado de 'mysql' a 'db-reservation'
+      db-reservation:
         condition: service_healthy
     env_file:
       - .env
@@ -102,6 +140,9 @@ services:
     networks:
       - microservices-net
 
+  # =========================================================
+  # TOURIST CATALOG SERVICE
+  # =========================================================
   tourist-catalog-service:
     build: ./tourist-catalog-service
     container_name: tourist-catalog-service
@@ -120,6 +161,35 @@ services:
     networks:
       - microservices-net
 
+  # =========================================================
+  # GALLERY SERVICE
+  # =========================================================
+  gallery-service:
+    build: ./gallery-service
+    container_name: gallery-service
+    restart: always
+    depends_on:
+      db-gallery:
+        condition: service_healthy
+    environment:
+      - SERVER_PORT=8084
+      - SPRING_DATA_MONGODB_URI=mongodb://root:root@db-gallery:27017/gallery_db?authSource=admin
+      - SPRING_DATA_MONGODB_HOST=db-gallery
+      - SPRING_DATA_MONGODB_PORT=27017
+      - SPRING_DATA_MONGODB_DATABASE=gallery_db
+      - SPRING_DATA_MONGODB_USERNAME=root
+      - SPRING_DATA_MONGODB_PASSWORD=root
+      - SPRING_DATA_MONGODB_AUTHENTICATION_DATABASE=admin
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+    ports:
+      - "${GALLERY_SERVICE_PORT}:8084"
+    networks:
+      - microservices-net
+  # =========================================================
+  # API GATEWAY
+  # =========================================================
   api-gateway:
     build: ./api-gateway
     container_name: api-gateway
@@ -128,6 +198,7 @@ services:
       - auth-service
       - reservation-service
       - tourist-catalog-service
+      - gallery-service
     env_file:
       - .env
     environment:
@@ -138,10 +209,17 @@ services:
     networks:
       - microservices-net
 
+# =========================================================
+# NETWORKS
+# =========================================================
 networks:
   microservices-net:
 
+# =========================================================
+# VOLUMES
+# =========================================================
 volumes:
   auth_data:
   reservation_data:
   catalog_data:
+  gallery_data:

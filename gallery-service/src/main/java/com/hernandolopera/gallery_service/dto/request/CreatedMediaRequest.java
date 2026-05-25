@@ -10,14 +10,18 @@ import lombok.Data;
 
 @Data
 public class CreatedMediaRequest {
-    @NotBlank(message = "URL es requerida")
-    private String url;
 
-    @NotNull(message = "Tipo es requerido")
+    @NotNull(message = "Media type is required")
     private MediaType type;
 
-    @NotNull(message = "Año es requerido")
+    @NotNull(message = "Year is required")
     @Min(value = 2000, message = "Year must be greater than or equal to 2000")
     @Max(value = 2100, message = "Year must be less than or equal to 2100")
     private Integer year;
+
+    @NotBlank(message = "Excursion is required")
+    private String excursion;
+
+    @NotBlank(message = "Location is required")
+    private String location;
 }

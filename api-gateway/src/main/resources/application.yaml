@@ -10,44 +10,84 @@ spring:
 
   cloud:
     gateway:
+
       routes:
+
+        # =========================================================
+        # AUTH SERVICE
+        # =========================================================
+
         - id: auth-service
           uri: http://auth-service:8081
           predicates:
-            - Path=/api/auth/**, /api/admin/**, /api/roles/**
+            - Path=/api/auth/**,/api/admin/**,/api/roles/**
 
-        - id: reservation_service
+        # =========================================================
+        # RESERVATION SERVICE
+        # =========================================================
+
+        - id: reservation-service
           uri: http://reservation-service:8082
           predicates:
-            - Path=/api/v1/reservas/**, /api/v1/viajeros/**, /api/v1/confirmaciones/**
+            - Path=/api/v1/reservas/**,/api/v1/viajeros/**,/api/v1/confirmaciones/**
 
-        - id: tourist_catalog_service
+        # =========================================================
+        # TOURIST CATALOG SERVICE
+        # =========================================================
+
+        - id: tourist-catalog-service
           uri: http://tourist-catalog-service:8083
           predicates:
-            - Path=/categorias/**, /paquetes/**, /proveedores/**
+            - Path=/categorias/**,/paquetes/**,/proveedores/**
+
+        # =========================================================
+        # GALLERY SERVICE
+        # =========================================================
+
+        - id: gallery-service
+          uri: http://gallery-service:8084
+          predicates:
+            - Path=/api/media/**
+
+      # =========================================================
+      # CORS
+      # =========================================================
 
       globalcors:
         corsConfigurations:
           "[/**]":
+
             allowedOrigins:
               - "http://localhost:4200"
+
             allowedMethods:
               - GET
               - POST
               - PUT
               - DELETE
               - OPTIONS
+
             allowedHeaders:
               - "*"
+
             allowCredentials: true
+
+      # =========================================================
+      # DEFAULT FILTERS
+      # =========================================================
 
       default-filters:
         - name: DedupeResponseHeader
           args:
-            # <--- Debe estar dentro del filtro
             name: Access-Control-Allow-Origin Access-Control-Allow-Credentials
             strategy: RETAIN_UNIQUE
+
+
+# =========================================================
+# JWT
+# =========================================================
+
 app:
   jwt:
-    secret: oH+9q7wdTI5MPQmt5wRelMhO70B6FmEGOanhAPEAGbM=
-    expiration: 900000
+    secret: ${JWT_SECRET}
+    expiration: ${JWT_EXPIRATION}

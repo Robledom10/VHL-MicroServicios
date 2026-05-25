@@ -1,9 +1,0 @@
-spring:
-    application:
-        name: gallery-service
-
-    mongodb:
-        uri: mongodb://root:root@localhost:27017/gallery_db?authSource=admin
-
-server:
-    port: 8083
