@@ -85,6 +85,16 @@ public class ControladorReserva {
 	}
 
 	/**
+	 * Obtiene las reservas pasadas de un usuario
+	 */
+	@GetMapping("/usuario/{idUsuario}/pasadas")
+	public ResponseEntity<List<ReservaDTO>> obtenerReservasPasadasDelUsuario(@PathVariable("idUsuario") Long idUsuario) {
+		log.info("GET /api/v1/reservas/usuario/{}/pasadas - Obteniendo reservas pasadas", idUsuario);
+		List<ReservaDTO> reservas = servicioReserva.obtenerReservasPasadasDelUsuario(idUsuario);
+		return ResponseEntity.ok(reservas);
+	}
+
+	/**
 	 * Obtiene reservas por estado
 	 */
 	@GetMapping("/estado/{estado}")

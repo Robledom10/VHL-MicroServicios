@@ -25,4 +25,6 @@ public interface RepositorioReserva extends JpaRepository<Reserva, Long> {
 
 	List<Reserva> findByEstadoAndExpiresAtBefore(EstadoReserva estado, LocalDateTime fecha);
 
+	List<Reserva> findByEstadoAndFechaFinViajeBefore(EstadoReserva estado, LocalDateTime fecha);
+
 }
