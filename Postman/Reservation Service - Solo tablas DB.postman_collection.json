@@ -721,6 +721,209 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Reservas Pasadas",
+      "item": [
+        {
+          "name": "14 POST Crear reserva para probar pasadas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Reserva para pasada creada', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "pm.test('La reserva inicia PENDIENTE', function () {",
+                  "  pm.expect(json.id).to.exist;",
+                  "  pm.expect(json.numeroReserva).to.exist;",
+                  "  pm.expect(json.estado).to.eql('PENDIENTE');",
+                  "});",
+                  "",
+                  "pm.collectionVariables.set('reservaId', json.id);",
+                  "pm.collectionVariables.set('numeroReserva', json.numeroReserva);",
+                  "pm.collectionVariables.set('idUsuario', json.idUsuario);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idUsuario\": 990101,\n  \"idPaquete\": 5,\n  \"cantidadPasajeros\": 2,\n  \"precioTotal\": 1500.00,\n  \"fechaInicioViaje\": \"2026-06-15T08:00:00\",\n  \"fechaFinViaje\": \"2026-06-22T18:00:00\",\n  \"notas\": \"Reserva para probar reservas pasadas desde Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reservas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reservas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "15 PUT Confirmar reserva con fecha vencida",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Reserva actualizada', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "pm.test('Queda CONFIRMADA antes de consultar pasadas', function () {",
+                  "  pm.expect(json.estado).to.eql('CONFIRMADA');",
+                  "  pm.expect(json.pagoVerificado).to.eql(true);",
+                  "  pm.expect(json.fechaFinViaje).to.include('2020-01-15T18:00:00');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fechaInicioViaje\": \"2020-01-10T08:00:00\",\n  \"fechaFinViaje\": \"2020-01-15T18:00:00\",\n  \"estado\": \"CONFIRMADA\",\n  \"pagoVerificado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reservas/{{reservaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reservas",
+                "{{reservaId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "16 GET Reservas pasadas por usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Lista reservas pasadas por usuario', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "const reservaId = Number(pm.collectionVariables.get('reservaId'));",
+                  "const reserva = pm.response.json().find(function (item) { return item.id === reservaId; });",
+                  "pm.test('La reserva vencida aparece como PASADA', function () {",
+                  "  pm.expect(reserva).to.exist;",
+                  "  pm.expect(reserva.estado).to.eql('PASADA');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reservas/usuario/{{idUsuario}}/pasadas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reservas",
+                "usuario",
+                "{{idUsuario}}",
+                "pasadas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "17 GET Reservas por estado PASADA",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Lista reservas por estado PASADA', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "const reservaId = Number(pm.collectionVariables.get('reservaId'));",
+                  "const reserva = pm.response.json().find(function (item) { return item.id === reservaId; });",
+                  "pm.test('La reserva esta en estado PASADA', function () {",
+                  "  pm.expect(reserva).to.exist;",
+                  "  pm.expect(reserva.estado).to.eql('PASADA');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reservas/estado/PASADA",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reservas",
+                "estado",
+                "PASADA"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [

@@ -145,6 +145,35 @@ class ControladorReservaIntegrationTests {
     }
 
     @Test
+    void reservasConfirmadasConFechaFinVencidaQuedanComoPasadas() throws Exception {
+        JsonNode reservaCreada = crearReserva(77L, 2, "1500.00");
+        Long reservaId = reservaCreada.get("id").asLong();
+
+        mockMvc.perform(put("/api/v1/reservas/{id}", reservaId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "fechaInicioViaje": "2020-01-10T08:00:00",
+                                  "fechaFinViaje": "2020-01-15T18:00:00",
+                                  "estado": "CONFIRMADA",
+                                  "pagoVerificado": true
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estado").value("CONFIRMADA"));
+
+        mockMvc.perform(get("/api/v1/reservas/usuario/{idUsuario}/pasadas", 77L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(reservaId))
+                .andExpect(jsonPath("$[0].estado").value("PASADA"));
+
+        mockMvc.perform(get("/api/v1/reservas/estado/{estado}", "PASADA"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(reservaId))
+                .andExpect(jsonPath("$[0].estado").value("PASADA"));
+    }
+
+    @Test
     void hu33ConfirmarReservaRechazaPagoNoVerificadoMontoIncorrectoYViajerosIncompletos() throws Exception {
         JsonNode reservaCreada = crearReserva(10L, 2, "1500.00");
         Long reservaId = reservaCreada.get("id").asLong();
