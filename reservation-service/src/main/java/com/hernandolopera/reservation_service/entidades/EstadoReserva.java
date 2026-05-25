@@ -7,6 +7,7 @@ public enum EstadoReserva implements Serializable {
 	PENDIENTE("Pendiente"),
 	CONFIRMADA("Confirmada"),
 	CANCELADA("Cancelada"),
+	PASADA("Pasada"),
 	COMPLETADA("Completada");
 
 	private final String descripcion;

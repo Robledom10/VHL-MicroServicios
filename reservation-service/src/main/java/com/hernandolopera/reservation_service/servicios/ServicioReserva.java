@@ -36,6 +36,7 @@ public class ServicioReserva {
 	 */
 	public Optional<ReservaDTO> obtenerReservaPorId(Long idReserva) {
 		log.info("Obteniendo reserva con ID: {}", idReserva);
+		actualizarReservasPasadas();
 		return repositorioReserva.findById(idReserva).map(this::convertirADTO);
 	}
 
@@ -45,6 +46,7 @@ public class ServicioReserva {
 	 */
 	public Optional<ReservaDTO> obtenerReservaPorNumero(String numeroReserva) {
 		log.info("Obteniendo reserva con número: {}", numeroReserva);
+		actualizarReservasPasadas();
 		return repositorioReserva.findByNumeroReserva(numeroReserva).map(this::convertirADTO);
 	}
 
@@ -53,6 +55,7 @@ public class ServicioReserva {
 	 */
 	public List<ReservaDTO> obtenerReservasDelUsuario(Long idUsuario) {
 		log.info("Obteniendo reservas del usuario: {}", idUsuario);
+		actualizarReservasPasadas();
 		return repositorioReserva.findByIdUsuario(idUsuario).stream().map(this::convertirADTO)
 				.collect(Collectors.toList());
 	}
@@ -62,6 +65,7 @@ public class ServicioReserva {
 	 */
 	public List<ReservaDTO> obtenerReservasPorEstado(EstadoReserva estado) {
 		log.info("Obteniendo reservas con estado: {}", estado);
+		actualizarReservasPasadas();
 		return repositorioReserva.findByEstado(estado).stream().map(this::convertirADTO)
 				.collect(Collectors.toList());
 	}
@@ -72,7 +76,18 @@ public class ServicioReserva {
 	 */
 	public List<ReservaDTO> obtenerReservasConfirmadasDelUsuario(Long idUsuario) {
 		log.info("Obteniendo reservas confirmadas del usuario: {}", idUsuario);
+		actualizarReservasPasadas();
 		return repositorioReserva.findByEstadoAndIdUsuario(EstadoReserva.CONFIRMADA, idUsuario).stream()
+				.map(this::convertirADTO).collect(Collectors.toList());
+	}
+
+	/**
+	 * Obtiene las reservas pasadas de un usuario
+	 */
+	public List<ReservaDTO> obtenerReservasPasadasDelUsuario(Long idUsuario) {
+		log.info("Obteniendo reservas pasadas del usuario: {}", idUsuario);
+		actualizarReservasPasadas();
+		return repositorioReserva.findByEstadoAndIdUsuario(EstadoReserva.PASADA, idUsuario).stream()
 				.map(this::convertirADTO).collect(Collectors.toList());
 	}
 
@@ -175,6 +190,24 @@ public class ServicioReserva {
 	 */
 	private String generarNumeroReserva() {
 		return "RES-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+	}
+
+	private void actualizarReservasPasadas() {
+		List<Reserva> reservasPasadas = repositorioReserva.findByEstadoAndFechaFinViajeBefore(
+				EstadoReserva.CONFIRMADA, LocalDateTime.now());
+
+		if (reservasPasadas.isEmpty()) {
+			return;
+		}
+
+		LocalDateTime fechaActualizacion = LocalDateTime.now();
+		reservasPasadas.forEach(reserva -> {
+			reserva.setEstado(EstadoReserva.PASADA);
+			reserva.setFechaActualizacion(fechaActualizacion);
+		});
+
+		repositorioReserva.saveAll(reservasPasadas);
+		log.info("Se marcaron {} reserva(s) como pasadas", reservasPasadas.size());
 	}
 
 	/**
