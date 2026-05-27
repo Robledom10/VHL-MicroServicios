@@ -20,9 +20,53 @@ public class Media {
     @Id
     private String id;
 
+    /**
+     * Cloudinary secure URL
+     */
     private String url;
-    private MediaType type;
-    private Integer year;
-    private LocalDateTime createdAt;
 
+    /**
+     * Cloudinary public identifier
+     */
+    private String publicId;
+
+    /**
+     * Media type (IMAGE or VIDEO)
+     */
+    private MediaType type;
+
+    /**
+     * Excursion year
+     */
+    private Integer year;
+
+    /**
+     * Excursion name
+     * Example:
+     * - Cartagena
+     * - Guatape
+     * - San Andres
+     */
+    private String excursion;
+
+    /**
+     * Excursion location
+     * Example:
+     * - Bolivar
+     * - Antioquia
+     * - San Andres Islands
+     */
+    private String location;
+
+    /**
+     * Cloudinary folder structure
+     * Example:
+     * gallery-service/excursions/2025/cartagena
+     */
+    private String folder;
+
+    /**
+     * Media creation date
+     */
+    private LocalDateTime createdAt;
 }
