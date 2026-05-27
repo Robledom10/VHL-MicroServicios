@@ -63,6 +63,27 @@ services:
     networks:
       - microservices-net
 
+  db-operation:
+    image: mysql:8
+    container_name: db-operation
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${OPERATION_DB_NAME}
+    ports:
+      - "${OPERATION_DB_PORT}:3306"
+    volumes:
+      - operation_data:/var/lib/mysql
+      - ./Docker/operation_service.sql:/docker-entrypoint-initdb.d/operation_service.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 20s
+    networks:
+      - microservices-net
+
   auth-service:
     build: ./auth-service
     container_name: auth-service
@@ -120,6 +141,24 @@ services:
     networks:
       - microservices-net
 
+  operation-service:
+    build: ./operation-service
+    container_name: operation-service
+    restart: always
+    depends_on:
+      db-operation:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db-operation:3306/${OPERATION_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "${OPERATION_SERVICE_PORT}:8084"
+    networks:
+      - microservices-net
+
   api-gateway:
     build: ./api-gateway
     container_name: api-gateway
@@ -128,6 +167,7 @@ services:
       - auth-service
       - reservation-service
       - tourist-catalog-service
+      - operation-service
     env_file:
       - .env
     environment:
@@ -145,3 +185,4 @@ volumes:
   auth_data:
   reservation_data:
   catalog_data:
+  operation_data:

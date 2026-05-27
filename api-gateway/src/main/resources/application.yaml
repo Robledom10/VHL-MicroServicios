@@ -26,6 +26,11 @@ spring:
           predicates:
             - Path=/categorias/**, /paquetes/**, /proveedores/**
 
+        - id: operation_service
+          uri: http://operation-service:8084
+          predicates:
+            - Path=/api/v1/operaciones/**
+
       globalcors:
         corsConfigurations:
           "[/**]":
