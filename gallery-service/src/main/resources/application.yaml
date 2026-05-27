@@ -1,0 +1,30 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: gallery-service
+  data:
+    mongodb:
+      uri: mongodb://root:root@db-gallery:27017/gallery_db?authSource=admin
+      host: db-gallery
+      port: 27017
+      database: gallery_db
+      username: root
+      password: root
+      authentication-database: admin
+      repositories:
+        enabled: true
+  mongodb:
+    uri: mongodb://root:root@db-gallery:27017/gallery_db?authSource=admin
+    host: db-gallery
+    port: 27017
+    database: gallery_db
+    username: root
+    password: root
+    authentication-database: admin
+
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME}
+  api-key: ${CLOUDINARY_API_KEY}
+  api-secret: ${CLOUDINARY_API_SECRET}

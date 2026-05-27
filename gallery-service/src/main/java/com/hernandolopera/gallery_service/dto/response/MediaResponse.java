@@ -10,9 +10,22 @@ import lombok.Data;
 @Data
 @Builder
 public class MediaResponse {
+
     private String id;
+
     private String url;
+
+    private String publicId;
+
     private MediaType type;
+
     private Integer year;
+
+    private String excursion;
+
+    private String location;
+
+    private String folder;
+
     private LocalDateTime createdAt;
 }

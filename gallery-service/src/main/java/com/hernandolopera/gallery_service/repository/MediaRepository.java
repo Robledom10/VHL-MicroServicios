@@ -8,9 +8,22 @@ import com.hernandolopera.gallery_service.model.Media;
 import com.hernandolopera.gallery_service.model.MediaType;
 
 public interface MediaRepository extends MongoRepository<Media, String> {
+
     List<Media> findByYear(Integer year);
 
     List<Media> findByType(MediaType type);
 
-    List<Media> findByYearAndType(Integer year, MediaType type);
+    List<Media> findByExcursion(String excursion);
+
+    List<Media> findByLocation(String location);
+
+    List<Media> findByYearAndType(
+            Integer year,
+            MediaType type
+    );
+
+    List<Media> findByYearAndExcursion(
+            Integer year,
+            String excursion
+    );
 }
