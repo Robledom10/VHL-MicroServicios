@@ -18,7 +18,4 @@ public class ActividadItinerario {
 
     @Column(name = "title", nullable = false, length = 150)
     public String titulo;
-
-    @Column(name = "description", length = 255)
-    public String descripcion;
 }

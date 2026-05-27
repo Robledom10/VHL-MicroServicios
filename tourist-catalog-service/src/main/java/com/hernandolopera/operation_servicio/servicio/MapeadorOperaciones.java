@@ -10,8 +10,10 @@ import org.springframework.stereotype.Component;
 public class MapeadorOperaciones {
     RespuestaPaqueteTuristico aRespuestaPaquete(PaqueteTuristico paquete) {
         return new RespuestaPaqueteTuristico(paquete.id, paquete.titulo, paquete.descripcion, paquete.destino,
-            paquete.duracionDias, paquete.precio, paquete.cupo, paquete.fechaInicio, paquete.fechaFin, paquete.activo,
-            paquete.categoria.id, paquete.categoria.nombre,
+            paquete.duracionDias, paquete.precio, paquete.cupo, paquete.fechaInicio, paquete.fechaFin,
+            paquete.lugarSalida, paquete.horaSalida, paquete.alojamiento, paquete.tipoHabitacion,
+            paquete.tipoTransporte, paquete.fotoVerticalUrl, paquete.fotoHorizontalUrl, paquete.incluye,
+            paquete.noIncluye, paquete.politicasCancelacion, paquete.activo, paquete.categoria.id, paquete.categoria.nombre,
             paquete.itinerario.stream().sorted(Comparator.comparing(a -> a.numeroDia)).map(this::aRespuestaActividad).toList());
     }
 
@@ -19,13 +21,12 @@ public class MapeadorOperaciones {
         ActividadItinerario actividad = new ActividadItinerario();
         actividad.numeroDia = solicitud.numeroDia();
         actividad.titulo = solicitud.titulo().trim();
-        actividad.descripcion = solicitud.descripcion() == null ? null : solicitud.descripcion().trim();
         return actividad;
     }
 
     RespuestaActividadItinerario aRespuestaActividad(ActividadItinerario actividad) {
         return new RespuestaActividadItinerario(actividad.id, actividad.numeroDia, actividad.titulo,
-            actividad.descripcion, actividad.paqueteTuristico.id);
+            actividad.paqueteTuristico.id);
     }
 
     RespuestaProveedor aRespuestaProveedor(ProveedorTuristico proveedor) {
