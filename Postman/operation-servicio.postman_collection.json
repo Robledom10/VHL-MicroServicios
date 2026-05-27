@@ -1,0 +1,586 @@
+{
+  "info": {
+    "name": "Operation Servicio - HU 2.1 a HU 2.11",
+    "description": "Pruebas organizadas para operation-service: paquetes, cupos, planes de precio, proveedores, seguros y configuracion.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8083" },
+    { "key": "idPaquete", "value": "1" },
+    { "key": "idPlanPrecio", "value": "1" },
+    { "key": "idProveedor", "value": "1" },
+    { "key": "idSeguro", "value": "1" },
+    { "key": "correoProveedor", "value": "laura@transportesandinos.com" }
+  ],
+  "item": [
+    {
+      "name": "01 - Paquetes turisticos",
+      "item": [
+        {
+          "name": "POST - Crear paquete",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201 Created', function () { pm.response.to.have.status(201); });",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('idPaquete', json.id);",
+                  "pm.test('Guarda idPaquete', function () { pm.expect(json.id).to.exist; });",
+                  "pm.test('Cupo disponible inicia igual al cupo total', function () { pm.expect(json.cupoDisponible).to.eql(json.cupoTotal); });",
+                  "pm.test('Incluye itinerario', function () { pm.expect(json.itinerario.length).to.be.above(0); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/paquetes",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Eje Cafetero Familiar {{$timestamp}}\",\n  \"categoria\": \"Familiar\",\n  \"destino\": \"Quindio\",\n  \"descripcion\": \"Paquete turistico de tres dias\",\n  \"precioBase\": 1250000,\n  \"cupoTotal\": 20,\n  \"itinerario\": [\n    {\n      \"numeroDia\": 1,\n      \"titulo\": \"Llegada y recorrido\",\n      \"descripcion\": \"Recepcion y recorrido guiado\",\n      \"horaInicio\": \"09:00:00\",\n      \"horaFin\": \"17:00:00\"\n    }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "POST - Validar paquete invalido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400 Bad Request', function () { pm.response.to.have.status(400); });",
+                  "pm.test('Reporta campos invalidos', function () { pm.expect(pm.response.json().campos).to.have.property('nombre'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/paquetes",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"\",\n  \"categoria\": \"Familiar\",\n  \"destino\": \"Quindio\",\n  \"descripcion\": \"Paquete invalido\",\n  \"precioBase\": 0,\n  \"cupoTotal\": 0\n}"
+            }
+          }
+        },
+        {
+          "name": "GET - Consultar paquetes con filtros",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Respuesta paginada', function () { pm.expect(pm.response.json()).to.have.property('content'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/paquetes?categoria=Familiar&destino=Quindio&busqueda=Eje&precioMinimo=1000000&precioMaximo=2000000&ordenarPor=precioBase&direccion=asc&pagina=0&tamano=10"
+          }
+        },
+        {
+          "name": "GET - Consultar paquete por id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Id correcto', function () { pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get('idPaquete'))); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/paquetes/{{idPaquete}}"
+          }
+        },
+        {
+          "name": "PUT - Actualizar paquete",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Actualiza nombre', function () { pm.expect(pm.response.json().nombre).to.include('Actualizado'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/paquetes/{{idPaquete}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Eje Cafetero Actualizado\",\n  \"categoria\": \"Familiar\",\n  \"destino\": \"Quindio\",\n  \"descripcion\": \"Paquete turistico actualizado\",\n  \"precioBase\": 1350000,\n  \"cupoTotal\": 20,\n  \"itinerario\": [\n    {\n      \"numeroDia\": 1,\n      \"titulo\": \"Llegada\",\n      \"descripcion\": \"Recepcion en hotel\",\n      \"horaInicio\": \"10:00:00\",\n      \"horaFin\": \"12:00:00\"\n    }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "PUT - Actualizar paquete inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404 Not Found', function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/paquetes/999999",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"No existe\",\n  \"categoria\": \"Familiar\",\n  \"destino\": \"Quindio\",\n  \"descripcion\": \"Paquete inexistente\",\n  \"precioBase\": 1350000,\n  \"cupoTotal\": 20\n}"
+            }
+          }
+        },
+        {
+          "name": "PUT - Validar itinerario invalido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('409 Conflict', function () { pm.response.to.have.status(409); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/paquetes/{{idPaquete}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Itinerario invalido\",\n  \"categoria\": \"Familiar\",\n  \"destino\": \"Quindio\",\n  \"descripcion\": \"Validacion de horas\",\n  \"precioBase\": 1250000,\n  \"cupoTotal\": 20,\n  \"itinerario\": [\n    {\n      \"numeroDia\": 1,\n      \"titulo\": \"Actividad\",\n      \"descripcion\": \"Horas invalidas\",\n      \"horaInicio\": \"18:00:00\",\n      \"horaFin\": \"08:00:00\"\n    }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "DELETE - Eliminar paquete",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('204 No Content', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/paquetes/{{idPaquete}}"
+          }
+        },
+        {
+          "name": "GET - Consultar paquete eliminado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404 Not Found', function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/paquetes/{{idPaquete}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Cupos",
+      "item": [
+        {
+          "name": "PUT - Actualizar cupos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Cupo total actualizado', function () { pm.expect(pm.response.json().cupoTotal).to.eql(25); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/paquetes/{{idPaquete}}/cupos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cupoTotal\": 25,\n  \"motivo\": \"Aumento de disponibilidad\"\n}"
+            }
+          }
+        },
+        {
+          "name": "GET - Consultar historial de cupos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Historial no vacio', function () { pm.expect(pm.response.json().length).to.be.above(0); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/paquetes/{{idPaquete}}/cupos/historial"
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Planes de precio",
+      "item": [
+        {
+          "name": "POST - Crear plan de precio",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201 Created', function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set('idPlanPrecio', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/planes-precio",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idPaquete\": {{idPaquete}},\n  \"nombre\": \"Pago en cuotas\",\n  \"precio\": 1300000,\n  \"cuotas\": 4,\n  \"condiciones\": \"Cuotas mensuales sin interes\"\n}"
+            }
+          }
+        },
+        {
+          "name": "GET - Consultar planes por paquete",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/planes-precio?idPaquete={{idPaquete}}"
+          }
+        },
+        {
+          "name": "PUT - Actualizar plan de precio",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/planes-precio/{{idPlanPrecio}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idPaquete\": {{idPaquete}},\n  \"nombre\": \"Pago en cuotas actualizado\",\n  \"precio\": 1320000,\n  \"cuotas\": 5,\n  \"condiciones\": \"Cuotas mensuales\"\n}"
+            }
+          }
+        },
+        {
+          "name": "DELETE - Eliminar plan de precio",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('204 No Content', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/planes-precio/{{idPlanPrecio}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Proveedores",
+      "item": [
+        {
+          "name": "POST - Crear proveedor",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('correoProveedor', `laura${Date.now()}@transportesandinos.com`);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201 Created', function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set('idProveedor', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/proveedores",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Transportes Andinos\",\n  \"tipoProveedor\": \"Transporte\",\n  \"nombreContacto\": \"Laura Perez\",\n  \"correo\": \"{{correoProveedor}}\",\n  \"telefono\": \"3001234567\"\n}"
+            }
+          }
+        },
+        {
+          "name": "GET - Consultar proveedores",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/proveedores"
+          }
+        },
+        {
+          "name": "PUT - Actualizar proveedor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/proveedores/{{idProveedor}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Transportes Andinos SAS\",\n  \"tipoProveedor\": \"Transporte\",\n  \"nombreContacto\": \"Laura Perez\",\n  \"correo\": \"{{correoProveedor}}\",\n  \"telefono\": \"3001234567\"\n}"
+            }
+          }
+        },
+        {
+          "name": "DELETE - Eliminar proveedor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('204 No Content', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/proveedores/{{idProveedor}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - Seguros",
+      "item": [
+        {
+          "name": "POST - Crear seguro",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201 Created', function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set('idSeguro', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/seguros",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idPaquete\": {{idPaquete}},\n  \"nombre\": \"Seguro viajero basico\",\n  \"detalleCobertura\": \"Asistencia medica y perdida de equipaje\",\n  \"montoCobertura\": 5000000\n}"
+            }
+          }
+        },
+        {
+          "name": "GET - Consultar seguros por paquete",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/seguros?idPaquete={{idPaquete}}"
+          }
+        },
+        {
+          "name": "PUT - Actualizar seguro",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/seguros/{{idSeguro}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idPaquete\": {{idPaquete}},\n  \"nombre\": \"Seguro viajero plus\",\n  \"detalleCobertura\": \"Asistencia medica ampliada\",\n  \"montoCobertura\": 8000000\n}"
+            }
+          }
+        },
+        {
+          "name": "DELETE - Eliminar seguro",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('204 No Content', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/seguros/{{idSeguro}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - Configuracion",
+      "item": [
+        {
+          "name": "GET - Obtener configuracion",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/configuracion"
+          }
+        },
+        {
+          "name": "PUT - Guardar configuracion unica",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Nombre configurado', function () { pm.expect(pm.response.json().nombreOrganizacion).to.eql('VHL Travel'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/configuracion",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreOrganizacion\": \"VHL Travel\",\n  \"correo\": \"operaciones@vhltravel.com\",\n  \"telefono\": \"6011234567\",\n  \"direccion\": \"Bogota, Colombia\",\n  \"logoBase64\": null\n}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
