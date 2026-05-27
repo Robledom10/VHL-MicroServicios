@@ -61,7 +61,7 @@ services:
       - "${CATALOG_DB_PORT}:3306"
     volumes:
       - catalog_data:/var/lib/mysql
-      - ./Docker/trip_operations_db.sql:/docker-entrypoint-initdb.d/trip_operations_db.sql
+      - ./Docker/tourist-catalog.sql:/docker-entrypoint-initdb.d/tourist-catalog.sql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 5s

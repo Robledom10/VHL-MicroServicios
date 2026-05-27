@@ -18,6 +18,13 @@ CREATE TABLE package (
     quota INT NOT NULL,
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
+    departure_place VARCHAR(150),
+    departure_time TIME,
+    lodging VARCHAR(150) DEFAULT 'Hotel 3 estrellas o similar',
+    room_type VARCHAR(120) DEFAULT 'Habitacion multiple (compartida)',
+    transport_type VARCHAR(80) DEFAULT 'Bus de turismo',
+    vertical_photo_url VARCHAR(500),
+    horizontal_photo_url VARCHAR(500),
     status TINYINT(1) NOT NULL DEFAULT 1,
     fk_id_category INT NOT NULL,
     FOREIGN KEY (fk_id_category) REFERENCES categorie(id_category)
@@ -27,7 +34,6 @@ CREATE TABLE itinerarie (
     id_itinerary INT AUTO_INCREMENT PRIMARY KEY,
     day_number INT NOT NULL,
     title VARCHAR(150) NOT NULL,
-    description VARCHAR(255),
     fk_id_package INT NOT NULL,
     FOREIGN KEY (fk_id_package) REFERENCES package(id_package)
 );
@@ -47,4 +53,22 @@ CREATE TABLE package_provider (
     fk_id_provider INT NOT NULL,
     FOREIGN KEY (fk_id_package) REFERENCES package(id_package),
     FOREIGN KEY (fk_id_provider) REFERENCES provider(id_provider)
+);
+
+CREATE TABLE package_inclusion (
+    fk_id_package INT NOT NULL,
+    description VARCHAR(150) NOT NULL,
+    FOREIGN KEY (fk_id_package) REFERENCES package(id_package)
+);
+
+CREATE TABLE package_exclusion (
+    fk_id_package INT NOT NULL,
+    description VARCHAR(150) NOT NULL,
+    FOREIGN KEY (fk_id_package) REFERENCES package(id_package)
+);
+
+CREATE TABLE package_cancellation_policy (
+    fk_id_package INT NOT NULL,
+    description VARCHAR(255) NOT NULL,
+    FOREIGN KEY (fk_id_package) REFERENCES package(id_package)
 );

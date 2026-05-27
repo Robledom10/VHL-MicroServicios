@@ -3,6 +3,7 @@ package com.hernandolopera.operation_servicio.entidades;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +38,27 @@ public class PaqueteTuristico {
     @Column(name = "end_date", nullable = false)
     public LocalDate fechaFin;
 
+    @Column(name = "departure_place", length = 150)
+    public String lugarSalida;
+
+    @Column(name = "departure_time")
+    public LocalTime horaSalida;
+
+    @Column(name = "lodging", length = 150)
+    public String alojamiento;
+
+    @Column(name = "room_type", length = 120)
+    public String tipoHabitacion;
+
+    @Column(name = "transport_type", length = 80)
+    public String tipoTransporte;
+
+    @Column(name = "vertical_photo_url", length = 500)
+    public String fotoVerticalUrl;
+
+    @Column(name = "horizontal_photo_url", length = 500)
+    public String fotoHorizontalUrl;
+
     @Column(name = "status", nullable = false)
     public Boolean activo = true;
 
@@ -47,11 +69,35 @@ public class PaqueteTuristico {
     @OneToMany(mappedBy = "paqueteTuristico", cascade = CascadeType.ALL, orphanRemoval = true)
     public List<ActividadItinerario> itinerario = new ArrayList<>();
 
+    @ElementCollection
+    @CollectionTable(name = "package_inclusion", joinColumns = @JoinColumn(name = "fk_id_package"))
+    @Column(name = "description", nullable = false, length = 150)
+    public List<String> incluye = new ArrayList<>();
+
+    @ElementCollection
+    @CollectionTable(name = "package_exclusion", joinColumns = @JoinColumn(name = "fk_id_package"))
+    @Column(name = "description", nullable = false, length = 150)
+    public List<String> noIncluye = new ArrayList<>();
+
+    @ElementCollection
+    @CollectionTable(name = "package_cancellation_policy", joinColumns = @JoinColumn(name = "fk_id_package"))
+    @Column(name = "description", nullable = false, length = 255)
+    public List<String> politicasCancelacion = new ArrayList<>();
+
     public void reemplazarItinerario(List<ActividadItinerario> actividades) {
         itinerario.clear();
         actividades.forEach(actividad -> {
             actividad.paqueteTuristico = this;
             itinerario.add(actividad);
         });
+    }
+
+    public void reemplazarListasDelDetalle(List<String> incluye, List<String> noIncluye, List<String> politicasCancelacion) {
+        this.incluye.clear();
+        this.incluye.addAll(incluye);
+        this.noIncluye.clear();
+        this.noIncluye.addAll(noIncluye);
+        this.politicasCancelacion.clear();
+        this.politicasCancelacion.addAll(politicasCancelacion);
     }
 }
