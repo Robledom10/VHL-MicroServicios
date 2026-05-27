@@ -48,7 +48,7 @@ public class JwtFilter implements GlobalFilter, Ordered {
                 "/api/auth/login",
                 "/api/auth/register",
                 "/api/auth/tokens/refresh",
-                "/api/auth/logout",
+                "/api/auth/tokens/logout",
                 "/api/auth/check-blacklist");
 
         boolean isPublic = publicRoutes.stream()

@@ -9,6 +9,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -21,106 +22,159 @@ import jakarta.servlet.http.HttpServletRequest;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-        @ExceptionHandler(MethodArgumentNotValidException.class)
-        public ResponseEntity<ApiError> handleValidation(MethodArgumentNotValidException ex,
-                        HttpServletRequest request) {
+    /**
+     * Validaciones DTO (@Valid)
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiError> handleValidation(
+            MethodArgumentNotValidException ex,
+            HttpServletRequest request) {
 
-                Map<String, String> errors = ex.getBindingResult()
-                                .getFieldErrors()
-                                .stream()
-                                .collect(Collectors.toMap(
-                                                e -> e.getField(),
-                                                e -> e.getDefaultMessage(),
-                                                (msg1, msg2) -> msg1));
+        Map<String, String> errors = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .collect(Collectors.toMap(
+                        e -> e.getField(),
+                        e -> e.getDefaultMessage(),
+                        (msg1, msg2) -> msg1));
 
-                ApiError apiError = ApiError.builder()
-                                .timeStamp(LocalDateTime.now())
-                                .status(HttpStatus.FORBIDDEN.value())
-                                .error("BAD_REQUEST")
-                                .message("Error de validaciones")
-                                .path(request.getRequestURI())
-                                .errors(errors)
-                                .build();
+        ApiError apiError = ApiError.builder()
+                .timeStamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("BAD_REQUEST")
+                .message("Error de validaciones")
+                .path(request.getRequestURI())
+                .errors(errors)
+                .build();
 
-                return ResponseEntity.badRequest().body(apiError);
-        }
+        return ResponseEntity
+                .badRequest()
+                .body(apiError);
+    }
 
-        @ExceptionHandler(AccessDeniedException.class)
-        public ResponseEntity<ApiError> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
-                ApiError apiError = ApiError.builder()
-                                .timeStamp(LocalDateTime.now())
-                                .status(HttpStatus.FORBIDDEN.value())
-                                .error("Forbidden")
-                                .message("No tienes permisos para acceder a este recurso")
-                                .path(request.getRequestURI())
-                                .build();
+    /**
+     * Acceso denegado
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiError> handleAccessDenied(
+            AccessDeniedException ex,
+            HttpServletRequest request) {
 
-                return ResponseEntity
-                                .status(HttpStatus.FORBIDDEN)
-                                .body(apiError);
-        }
+        ApiError apiError = ApiError.builder()
+                .timeStamp(LocalDateTime.now())
+                .status(HttpStatus.FORBIDDEN.value())
+                .error("FORBIDDEN")
+                .message("No tienes permisos para acceder a este recurso")
+                .path(request.getRequestURI())
+                .build();
 
-        @ExceptionHandler(org.springframework.security.authentication.BadCredentialsException.class)
-        public ResponseEntity<ApiError> handleBadCredentials(
-                        Exception ex,
-                        HttpServletRequest request) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(apiError);
+    }
 
-                ApiError apiError = ApiError.builder()
-                                .timeStamp(LocalDateTime.now())
-                                .status(HttpStatus.UNAUTHORIZED.value())
-                                .error("Unauthorized")
-                                .message("Credenciales inválidas")
-                                .path(request.getRequestURI())
-                                .build();
+    /**
+     * Credenciales inválidas
+     */
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ApiError> handleBadCredentials(
+            BadCredentialsException ex,
+            HttpServletRequest request) {
 
-                return ResponseEntity
-                                .status(HttpStatus.UNAUTHORIZED)
-                                .body(apiError);
-        }
+        ApiError apiError = ApiError.builder()
+                .timeStamp(LocalDateTime.now())
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .error("UNAUTHORIZED")
+                .message("Credenciales inválidas")
+                .path(request.getRequestURI())
+                .build();
 
-        @ExceptionHandler(ResponseStatusException.class)
-        public ResponseEntity<ApiError> handleCustom(ResponseStatusException ex, HttpServletRequest request) {
-                ApiError apiError = ApiError.builder()
-                                .timeStamp(LocalDateTime.now())
-                                .status(HttpStatus.BAD_REQUEST.value())
-                                .error("BAD_REQUEST")
-                                .message(ex.getReason())
-                                .path(request.getRequestURI())
-                                .build();
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(apiError);
+    }
 
-                return ResponseEntity.status(ex.getStatusCode())
-                                .body(apiError);
-        }
+    /**
+     * Excepciones personalizadas con ResponseStatusException
+     */
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ApiError> handleResponseStatus(
+            ResponseStatusException ex,
+            HttpServletRequest request) {
 
-        @ExceptionHandler(HttpMessageNotReadableException.class)
-        public ResponseEntity<ApiError> handleInvalidFormat(
-                        HttpMessageNotReadableException ex,
-                        HttpServletRequest request) {
+        ApiError apiError = ApiError.builder()
+                .timeStamp(LocalDateTime.now())
+                .status(ex.getStatusCode().value())
+                .error(ex.getStatusCode().toString())
+                .message(ex.getReason())
+                .path(request.getRequestURI())
+                .build();
 
-                ApiError apiError = ApiError.builder()
-                                .timeStamp(LocalDateTime.now())
-                                .status(HttpStatus.BAD_REQUEST.value())
-                                .error("Bad Request")
-                                .message("Formato de datos inválido")
-                                .path(request.getRequestURI())
-                                .build();
+        return ResponseEntity
+                .status(ex.getStatusCode())
+                .body(apiError);
+    }
 
-                return ResponseEntity.badRequest().body(apiError);
-        }
+    /**
+     * JSON inválido o formato incorrecto
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiError> handleInvalidFormat(
+            HttpMessageNotReadableException ex,
+            HttpServletRequest request) {
 
-        @ExceptionHandler(DataIntegrityViolationException.class)
-        public ResponseEntity<ApiError> handleDuplicate(
-                        DataIntegrityViolationException ex,
-                        HttpServletRequest request) {
+        ApiError apiError = ApiError.builder()
+                .timeStamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("BAD_REQUEST")
+                .message("Formato de datos inválido")
+                .path(request.getRequestURI())
+                .build();
 
-                ApiError apiError = ApiError.builder()
-                                .timeStamp(LocalDateTime.now())
-                                .status(HttpStatus.CONFLICT.value())
-                                .error("Conflict")
-                                .message("El correo ya está registrado")
-                                .path(request.getRequestURI())
-                                .build();
+        return ResponseEntity
+                .badRequest()
+                .body(apiError);
+    }
 
-                return ResponseEntity.status(HttpStatus.CONFLICT).body(apiError);
-        }
+    /**
+     * Violaciones de integridad SQL
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiError> handleDuplicate(
+            DataIntegrityViolationException ex,
+            HttpServletRequest request) {
+
+        ApiError apiError = ApiError.builder()
+                .timeStamp(LocalDateTime.now())
+                .status(HttpStatus.CONFLICT.value())
+                .error("CONFLICT")
+                .message("El recurso ya existe o viola una restricción de integridad")
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(apiError);
+    }
+
+    /**
+     * Cualquier excepción no controlada
+     */
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiError> handleGeneralException(
+            Exception ex,
+            HttpServletRequest request) {
+
+        ApiError apiError = ApiError.builder()
+                .timeStamp(LocalDateTime.now())
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .error("INTERNAL_SERVER_ERROR")
+                .message("Ocurrió un error interno en el servidor")
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(apiError);
+    }
 }

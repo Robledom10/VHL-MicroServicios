@@ -6,6 +6,5 @@ import lombok.Data;
 
 @Data
 public class RoleRequest {
-    private String name;
-    private Set<String> permissions; // nombres de permisos
+    private String name; // nombres de permisos
 }

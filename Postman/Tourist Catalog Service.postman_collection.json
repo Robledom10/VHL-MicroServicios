@@ -1,0 +1,415 @@
+{
+  "info": {
+    "name": "Tourist Catalog Service",
+    "description": "Pruebas HTTP end-to-end para tourist-catalog-service pasando por API Gateway. Ejecuta primero Auth / Registrar usuario QA y Auth / Login para guardar el Bearer token.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "gatewayUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "categoriaId",
+      "value": ""
+    },
+    {
+      "key": "paqueteId",
+      "value": ""
+    },
+    {
+      "key": "proveedorId",
+      "value": ""
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "authEmail",
+      "value": "catalog.qa.postman@test.com"
+    },
+    {
+      "key": "authPassword",
+      "value": "Password123"
+    },
+    {
+      "key": "documentNumber",
+      "value": "999000111"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth por Gateway",
+      "auth": {
+        "type": "noauth"
+      },
+      "item": [
+        {
+          "name": "Registrar usuario QA",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 201 o usuario ya existe', function () {",
+                  "  pm.expect([201, 409]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Catalog\",\n  \"lastName\": \"QA\",\n  \"email\": \"{{authEmail}}\",\n  \"password\": \"{{authPassword}}\",\n  \"documentType\": \"Cedula Ciudadania\",\n  \"documentNumber\": \"{{documentNumber}}\",\n  \"phone\": \"3001234567\",\n  \"birthDate\": \"1995-01-01\",\n  \"state\": \"Quindio\",\n  \"city\": \"Armenia\",\n  \"address\": \"Centro\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/register"
+          }
+        },
+        {
+          "name": "Login y guardar token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.expect(json.accessToken).to.exist;",
+                  "pm.collectionVariables.set('token', json.accessToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{authEmail}}\",\n  \"password\": \"{{authPassword}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Catalogo por Gateway 8080",
+      "item": [
+        {
+          "name": "Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/actuator/health"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('UP', function () { pm.expect(pm.response.json().status).to.eql('UP'); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear categoria",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Aventura {{$timestamp}}\",\n  \"descripcion\": \"Categoria para pruebas HTTP\"\n}"
+            },
+            "url": "{{baseUrl}}/categorias"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 201', function () { pm.response.to.have.status(201); });",
+                  "const json = pm.response.json();",
+                  "pm.expect(json.id).to.exist;",
+                  "pm.collectionVariables.set('categoriaId', json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar categorias",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/categorias"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.expect(pm.response.json()).to.be.an('array');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear paquete",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Eje Cafetero {{$timestamp}}\",\n  \"descripcion\": \"Paquete creado desde Postman\",\n  \"destino\": \"Quindio\",\n  \"duracionDias\": 3,\n  \"precio\": 1250000.00,\n  \"cupo\": 20,\n  \"fechaInicio\": \"2026-07-10\",\n  \"fechaFin\": \"2026-07-13\",\n  \"idCategoria\": {{categoriaId}},\n  \"itinerario\": [\n    {\n      \"numeroDia\": 1,\n      \"titulo\": \"Llegada y recorrido\",\n      \"descripcion\": \"Recepcion y recorrido guiado\"\n    },\n    {\n      \"numeroDia\": 2,\n      \"titulo\": \"Tour cafetero\",\n      \"descripcion\": \"Visita a finca cafetera\"\n    }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/paquetes"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 201', function () { pm.response.to.have.status(201); });",
+                  "const json = pm.response.json();",
+                  "pm.expect(json.id).to.exist;",
+                  "pm.collectionVariables.set('paqueteId', json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar paquetes con filtros",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/paquetes?destino=Quindio&activo=true&pagina=0&tamano=5&ordenarPor=titulo&direccion=asc"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.expect(json.content).to.be.an('array');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar paquete por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/paquetes/{{paqueteId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get('paqueteId')));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar paquete",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Eje Cafetero Actualizado {{$timestamp}}\",\n  \"descripcion\": \"Paquete actualizado desde Postman\",\n  \"destino\": \"Quindio\",\n  \"duracionDias\": 4,\n  \"precio\": 1450000.00,\n  \"cupo\": 15,\n  \"fechaInicio\": \"2026-07-10\",\n  \"fechaFin\": \"2026-07-14\",\n  \"idCategoria\": {{categoriaId}},\n  \"itinerario\": [\n    {\n      \"numeroDia\": 1,\n      \"titulo\": \"Llegada\",\n      \"descripcion\": \"Recepcion\"\n    }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/paquetes/{{paqueteId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.expect(pm.response.json().duracionDias).to.eql(4);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear proveedor",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Proveedor {{$timestamp}}\",\n  \"tipoProveedor\": \"TRANSPORTE\",\n  \"correo\": \"proveedor.{{$timestamp}}@test.com\",\n  \"telefono\": \"3001234567\"\n}"
+            },
+            "url": "{{baseUrl}}/proveedores"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 201', function () { pm.response.to.have.status(201); });",
+                  "const json = pm.response.json();",
+                  "pm.expect(json.id).to.exist;",
+                  "pm.collectionVariables.set('proveedorId', json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar proveedores",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/proveedores"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.expect(pm.response.json()).to.be.an('array');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Validacion paquete invalido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"\",\n  \"destino\": \"\",\n  \"duracionDias\": 0,\n  \"precio\": 0,\n  \"cupo\": 0,\n  \"fechaInicio\": \"2026-07-10\",\n  \"fechaFin\": \"2026-07-09\",\n  \"idCategoria\": {{categoriaId}}\n}"
+            },
+            "url": "{{baseUrl}}/paquetes"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 400', function () { pm.response.to.have.status(400); });",
+                  "pm.expect(pm.response.json().campos).to.be.an('object');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Gateway 8080 con Bearer token",
+      "description": "Estas pruebas usan las mismas rutas por gateway. Debes poner un JWT valido en la variable token.",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "Listar categorias por gateway",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{gatewayUrl}}/categorias"
+          }
+        },
+        {
+          "name": "Buscar paquetes por gateway",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{gatewayUrl}}/paquetes?activo=true&pagina=0&tamano=5"
+          }
+        }
+      ]
+    }
+  ]
+}

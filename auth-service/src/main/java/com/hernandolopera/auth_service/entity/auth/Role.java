@@ -36,8 +36,4 @@ public class Role {
     @OneToMany(mappedBy = "role")
     @JsonIgnore
     private Set<User> users;
-
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "role_permission", joinColumns = @JoinColumn(name = "fk_id_rol"), inverseJoinColumns = @JoinColumn(name = "fk_id_permission"))
-    private Set<Permission> permissions;
 }

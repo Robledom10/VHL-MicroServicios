@@ -14,12 +14,17 @@ spring:
         - id: auth-service
           uri: http://auth-service:8081
           predicates:
-            - Path=/api/auth/**
+            - Path=/api/auth/**, /api/admin/**, /api/roles/**
 
         - id: reservation_service
           uri: http://reservation-service:8082
           predicates:
-            - Path=/api/reservation/**
+            - Path=/api/v1/reservas/**, /api/v1/viajeros/**, /api/v1/confirmaciones/**
+
+        - id: tourist_catalog_service
+          uri: http://tourist-catalog-service:8083
+          predicates:
+            - Path=/categorias/**, /paquetes/**, /proveedores/**
 
       globalcors:
         corsConfigurations:

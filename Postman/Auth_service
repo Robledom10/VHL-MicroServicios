@@ -1,275 +1,1404 @@
 {
-  "info": {
-    "_postman_id": "79c3dea3-edda-423a-818c-0cbc0c453a61",
-    "name": "Backend Hernando Lopera",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "44599807",
-    "_collection_link": "https://go.postman.co/collection/44599807-79c3dea3-edda-423a-818c-0cbc0c453a61?source=collection_link"
-  },
-  "item": [
-    {
-      "name": "auth_service",
-      "item": [
-        {
-          "name": "POST",
-          "item": [
-            {
-              "name": "Register",
-              "request": {
-                "method": "POST",
-                "header": [],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n  \"firstName\": \"Admin\",\r\n  \"lastName\": \"test\",\r\n  \"email\": \"admin@test.com\",\r\n  \"password\": \"admin1\",\r\n  \"documentType\": \"Cedula Ciudadania\",\r\n  \"documentNumber\": \"12345\"\r\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "http://localhost:8080/api/auth/register",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "8080",
-                  "path": [
-                    "api",
-                    "auth",
-                    "register"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Login Client",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json",
-                    "type": "text"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n  \"email\": \"juan@test.com \",\r\n  \"password\": \"123456\"\r\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "http://localhost:8080/api/auth/login",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "8080",
-                  "path": [
-                    "api",
-                    "auth",
-                    "login"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Login Admin",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json",
-                    "type": "text"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n  \"email\": \"admin@test.com \",\r\n  \"password\": \"admin1\"\r\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "http://localhost:8080/api/auth/login",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "8080",
-                  "path": [
-                    "api",
-                    "auth",
-                    "login"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Refresh",
-              "request": {
-                "method": "POST",
-                "header": [],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n    \"refreshToken\": \"b7b4154f-2e97-45af-9a2a-d11cd2347843\"\r\n}\r\n",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "http://localhost:8080/api/auth/refresh",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "8080",
-                  "path": [
-                    "api",
-                    "auth",
-                    "refresh"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Logout",
-              "request": {
-                "method": "POST",
-                "header": [],
-                "body": {
-                  "mode": "raw",
-                  "raw": "",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "http://localhost:8080/api/auth/logout",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "8080",
-                  "path": [
-                    "api",
-                    "auth",
-                    "logout"
-                  ]
-                }
-              },
-              "response": []
-            }
-          ]
-        },
-        {
-          "name": "GET",
-          "item": [
-            {
-              "name": "Token ME",
-              "protocolProfileBehavior": {
-                "disableBodyPruning": true
-              },
-              "request": {
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqdWFuQHRlc3QuY29tIiwidXNlcklkIjoxLCJyb2xlIjoiQ0xJRU5UIiwiaWF0IjoxNzc3NDAxMDkxLCJleHAiOjE3Nzc0MDEzOTF9.SrrwXc4il_DTXOwU57gVRRUaKwRC9Lk8ZmezOIMPwJ4",
-                      "type": "string"
-                    }
-                  ]
-                },
-                "method": "GET",
-                "header": [],
-                "body": {
-                  "mode": "raw",
-                  "raw": "",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "http://localhost:8080/api/auth/me",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "8080",
-                  "path": [
-                    "api",
-                    "auth",
-                    "me"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Admin",
-              "protocolProfileBehavior": {
-                "disableBodyPruning": true
-              },
-              "request": {
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkB0ZXN0LmNvbSIsImlhdCI6MTc3NzAwMzg5OCwiZXhwIjoxNzc3MDA0Nzk4fQ.eX52ipfHYb2DXQgg1ws_cXGG-_9lyg9ZEisU-JETUIM",
-                      "type": "string"
-                    }
-                  ]
-                },
-                "method": "GET",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json",
-                    "type": "text"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n  \"email\": \"admin@test.com \",\r\n  \"password\": \"admin1\"\r\n}"
-                },
-                "url": {
-                  "raw": "http://localhost:8080/api/auth/admin",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "8080",
-                  "path": [
-                    "api",
-                    "auth",
-                    "admin"
-                  ]
-                }
-              },
-              "response": []
-            }
-          ]
-        }
-      ]
-    }
-  ]
+	"log": {
+		"version": "1.2",
+		"creator": {
+			"name": "Insomnia REST Client",
+			"version": "insomnia.desktop.app:v12.5.0"
+		},
+		"entries": [
+			{
+				"startedDateTime": "2026-05-15T19:14:37.537Z",
+				"time": 199.663,
+				"request": {
+					"method": "PUT",
+					"url": "http://localhost:8080/api/auth/profile/update",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [
+						{
+							"name": "refreshToken",
+							"value": "49396a21-b7b1-4cbc-828c-2344402ca70d",
+							"path": "/",
+							"domain": "localhost",
+							"expires": "2026-05-22T18:52:02.000Z",
+							"httpOnly": true
+						}
+					],
+					"headers": [
+						{
+							"name": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"name": "User-Agent",
+							"value": "insomnia/12.5.0"
+						},
+						{
+							"name": "Authorization",
+							"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjbGllbnRAdGVzdC5jb20iLCJ1c2VySWQiOjMsInJvbGUiOiJDTElFTlQiLCJpYXQiOjE3Nzg4NzEwNDcsImV4cCI6MTc3ODg3MTk0N30.HbKDMoM63z1sPTKJvpHkvAZLMa_lFOtzHU5vgFvzrvc"
+						}
+					],
+					"queryString": [],
+					"postData": {
+						"mimeType": "application/json",
+						"text": "{\n  \"phone\": \"3001234567\",\n  \"birthDate\": \"2005-10-15\",\n  \"state\": \"Quindio\",\n  \"city\": \"Armenia\",\n  \"address\": \"Barrio\"\n}"
+					},
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"response": {
+					"status": 200,
+					"statusText": "OK",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [],
+					"headers": [
+						{
+							"name": "transfer-encoding",
+							"value": "chunked"
+						},
+						{
+							"name": "Vary",
+							"value": "Origin"
+						},
+						{
+							"name": "Vary",
+							"value": "Access-Control-Request-Method"
+						},
+						{
+							"name": "Vary",
+							"value": "Access-Control-Request-Headers"
+						},
+						{
+							"name": "X-Content-Type-Options",
+							"value": "nosniff"
+						},
+						{
+							"name": "X-XSS-Protection",
+							"value": "0"
+						},
+						{
+							"name": "Cache-Control",
+							"value": "no-cache, no-store, max-age=0, must-revalidate"
+						},
+						{
+							"name": "Pragma",
+							"value": "no-cache"
+						},
+						{
+							"name": "Expires",
+							"value": "0"
+						},
+						{
+							"name": "X-Frame-Options",
+							"value": "DENY"
+						},
+						{
+							"name": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"name": "Date",
+							"value": "Fri, 15 May 2026 18:52:59 GMT"
+						},
+						{
+							"name": "Referrer-Policy",
+							"value": "no-referrer"
+						}
+					],
+					"content": {
+						"size": 333,
+						"mimeType": "application/json",
+						"text": "{\"active\":true,\"address\":\"Barrio\",\"birthDate\":\"2005-10-15\",\"city\":\"Armenia\",\"documentNumber\":\"1234567\",\"documentType\":\"Cedula Ciudadania\",\"email\":\"client@test.com\",\"emailVerified\":false,\"firstName\":\"client\",\"id\":3,\"lastName\":\"test\",\"phone\":\"3001234567\",\"phoneVerified\":false,\"profileCompleted\":true,\"role\":\"CLIENT\",\"state\":\"Quindio\"}"
+					},
+					"redirectURL": "",
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"cache": {},
+				"timings": {
+					"blocked": -1,
+					"dns": -1,
+					"connect": -1,
+					"send": 0,
+					"wait": 199.663,
+					"receive": 0,
+					"ssl": -1
+				},
+				"comment": "Update Profile"
+			},
+			{
+				"startedDateTime": "2026-05-15T19:14:37.537Z",
+				"time": 0,
+				"request": {
+					"method": "POST",
+					"url": "http://localhost:8080/api/admin/roles/assign",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [
+						{
+							"name": "refreshToken",
+							"value": "49396a21-b7b1-4cbc-828c-2344402ca70d",
+							"path": "/",
+							"domain": "localhost",
+							"expires": "2026-05-22T18:52:02.000Z",
+							"httpOnly": true
+						}
+					],
+					"headers": [
+						{
+							"name": "User-Agent",
+							"value": "insomnia/12.5.0"
+						}
+					],
+					"queryString": [],
+					"postData": {
+						"mimeType": "",
+						"text": ""
+					},
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"response": {
+					"status": 0,
+					"statusText": "",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [],
+					"headers": [],
+					"content": {
+						"size": 0,
+						"mimeType": ""
+					},
+					"redirectURL": "",
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"cache": {},
+				"timings": {
+					"blocked": -1,
+					"dns": -1,
+					"connect": -1,
+					"send": 0,
+					"wait": 0,
+					"receive": 0,
+					"ssl": -1
+				},
+				"comment": "New Request"
+			},
+			{
+				"startedDateTime": "2026-05-15T19:14:37.537Z",
+				"time": 0,
+				"request": {
+					"method": "DELETE",
+					"url": "http://localhost:8080/api/admin/roles/1",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [
+						{
+							"name": "refreshToken",
+							"value": "49396a21-b7b1-4cbc-828c-2344402ca70d",
+							"path": "/",
+							"domain": "localhost",
+							"expires": "2026-05-22T18:52:02.000Z",
+							"httpOnly": true
+						}
+					],
+					"headers": [
+						{
+							"name": "User-Agent",
+							"value": "insomnia/12.5.0"
+						}
+					],
+					"queryString": [],
+					"postData": {
+						"mimeType": "",
+						"text": ""
+					},
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"response": {
+					"status": 0,
+					"statusText": "",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [],
+					"headers": [],
+					"content": {
+						"size": 0,
+						"mimeType": ""
+					},
+					"redirectURL": "",
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"cache": {},
+				"timings": {
+					"blocked": -1,
+					"dns": -1,
+					"connect": -1,
+					"send": 0,
+					"wait": 0,
+					"receive": 0,
+					"ssl": -1
+				},
+				"comment": "Eliminar"
+			},
+			{
+				"startedDateTime": "2026-05-15T19:14:37.537Z",
+				"time": 0,
+				"request": {
+					"method": "PUT",
+					"url": "http://localhost:8080/api/admin/roles/1",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [
+						{
+							"name": "refreshToken",
+							"value": "49396a21-b7b1-4cbc-828c-2344402ca70d",
+							"path": "/",
+							"domain": "localhost",
+							"expires": "2026-05-22T18:52:02.000Z",
+							"httpOnly": true
+						}
+					],
+					"headers": [
+						{
+							"name": "User-Agent",
+							"value": "insomnia/12.5.0"
+						}
+					],
+					"queryString": [],
+					"postData": {
+						"mimeType": "",
+						"text": ""
+					},
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"response": {
+					"status": 0,
+					"statusText": "",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [],
+					"headers": [],
+					"content": {
+						"size": 0,
+						"mimeType": ""
+					},
+					"redirectURL": "",
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"cache": {},
+				"timings": {
+					"blocked": -1,
+					"dns": -1,
+					"connect": -1,
+					"send": 0,
+					"wait": 0,
+					"receive": 0,
+					"ssl": -1
+				},
+				"comment": "Actualizar"
+			},
+			{
+				"startedDateTime": "2026-05-15T19:14:37.537Z",
+				"time": 0,
+				"request": {
+					"method": "POST",
+					"url": "http://localhost:8080/api/admin/roles",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [
+						{
+							"name": "refreshToken",
+							"value": "49396a21-b7b1-4cbc-828c-2344402ca70d",
+							"path": "/",
+							"domain": "localhost",
+							"expires": "2026-05-22T18:52:02.000Z",
+							"httpOnly": true
+						}
+					],
+					"headers": [
+						{
+							"name": "User-Agent",
+							"value": "insomnia/12.5.0"
+						}
+					],
+					"queryString": [],
+					"postData": {
+						"mimeType": "",
+						"text": ""
+					},
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"response": {
+					"status": 0,
+					"statusText": "",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [],
+					"headers": [],
+					"content": {
+						"size": 0,
+						"mimeType": ""
+					},
+					"redirectURL": "",
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"cache": {},
+				"timings": {
+					"blocked": -1,
+					"dns": -1,
+					"connect": -1,
+					"send": 0,
+					"wait": 0,
+					"receive": 0,
+					"ssl": -1
+				},
+				"comment": "Create Role"
+			},
+			{
+				"startedDateTime": "2026-05-15T19:14:37.537Z",
+				"time": 0,
+				"request": {
+					"method": "GET",
+					"url": "http://localhost:8080/api/admin/roles",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [
+						{
+							"name": "refreshToken",
+							"value": "49396a21-b7b1-4cbc-828c-2344402ca70d",
+							"path": "/",
+							"domain": "localhost",
+							"expires": "2026-05-22T18:52:02.000Z",
+							"httpOnly": true
+						}
+					],
+					"headers": [
+						{
+							"name": "User-Agent",
+							"value": "insomnia/12.5.0"
+						}
+					],
+					"queryString": [],
+					"postData": {
+						"mimeType": "",
+						"text": ""
+					},
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"response": {
+					"status": 0,
+					"statusText": "",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [],
+					"headers": [],
+					"content": {
+						"size": 0,
+						"mimeType": ""
+					},
+					"redirectURL": "",
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"cache": {},
+				"timings": {
+					"blocked": -1,
+					"dns": -1,
+					"connect": -1,
+					"send": 0,
+					"wait": 0,
+					"receive": 0,
+					"ssl": -1
+				},
+				"comment": "Admin Roles"
+			},
+			{
+				"startedDateTime": "2026-05-15T19:14:37.537Z",
+				"time": 0,
+				"request": {
+					"method": "PUT",
+					"url": "http://localhost:8080/api/admin/users/1/enable",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [
+						{
+							"name": "refreshToken",
+							"value": "49396a21-b7b1-4cbc-828c-2344402ca70d",
+							"path": "/",
+							"domain": "localhost",
+							"expires": "2026-05-22T18:52:02.000Z",
+							"httpOnly": true
+						}
+					],
+					"headers": [
+						{
+							"name": "User-Agent",
+							"value": "insomnia/12.5.0"
+						}
+					],
+					"queryString": [],
+					"postData": {
+						"mimeType": "",
+						"text": ""
+					},
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"response": {
+					"status": 0,
+					"statusText": "",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [],
+					"headers": [],
+					"content": {
+						"size": 0,
+						"mimeType": ""
+					},
+					"redirectURL": "",
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"cache": {},
+				"timings": {
+					"blocked": -1,
+					"dns": -1,
+					"connect": -1,
+					"send": 0,
+					"wait": 0,
+					"receive": 0,
+					"ssl": -1
+				},
+				"comment": "ENABLE"
+			},
+			{
+				"startedDateTime": "2026-05-15T19:14:37.537Z",
+				"time": 0,
+				"request": {
+					"method": "PUT",
+					"url": "http://localhost:8080/api/admin/users/1/disable",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [
+						{
+							"name": "refreshToken",
+							"value": "49396a21-b7b1-4cbc-828c-2344402ca70d",
+							"path": "/",
+							"domain": "localhost",
+							"expires": "2026-05-22T18:52:02.000Z",
+							"httpOnly": true
+						}
+					],
+					"headers": [
+						{
+							"name": "User-Agent",
+							"value": "insomnia/12.5.0"
+						}
+					],
+					"queryString": [],
+					"postData": {
+						"mimeType": "",
+						"text": ""
+					},
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"response": {
+					"status": 0,
+					"statusText": "",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [],
+					"headers": [],
+					"content": {
+						"size": 0,
+						"mimeType": ""
+					},
+					"redirectURL": "",
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"cache": {},
+				"timings": {
+					"blocked": -1,
+					"dns": -1,
+					"connect": -1,
+					"send": 0,
+					"wait": 0,
+					"receive": 0,
+					"ssl": -1
+				},
+				"comment": "DISABLE"
+			},
+			{
+				"startedDateTime": "2026-05-15T19:14:37.537Z",
+				"time": 0,
+				"request": {
+					"method": "GET",
+					"url": "http://localhost:8080/api/admin/users",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [
+						{
+							"name": "refreshToken",
+							"value": "49396a21-b7b1-4cbc-828c-2344402ca70d",
+							"path": "/",
+							"domain": "localhost",
+							"expires": "2026-05-22T18:52:02.000Z",
+							"httpOnly": true
+						}
+					],
+					"headers": [
+						{
+							"name": "User-Agent",
+							"value": "insomnia/12.5.0"
+						}
+					],
+					"queryString": [],
+					"postData": {
+						"mimeType": "",
+						"text": ""
+					},
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"response": {
+					"status": 0,
+					"statusText": "",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [],
+					"headers": [],
+					"content": {
+						"size": 0,
+						"mimeType": ""
+					},
+					"redirectURL": "",
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"cache": {},
+				"timings": {
+					"blocked": -1,
+					"dns": -1,
+					"connect": -1,
+					"send": 0,
+					"wait": 0,
+					"receive": 0,
+					"ssl": -1
+				},
+				"comment": "Users"
+			},
+			{
+				"startedDateTime": "2026-05-15T19:14:37.537Z",
+				"time": 0,
+				"request": {
+					"method": "GET",
+					"url": "http://localhost:8080/api/admin/users/1",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [
+						{
+							"name": "refreshToken",
+							"value": "49396a21-b7b1-4cbc-828c-2344402ca70d",
+							"path": "/",
+							"domain": "localhost",
+							"expires": "2026-05-22T18:52:02.000Z",
+							"httpOnly": true
+						}
+					],
+					"headers": [
+						{
+							"name": "User-Agent",
+							"value": "insomnia/12.5.0"
+						}
+					],
+					"queryString": [],
+					"postData": {
+						"mimeType": "",
+						"text": ""
+					},
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"response": {
+					"status": 0,
+					"statusText": "",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [],
+					"headers": [],
+					"content": {
+						"size": 0,
+						"mimeType": ""
+					},
+					"redirectURL": "",
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"cache": {},
+				"timings": {
+					"blocked": -1,
+					"dns": -1,
+					"connect": -1,
+					"send": 0,
+					"wait": 0,
+					"receive": 0,
+					"ssl": -1
+				},
+				"comment": "User ID"
+			},
+			{
+				"startedDateTime": "2026-05-15T19:14:37.537Z",
+				"time": 0,
+				"request": {
+					"method": "PUT",
+					"url": "http://localhost:8080/api/auth/profile/complete",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [
+						{
+							"name": "refreshToken",
+							"value": "49396a21-b7b1-4cbc-828c-2344402ca70d",
+							"path": "/",
+							"domain": "localhost",
+							"expires": "2026-05-22T18:52:02.000Z",
+							"httpOnly": true
+						}
+					],
+					"headers": [
+						{
+							"name": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"name": "User-Agent",
+							"value": "insomnia/12.5.0"
+						}
+					],
+					"queryString": [],
+					"postData": {
+						"mimeType": "application/json",
+						"text": ""
+					},
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"response": {
+					"status": 0,
+					"statusText": "",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [],
+					"headers": [],
+					"content": {
+						"size": 0,
+						"mimeType": ""
+					},
+					"redirectURL": "",
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"cache": {},
+				"timings": {
+					"blocked": -1,
+					"dns": -1,
+					"connect": -1,
+					"send": 0,
+					"wait": 0,
+					"receive": 0,
+					"ssl": -1
+				},
+				"comment": "Complete Profile"
+			},
+			{
+				"startedDateTime": "2026-05-15T19:14:37.537Z",
+				"time": 0,
+				"request": {
+					"method": "GET",
+					"url": "http://localhost:8080/api/auth/check-blacklist",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [
+						{
+							"name": "refreshToken",
+							"value": "49396a21-b7b1-4cbc-828c-2344402ca70d",
+							"path": "/",
+							"domain": "localhost",
+							"expires": "2026-05-22T18:52:02.000Z",
+							"httpOnly": true
+						}
+					],
+					"headers": [
+						{
+							"name": "User-Agent",
+							"value": "insomnia/12.5.0"
+						}
+					],
+					"queryString": [],
+					"postData": {
+						"mimeType": "",
+						"text": ""
+					},
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"response": {
+					"status": 0,
+					"statusText": "",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [],
+					"headers": [],
+					"content": {
+						"size": 0,
+						"mimeType": ""
+					},
+					"redirectURL": "",
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"cache": {},
+				"timings": {
+					"blocked": -1,
+					"dns": -1,
+					"connect": -1,
+					"send": 0,
+					"wait": 0,
+					"receive": 0,
+					"ssl": -1
+				},
+				"comment": "Check Blacklist"
+			},
+			{
+				"startedDateTime": "2026-05-15T19:14:37.537Z",
+				"time": 0,
+				"request": {
+					"method": "POST",
+					"url": "http://localhost:8080/api/auth/register",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [
+						{
+							"name": "refreshToken",
+							"value": "49396a21-b7b1-4cbc-828c-2344402ca70d",
+							"path": "/",
+							"domain": "localhost",
+							"expires": "2026-05-22T18:52:02.000Z",
+							"httpOnly": true
+						}
+					],
+					"headers": [
+						{
+							"name": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"queryString": [],
+					"postData": {
+						"mimeType": "application/json",
+						"text": "{\r\n  \"firstName\": \"Admin\",\r\n  \"lastName\": \"test\",\r\n  \"email\": \"admin@test.com\",\r\n  \"password\": \"admin1\",\r\n  \"documentType\": \"Cedula Ciudadania\",\r\n  \"documentNumber\": \"12345\"\r\n}"
+					},
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"response": {
+					"status": 0,
+					"statusText": "",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [],
+					"headers": [],
+					"content": {
+						"size": 0,
+						"mimeType": ""
+					},
+					"redirectURL": "",
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"cache": {},
+				"timings": {
+					"blocked": -1,
+					"dns": -1,
+					"connect": -1,
+					"send": 0,
+					"wait": 0,
+					"receive": 0,
+					"ssl": -1
+				},
+				"comment": "Register"
+			},
+			{
+				"startedDateTime": "2026-05-15T19:14:37.537Z",
+				"time": 106.344,
+				"request": {
+					"method": "POST",
+					"url": "http://localhost:8080/api/auth/login",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [
+						{
+							"name": "refreshToken",
+							"value": "49396a21-b7b1-4cbc-828c-2344402ca70d",
+							"path": "/",
+							"domain": "localhost",
+							"expires": "2026-05-22T18:52:02.000Z",
+							"httpOnly": true
+						}
+					],
+					"headers": [
+						{
+							"name": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"queryString": [],
+					"postData": {
+						"mimeType": "application/json",
+						"text": "{\n  \"email\": \"client@test.com \",\n  \"password\": \"client1\"\n}"
+					},
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"response": {
+					"status": 200,
+					"statusText": "OK",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [
+						{
+							"name": "refreshToken",
+							"value": "49396a21-b7b1-4cbc-828c-2344402ca70d",
+							"path": "/",
+							"expires": "2026-05-22T18:52:02.000Z",
+							"httpOnly": true
+						}
+					],
+					"headers": [
+						{
+							"name": "transfer-encoding",
+							"value": "chunked"
+						},
+						{
+							"name": "Vary",
+							"value": "Origin"
+						},
+						{
+							"name": "Vary",
+							"value": "Access-Control-Request-Method"
+						},
+						{
+							"name": "Vary",
+							"value": "Access-Control-Request-Headers"
+						},
+						{
+							"name": "Set-Cookie",
+							"value": "refreshToken=49396a21-b7b1-4cbc-828c-2344402ca70d; Expires=Fri, 22 May 2026 18:52:02 GMT; Max-Age=604800; Path=/; HttpOnly"
+						},
+						{
+							"name": "X-Content-Type-Options",
+							"value": "nosniff"
+						},
+						{
+							"name": "X-XSS-Protection",
+							"value": "0"
+						},
+						{
+							"name": "Cache-Control",
+							"value": "no-cache, no-store, max-age=0, must-revalidate"
+						},
+						{
+							"name": "Pragma",
+							"value": "no-cache"
+						},
+						{
+							"name": "Expires",
+							"value": "0"
+						},
+						{
+							"name": "X-Frame-Options",
+							"value": "DENY"
+						},
+						{
+							"name": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"name": "Date",
+							"value": "Fri, 15 May 2026 18:52:02 GMT"
+						},
+						{
+							"name": "Referrer-Policy",
+							"value": "no-referrer"
+						}
+					],
+					"content": {
+						"size": 315,
+						"mimeType": "application/json",
+						"text": "{\"accessToken\":\"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjbGllbnRAdGVzdC5jb20iLCJ1c2VySWQiOjMsInJvbGUiOiJDTElFTlQiLCJpYXQiOjE3Nzg4NzExMjIsImV4cCI6MTc3ODg3MjAyMn0.T-ByyWzMKpE_LFZM6qEsK2oNbQOELz-i2qzpufHeWCM\",\"refreshToken\":null,\"user\":{\"id\":3,\"firstName\":\"client\",\"lastName\":\"test\",\"email\":\"client@test.com\",\"role\":\"CLIENT\"}}"
+					},
+					"redirectURL": "",
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"cache": {},
+				"timings": {
+					"blocked": -1,
+					"dns": -1,
+					"connect": -1,
+					"send": 0,
+					"wait": 106.344,
+					"receive": 0,
+					"ssl": -1
+				},
+				"comment": "Login Client"
+			},
+			{
+				"startedDateTime": "2026-05-15T19:14:37.537Z",
+				"time": 104.482,
+				"request": {
+					"method": "POST",
+					"url": "http://localhost:8080/api/auth/login",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [
+						{
+							"name": "refreshToken",
+							"value": "49396a21-b7b1-4cbc-828c-2344402ca70d",
+							"path": "/",
+							"domain": "localhost",
+							"expires": "2026-05-22T18:52:02.000Z",
+							"httpOnly": true
+						}
+					],
+					"headers": [
+						{
+							"name": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"queryString": [],
+					"postData": {
+						"mimeType": "application/json",
+						"text": "{\r\n  \"email\": \"admin@test.com \",\r\n  \"password\": \"admin1\"\r\n}"
+					},
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"response": {
+					"status": 200,
+					"statusText": "OK",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [
+						{
+							"name": "refreshToken",
+							"value": "5ea5c9a5-b5e5-4d1b-b9dc-fd4784bea6a3",
+							"path": "/",
+							"expires": "2026-05-22T18:51:37.000Z",
+							"httpOnly": true
+						}
+					],
+					"headers": [
+						{
+							"name": "transfer-encoding",
+							"value": "chunked"
+						},
+						{
+							"name": "Vary",
+							"value": "Origin"
+						},
+						{
+							"name": "Vary",
+							"value": "Access-Control-Request-Method"
+						},
+						{
+							"name": "Vary",
+							"value": "Access-Control-Request-Headers"
+						},
+						{
+							"name": "Set-Cookie",
+							"value": "refreshToken=5ea5c9a5-b5e5-4d1b-b9dc-fd4784bea6a3; Expires=Fri, 22 May 2026 18:51:37 GMT; Max-Age=604800; Path=/; HttpOnly"
+						},
+						{
+							"name": "X-Content-Type-Options",
+							"value": "nosniff"
+						},
+						{
+							"name": "X-XSS-Protection",
+							"value": "0"
+						},
+						{
+							"name": "Cache-Control",
+							"value": "no-cache, no-store, max-age=0, must-revalidate"
+						},
+						{
+							"name": "Pragma",
+							"value": "no-cache"
+						},
+						{
+							"name": "Expires",
+							"value": "0"
+						},
+						{
+							"name": "X-Frame-Options",
+							"value": "DENY"
+						},
+						{
+							"name": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"name": "Date",
+							"value": "Fri, 15 May 2026 18:51:37 GMT"
+						},
+						{
+							"name": "Referrer-Policy",
+							"value": "no-referrer"
+						}
+					],
+					"content": {
+						"size": 309,
+						"mimeType": "application/json",
+						"text": "{\"accessToken\":\"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkB0ZXN0LmNvbSIsInVzZXJJZCI6Miwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzc4ODcxMDk3LCJleHAiOjE3Nzg4NzE5OTd9.5WGgL6BR2ZzDHK0dkBPJirSM0ZnTkx9gsgZMkRW2ARQ\",\"refreshToken\":null,\"user\":{\"id\":2,\"firstName\":\"Admin\",\"lastName\":\"test\",\"email\":\"admin@test.com\",\"role\":\"ADMIN\"}}"
+					},
+					"redirectURL": "",
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"cache": {},
+				"timings": {
+					"blocked": -1,
+					"dns": -1,
+					"connect": -1,
+					"send": 0,
+					"wait": 104.482,
+					"receive": 0,
+					"ssl": -1
+				},
+				"comment": "Login Admin"
+			},
+			{
+				"startedDateTime": "2026-05-15T19:14:37.537Z",
+				"time": 0,
+				"request": {
+					"method": "POST",
+					"url": "http://localhost:8080/api/auth/tokens/refresh",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [
+						{
+							"name": "refreshToken",
+							"value": "49396a21-b7b1-4cbc-828c-2344402ca70d",
+							"path": "/",
+							"domain": "localhost",
+							"expires": "2026-05-22T18:52:02.000Z",
+							"httpOnly": true
+						}
+					],
+					"headers": [
+						{
+							"name": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"queryString": [],
+					"postData": {
+						"mimeType": "application/json",
+						"text": "{\r\n    \"refreshToken\": \"b7b4154f-2e97-45af-9a2a-d11cd2347843\"\r\n}\r\n"
+					},
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"response": {
+					"status": 0,
+					"statusText": "",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [],
+					"headers": [],
+					"content": {
+						"size": 0,
+						"mimeType": ""
+					},
+					"redirectURL": "",
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"cache": {},
+				"timings": {
+					"blocked": -1,
+					"dns": -1,
+					"connect": -1,
+					"send": 0,
+					"wait": 0,
+					"receive": 0,
+					"ssl": -1
+				},
+				"comment": "Refresh"
+			},
+			{
+				"startedDateTime": "2026-05-15T19:14:37.537Z",
+				"time": 0,
+				"request": {
+					"method": "POST",
+					"url": "http://localhost:8080/api/auth/tokens/logout",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [
+						{
+							"name": "refreshToken",
+							"value": "49396a21-b7b1-4cbc-828c-2344402ca70d",
+							"path": "/",
+							"domain": "localhost",
+							"expires": "2026-05-22T18:52:02.000Z",
+							"httpOnly": true
+						}
+					],
+					"headers": [
+						{
+							"name": "Authorization",
+							"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqdWFuQHRlc3QuY29tIiwidXNlcklkIjoxLCJyb2xlIjoiQ0xJRU5UIiwiaWF0IjoxNzc3OTE4MDY1LCJleHAiOjE3Nzc5MTgzNjV9.az3izk7_rmGqX5MqW_lWMK2EvrYLjkWzaCdtiIX-k2c"
+						}
+					],
+					"queryString": [],
+					"postData": {
+						"mimeType": "",
+						"text": ""
+					},
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"response": {
+					"status": 0,
+					"statusText": "",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [],
+					"headers": [],
+					"content": {
+						"size": 0,
+						"mimeType": ""
+					},
+					"redirectURL": "",
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"cache": {},
+				"timings": {
+					"blocked": -1,
+					"dns": -1,
+					"connect": -1,
+					"send": 0,
+					"wait": 0,
+					"receive": 0,
+					"ssl": -1
+				},
+				"comment": "Logout"
+			},
+			{
+				"startedDateTime": "2026-05-15T19:14:37.537Z",
+				"time": 34.058,
+				"request": {
+					"method": "GET",
+					"url": "http://localhost:8080/api/auth/profile",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [
+						{
+							"name": "refreshToken",
+							"value": "49396a21-b7b1-4cbc-828c-2344402ca70d",
+							"path": "/",
+							"domain": "localhost",
+							"expires": "2026-05-22T18:52:02.000Z",
+							"httpOnly": true
+						}
+					],
+					"headers": [
+						{
+							"name": "Authorization",
+							"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjbGllbnRAdGVzdC5jb20iLCJ1c2VySWQiOjMsInJvbGUiOiJDTElFTlQiLCJpYXQiOjE3Nzg4NzExMjIsImV4cCI6MTc3ODg3MjAyMn0.T-ByyWzMKpE_LFZM6qEsK2oNbQOELz-i2qzpufHeWCM"
+						}
+					],
+					"queryString": [],
+					"postData": {
+						"mimeType": "",
+						"text": ""
+					},
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"response": {
+					"status": 200,
+					"statusText": "OK",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [],
+					"headers": [
+						{
+							"name": "transfer-encoding",
+							"value": "chunked"
+						},
+						{
+							"name": "Vary",
+							"value": "Origin"
+						},
+						{
+							"name": "Vary",
+							"value": "Access-Control-Request-Method"
+						},
+						{
+							"name": "Vary",
+							"value": "Access-Control-Request-Headers"
+						},
+						{
+							"name": "X-Content-Type-Options",
+							"value": "nosniff"
+						},
+						{
+							"name": "X-XSS-Protection",
+							"value": "0"
+						},
+						{
+							"name": "Cache-Control",
+							"value": "no-cache, no-store, max-age=0, must-revalidate"
+						},
+						{
+							"name": "Pragma",
+							"value": "no-cache"
+						},
+						{
+							"name": "Expires",
+							"value": "0"
+						},
+						{
+							"name": "X-Frame-Options",
+							"value": "DENY"
+						},
+						{
+							"name": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"name": "Date",
+							"value": "Fri, 15 May 2026 18:53:15 GMT"
+						},
+						{
+							"name": "Referrer-Policy",
+							"value": "no-referrer"
+						}
+					],
+					"content": {
+						"size": 333,
+						"mimeType": "application/json",
+						"text": "{\"active\":true,\"address\":\"Barrio\",\"birthDate\":\"2005-10-15\",\"city\":\"Armenia\",\"documentNumber\":\"1234567\",\"documentType\":\"Cedula Ciudadania\",\"email\":\"client@test.com\",\"emailVerified\":false,\"firstName\":\"client\",\"id\":3,\"lastName\":\"test\",\"phone\":\"3001234567\",\"phoneVerified\":false,\"profileCompleted\":true,\"role\":\"CLIENT\",\"state\":\"Quindio\"}"
+					},
+					"redirectURL": "",
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"cache": {},
+				"timings": {
+					"blocked": -1,
+					"dns": -1,
+					"connect": -1,
+					"send": 0,
+					"wait": 34.058,
+					"receive": 0,
+					"ssl": -1
+				},
+				"comment": "Token ME"
+			},
+			{
+				"startedDateTime": "2026-05-15T19:14:37.537Z",
+				"time": 185.832,
+				"request": {
+					"method": "GET",
+					"url": "http://localhost:8080/api/auth/profile/admin",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [
+						{
+							"name": "refreshToken",
+							"value": "49396a21-b7b1-4cbc-828c-2344402ca70d",
+							"path": "/",
+							"domain": "localhost",
+							"expires": "2026-05-22T18:52:02.000Z",
+							"httpOnly": true
+						}
+					],
+					"headers": [
+						{
+							"name": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"name": "Authorization",
+							"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkB0ZXN0LmNvbSIsInVzZXJJZCI6Miwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzc4ODcwOTA5LCJleHAiOjE3Nzg4NzE4MDl9.CjAEt3g1luB3AwHwWeJNLILpI0PYFMVZnVzchSP_JNk"
+						}
+					],
+					"queryString": [],
+					"postData": {
+						"mimeType": "text/plain",
+						"text": "{\r\n  \"email\": \"admin@test.com \",\r\n  \"password\": \"admin1\"\r\n}"
+					},
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"response": {
+					"status": 200,
+					"statusText": "OK",
+					"httpVersion": "HTTP/1.1",
+					"cookies": [],
+					"headers": [
+						{
+							"name": "transfer-encoding",
+							"value": "chunked"
+						},
+						{
+							"name": "Vary",
+							"value": "Origin"
+						},
+						{
+							"name": "Vary",
+							"value": "Access-Control-Request-Method"
+						},
+						{
+							"name": "Vary",
+							"value": "Access-Control-Request-Headers"
+						},
+						{
+							"name": "X-Content-Type-Options",
+							"value": "nosniff"
+						},
+						{
+							"name": "X-XSS-Protection",
+							"value": "0"
+						},
+						{
+							"name": "Cache-Control",
+							"value": "no-cache, no-store, max-age=0, must-revalidate"
+						},
+						{
+							"name": "Pragma",
+							"value": "no-cache"
+						},
+						{
+							"name": "Expires",
+							"value": "0"
+						},
+						{
+							"name": "X-Frame-Options",
+							"value": "DENY"
+						},
+						{
+							"name": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"name": "Date",
+							"value": "Fri, 15 May 2026 18:48:38 GMT"
+						},
+						{
+							"name": "Referrer-Policy",
+							"value": "no-referrer"
+						}
+					],
+					"content": {
+						"size": 42,
+						"mimeType": "application/json",
+						"text": "{\"message\":\"Acceso autorizado para ADMIN\"}"
+					},
+					"redirectURL": "",
+					"headersSize": -1,
+					"bodySize": -1
+				},
+				"cache": {},
+				"timings": {
+					"blocked": -1,
+					"dns": -1,
+					"connect": -1,
+					"send": 0,
+					"wait": 185.832,
+					"receive": 0,
+					"ssl": -1
+				},
+				"comment": "Admin"
+			}
+		]
+	}
 }
