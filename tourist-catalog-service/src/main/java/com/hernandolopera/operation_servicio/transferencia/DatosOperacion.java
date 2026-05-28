@@ -5,6 +5,7 @@ import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 
@@ -14,18 +15,22 @@ public final class DatosOperacion {
     public record SolicitudCategoria(@NotBlank String nombre, String descripcion) {}
     public record RespuestaCategoria(Integer id, String nombre, String descripcion, Boolean activo) {}
 
-    public record SolicitudActividadItinerario(@NotNull @Min(1) Integer numeroDia, @NotBlank String titulo,
-        String descripcion) {}
-    public record RespuestaActividadItinerario(Integer id, Integer numeroDia, String titulo, String descripcion,
-        Integer idPaquete) {}
+    public record SolicitudActividadItinerario(@NotNull @Min(1) Integer numeroDia, @NotBlank String titulo) {}
+    public record RespuestaActividadItinerario(Integer id, Integer numeroDia, String titulo, Integer idPaquete) {}
 
     public record SolicitudPaqueteTuristico(@NotBlank String titulo, String descripcion, @NotBlank String destino,
         @NotNull @Min(1) Integer duracionDias, @NotNull @DecimalMin("0.01") BigDecimal precio,
         @NotNull @Min(1) Integer cupo, @NotNull LocalDate fechaInicio, @NotNull LocalDate fechaFin,
+        String lugarSalida, LocalTime horaSalida, String alojamiento, String tipoHabitacion, String tipoTransporte,
+        String fotoVerticalUrl, String fotoHorizontalUrl, List<@NotBlank String> incluye,
+        List<@NotBlank String> noIncluye, List<@NotBlank String> politicasCancelacion,
         @NotNull Integer idCategoria, @Valid List<SolicitudActividadItinerario> itinerario) {}
     public record RespuestaPaqueteTuristico(Integer id, String titulo, String descripcion, String destino,
         Integer duracionDias, BigDecimal precio, Integer cupo, LocalDate fechaInicio, LocalDate fechaFin,
-        Boolean activo, Integer idCategoria, String categoria, List<RespuestaActividadItinerario> itinerario) {}
+        String lugarSalida, LocalTime horaSalida, String alojamiento, String tipoHabitacion, String tipoTransporte,
+        String fotoVerticalUrl, String fotoHorizontalUrl, List<String> incluye, List<String> noIncluye,
+        List<String> politicasCancelacion, Boolean activo, Integer idCategoria, String categoria,
+        List<RespuestaActividadItinerario> itinerario) {}
 
     public record SolicitudProveedor(@NotBlank String nombre, @NotBlank String tipoProveedor,
         @Email String correo, String telefono) {}
