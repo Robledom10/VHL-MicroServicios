@@ -10,9 +10,7 @@ spring:
 
   cloud:
     gateway:
-
       routes:
-
         # =========================================================
         # AUTH SERVICE
         # =========================================================
@@ -38,7 +36,7 @@ spring:
         - id: tourist-catalog-service
           uri: http://tourist-catalog-service:8083
           predicates:
-            - Path=/categorias/**,/paquetes/**,/proveedores/**
+            - Path=/api/categorias/**,/api/paquetes/**,/api/proveedores/**
 
         # =========================================================
         # GALLERY SERVICE
@@ -48,6 +46,15 @@ spring:
           uri: http://gallery-service:8084
           predicates:
             - Path=/api/media/**
+
+        # =========================================================
+        # FINANCIAL SERVICE
+        # =========================================================
+
+        - id: financial-service
+          uri: http://financial-service:8085
+          predicates:
+            - Path=/api/payments/**,/api/webhook/**
 
       # =========================================================
       # CORS
@@ -61,7 +68,6 @@ spring:
       globalcors:
         corsConfigurations:
           "[/**]":
-
             allowedOrigins:
               - "http://localhost:4200"
 
@@ -86,7 +92,6 @@ spring:
           args:
             name: Access-Control-Allow-Origin Access-Control-Allow-Credentials
             strategy: RETAIN_UNIQUE
-
 
 # =========================================================
 # JWT

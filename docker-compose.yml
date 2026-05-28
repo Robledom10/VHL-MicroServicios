@@ -95,6 +95,35 @@ services:
     networks:
       - microservices-net
 
+      # =========================================================
+  # FINANCIAL DATABASE
+  # =========================================================
+  financial-db:
+    image: mysql:8
+    container_name: financial-db
+    restart: always
+
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${FINANCIAL_DB_NAME}
+
+    ports:
+      - "${FINANCIAL_DB_PORT}:3306"
+
+    volumes:
+      - financial_data:/var/lib/mysql
+      - ./Docker/pago_db.sql:/docker-entrypoint-initdb.d/pago_db.sql
+
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 20s
+
+    networks:
+      - microservices-net
+
   # =========================================================
   # OPERATION DATABASE
   # =========================================================
@@ -212,6 +241,42 @@ services:
     networks:
       - microservices-net
 
+
+  # =========================================================
+  # FINANCIAL SERVICE
+  # =========================================================
+  financial-service:
+    build: ./financial-service
+
+    container_name: financial-service
+
+    restart: always
+
+    depends_on:
+      financial-db:
+        condition: service_healthy
+
+    env_file:
+      - .env
+
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+
+      SPRING_DATASOURCE_URL: jdbc:mysql://financial-db:3306/${FINANCIAL_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+
+      SPRING_DATASOURCE_USERNAME: root
+
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+
+      WOMPI_PUBLIC_KEY: ${WOMPI_PUBLIC_KEY}
+      WOMPI_PRIVATE_KEY: ${WOMPI_PRIVATE_KEY}
+
+    ports:
+      - "${FINANCIAL_SERVICE_PORT}:8085"
+
+    networks:
+      - microservices-net
+
   # =========================================================
   # OPERATION SERVICE
   # =========================================================
@@ -229,10 +294,10 @@ services:
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     ports:
-      - "${OPERATION_SERVICE_PORT}:8084"
+      - "${OPERATION_SERVICE_PORT}:8086"
     networks:
       - microservices-net
-
+      
   # =========================================================
   # API GATEWAY
   # =========================================================
@@ -246,6 +311,7 @@ services:
       - tourist-catalog-service
       - gallery-service
       - operation-service
+      - financial-service
     env_file:
       - .env
     environment:
@@ -271,3 +337,4 @@ volumes:
   catalog_data:
   gallery_data:
   operation_data:
+  financial_data:
