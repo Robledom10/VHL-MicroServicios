@@ -1,7 +1,7 @@
 # ==========================================
 # ETAPA 1: Compilación de todos los servicios
 # ==========================================
-FROM maven:3.9.6-eclipse-temurin-17-alpine AS build
+FROM maven:3.9.6-eclipse-temurin-21-alpine AS build
 WORKDIR /app
 
 # 1. Copiar las carpetas de tus 7 microservicios al contenedor
@@ -25,7 +25,7 @@ RUN cd tourist-catalog-service && mvn clean package -DskipTests
 # ==========================================
 # ETAPA 2: Entorno de ejecución unificado
 # ==========================================
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
 # 3. Copiar únicamente los archivos .jar compilados de la etapa anterior
