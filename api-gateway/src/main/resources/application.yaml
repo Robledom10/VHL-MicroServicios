@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: ${PORT:8080}
 
 spring:
   application:
@@ -14,79 +14,73 @@ spring:
         # =========================================================
         # AUTH SERVICE
         # =========================================================
-
         - id: auth-service
-          uri: http://auth-service:8081
+          uri: http://railway.internal
           predicates:
             - Path=/api/auth/**,/api/admin/**,/api/roles/**
 
         # =========================================================
         # RESERVATION SERVICE
         # =========================================================
-
         - id: reservation-service
-          uri: http://reservation-service:8082
+          uri: http://railway.internal
           predicates:
             - Path=/api/v1/reservas/**,/api/v1/viajeros/**,/api/v1/confirmaciones/**
 
         # =========================================================
         # TOURIST CATALOG SERVICE
         # =========================================================
-
         - id: tourist-catalog-service
-          uri: http://tourist-catalog-service:8083
+          uri: http://railway.internal
           predicates:
             - Path=/api/categorias/**,/api/paquetes/**,/api/proveedores/**
 
         # =========================================================
         # GALLERY SERVICE
         # =========================================================
-
         - id: gallery-service
-          uri: http://gallery-service:8084
+          uri: http://railway.internal
           predicates:
             - Path=/api/media/**
 
         # =========================================================
         # FINANCIAL SERVICE
         # =========================================================
-
         - id: financial-service
-          uri: http://financial-service:8085
+          uri: http://railway.internal
           predicates:
             - Path=/api/payments/**,/api/webhook/**
+
+        # =========================================================
+        # OPERATION SERVICE
+        # =========================================================
+        - id: operation_service
+          uri: http://railway.internal
+          predicates:
+            - Path=/api/v1/operaciones/**
 
       # =========================================================
       # CORS
       # =========================================================
-
-        - id: operation_service
-          uri: http://operation-service:8084
-          predicates:
-            - Path=/api/v1/operaciones/**
-
       globalcors:
         corsConfigurations:
           "[/**]":
             allowedOrigins:
               - "http://localhost:4200"
-
+              - "https://*.vercel.app" # Opcional: Descomenta o cambia por la URL de tu frontend real
             allowedMethods:
               - GET
               - POST
               - PUT
               - DELETE
               - OPTIONS
-
             allowedHeaders:
               - "*"
-
             allowCredentials: true
 
       # =========================================================
       # DEFAULT FILTERS
       # =========================================================
-
       default-filters:
         - name: DedupeResponseHeader
           args:
@@ -96,7 +90,6 @@ spring:
 # =========================================================
 # JWT
 # =========================================================
-
 app:
   jwt:
     secret: ${JWT_SECRET}
