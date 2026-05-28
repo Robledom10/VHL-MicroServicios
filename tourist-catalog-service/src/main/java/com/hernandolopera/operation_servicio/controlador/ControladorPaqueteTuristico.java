@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/paquetes")
+@RequestMapping("/api/paquetes")
 public class ControladorPaqueteTuristico {
     private final ServicioPaqueteTuristico servicio;
 
