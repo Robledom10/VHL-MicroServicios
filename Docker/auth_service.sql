@@ -57,7 +57,7 @@ CREATE TABLE `refresh_token` (
   UNIQUE KEY `token` (`token`),
   UNIQUE KEY `fk_id_user` (`fk_id_user`),
   CONSTRAINT `refresh_token_ibfk_1` FOREIGN KEY (`fk_id_user`) REFERENCES `user` (`id_user`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=61 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=62 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -66,7 +66,7 @@ CREATE TABLE `refresh_token` (
 
 LOCK TABLES `refresh_token` WRITE;
 /*!40000 ALTER TABLE `refresh_token` DISABLE KEYS */;
-INSERT INTO `refresh_token` VALUES (57,'460cf364-5e69-4959-852e-3f78bd4ad9c7','2026-05-22 17:48:03',1),(60,'e9a6056c-1548-449f-a241-e6a7db0ad003','2026-06-04 21:50:53',2);
+INSERT INTO `refresh_token` VALUES (57,'460cf364-5e69-4959-852e-3f78bd4ad9c7','2026-05-22 17:48:03',1),(61,'e3f6543a-603a-4d85-804a-b0673589b843','2026-06-05 04:45:21',2);
 /*!40000 ALTER TABLE `refresh_token` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -107,13 +107,13 @@ CREATE TABLE `user` (
   `address` varchar(255) DEFAULT NULL,
   `birth_date` date DEFAULT NULL,
   `city` varchar(255) DEFAULT NULL,
-  `document_number` varchar(255) NOT NULL,
+  `document_number` varchar(255) DEFAULT NULL,
   `document_type` enum('CEDULA_CIUDADANIA','CEDULA_EXTRANJERIA','PASAPORTE','TARJETA_IDENTIDAD','VISA') DEFAULT NULL,
   `email` varchar(255) NOT NULL,
   `email_verified` bit(1) NOT NULL,
   `first_name` varchar(255) NOT NULL,
   `last_name` varchar(255) NOT NULL,
-  `password_hash` varchar(255) NOT NULL,
+  `password_hash` varchar(255) DEFAULT NULL,
   `phone` varchar(255) DEFAULT NULL,
   `phone_verified` bit(1) NOT NULL,
   `state` varchar(255) DEFAULT NULL,
@@ -124,11 +124,11 @@ CREATE TABLE `user` (
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `profile_completed` bit(1) NOT NULL,
   `failed_attemps` int NOT NULL,
-  `provider` varchar(20) DEFAULT 'LOCAL',
-  `avatar` text,
+  `provider` varchar(255) DEFAULT NULL,
+  `avatar` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id_user`),
-  UNIQUE KEY `UKckltqnf47mr90fw56edpewrk8` (`document_number`),
   UNIQUE KEY `UKob8kqyqqgmefl0aco34akdtpe` (`email`),
+  UNIQUE KEY `UKckltqnf47mr90fw56edpewrk8` (`document_number`),
   KEY `FK3gd57fmfubx2birsarn5fjbdw` (`fk_id_rol`),
   CONSTRAINT `FK3gd57fmfubx2birsarn5fjbdw` FOREIGN KEY (`fk_id_rol`) REFERENCES `role` (`id_rol`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -153,4 +153,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-28 19:57:15
+-- Dump completed on 2026-05-29  0:47:48

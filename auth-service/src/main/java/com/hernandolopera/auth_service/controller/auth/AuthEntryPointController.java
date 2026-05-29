@@ -80,7 +80,7 @@ public class AuthEntryPointController {
 
         auth.setRefreshToken(null);
 
-        return ResponseEntity.ok(auth);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(auth);
     }
 
     @GetMapping("/check-blacklist")
