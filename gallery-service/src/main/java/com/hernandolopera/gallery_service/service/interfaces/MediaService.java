@@ -10,7 +10,13 @@ import com.hernandolopera.gallery_service.model.MediaType;
 
 public interface MediaService {
 
-    MediaResponse create(
+    List<MediaResponse> create(
+            List<MultipartFile> files,
+            CreatedMediaRequest request
+    );
+
+    MediaResponse update(
+            String id,
             MultipartFile file,
             CreatedMediaRequest request
     );

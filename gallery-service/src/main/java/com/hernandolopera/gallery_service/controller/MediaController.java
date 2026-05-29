@@ -22,173 +22,179 @@ import tools.jackson.databind.ObjectMapper;
 @Validated
 public class MediaController {
 
-    private final MediaService mediaService;
+        private final MediaService mediaService;
 
-    private final ObjectMapper objectMapper;
+        private final ObjectMapper objectMapper;
 
-    /**
-     * Uploads a media file to Cloudinary and stores its metadata in MongoDB.
-     *
-     * @param file uploaded media file
-     * @param data media metadata in JSON format
-     * @return created media response
-     */
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<MediaResponse> create(
-            @RequestPart("file") MultipartFile file,
-            @RequestPart("data") String data) throws Exception {
+        /**
+         * Uploads a media file to Cloudinary and stores its metadata in MongoDB.
+         *
+         * @param file uploaded media file
+         * @param data media metadata in JSON format
+         * @return created media response
+         */
+        @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        public ResponseEntity<List<MediaResponse>> create(
+                        @RequestPart("files") List<MultipartFile> files,
+                        @RequestPart("data") String data) throws Exception {
 
-        CreatedMediaRequest request =
-                objectMapper.readValue(
-                        data,
-                        CreatedMediaRequest.class
-                );
+                CreatedMediaRequest request = objectMapper.readValue(
+                                data,
+                                CreatedMediaRequest.class);
 
-        MediaResponse response =
-                mediaService.create(file, request);
+                List<MediaResponse> response = mediaService.create(files, request);
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(response);
-    }
+                return ResponseEntity
+                                .status(HttpStatus.CREATED)
+                                .body(response);
+        }
 
-    /**
-     * Retrieves all media records.
-     *
-     * @return list of media
-     */
-    @GetMapping
-    public ResponseEntity<List<MediaResponse>> getAll() {
+        /**
+         * Retrieves all media records.
+         *
+         * @return list of media
+         */
+        @GetMapping
+        public ResponseEntity<List<MediaResponse>> getAll() {
 
-        return ResponseEntity.ok(
-                mediaService.getAll()
-        );
-    }
+                return ResponseEntity.ok(
+                                mediaService.getAll());
+        }
 
-    /**
-     * Retrieves a media record by its identifier.
-     *
-     * @param id media identifier
-     * @return media response
-     */
-    @GetMapping("/{id}")
-    public ResponseEntity<MediaResponse> getById(
-            @PathVariable String id) {
+        /**
+         * Retrieves a media record by its identifier.
+         *
+         * @param id media identifier
+         * @return media response
+         */
+        @GetMapping("/{id}")
+        public ResponseEntity<MediaResponse> getById(
+                        @PathVariable String id) {
 
-        return ResponseEntity.ok(
-                mediaService.getById(id)
-        );
-    }
+                return ResponseEntity.ok(
+                                mediaService.getById(id));
+        }
 
-    /**
-     * Retrieves media records filtered by year.
-     *
-     * @param year excursion year
-     * @return filtered media list
-     */
-    @GetMapping("/year/{year}")
-    public ResponseEntity<List<MediaResponse>> getByYear(
-            @PathVariable Integer year) {
+        /**
+         * Retrieves media records filtered by year.
+         *
+         * @param year excursion year
+         * @return filtered media list
+         */
+        @GetMapping("/year/{year}")
+        public ResponseEntity<List<MediaResponse>> getByYear(
+                        @PathVariable Integer year) {
 
-        return ResponseEntity.ok(
-                mediaService.getByYear(year)
-        );
-    }
+                return ResponseEntity.ok(
+                                mediaService.getByYear(year));
+        }
 
-    /**
-     * Retrieves media records filtered by media type.
-     *
-     * @param type media type
-     * @return filtered media list
-     */
-    @GetMapping("/type/{type}")
-    public ResponseEntity<List<MediaResponse>> getByType(
-            @PathVariable com.hernandolopera.gallery_service.model.MediaType type) {
+        /**
+         * Retrieves media records filtered by media type.
+         *
+         * @param type media type
+         * @return filtered media list
+         */
+        @GetMapping("/type/{type}")
+        public ResponseEntity<List<MediaResponse>> getByType(
+                        @PathVariable com.hernandolopera.gallery_service.model.MediaType type) {
 
-        return ResponseEntity.ok(
-                mediaService.getByType(type)
-        );
-    }
+                return ResponseEntity.ok(
+                                mediaService.getByType(type));
+        }
 
-    /**
-     * Retrieves media records filtered by excursion.
-     *
-     * @param excursion excursion name
-     * @return filtered media list
-     */
-    @GetMapping("/excursion/{excursion}")
-    public ResponseEntity<List<MediaResponse>> getByExcursion(
-            @PathVariable String excursion) {
+        /**
+         * Retrieves media records filtered by excursion.
+         *
+         * @param excursion excursion name
+         * @return filtered media list
+         */
+        @GetMapping("/excursion/{excursion}")
+        public ResponseEntity<List<MediaResponse>> getByExcursion(
+                        @PathVariable String excursion) {
 
-        return ResponseEntity.ok(
-                mediaService.getByExcursion(excursion)
-        );
-    }
+                return ResponseEntity.ok(
+                                mediaService.getByExcursion(excursion));
+        }
 
-    /**
-     * Retrieves media records filtered by location.
-     *
-     * @param activity excursion location
-     * @return filtered media list
-     */
-    @GetMapping("/activity/{activity}")
-    public ResponseEntity<List<MediaResponse>> getByActivity(
-            @PathVariable String activity) {
+        /**
+         * Retrieves media records filtered by location.
+         *
+         * @param activity excursion location
+         * @return filtered media list
+         */
+        @GetMapping("/activity/{activity}")
+        public ResponseEntity<List<MediaResponse>> getByActivity(
+                        @PathVariable String activity) {
 
-        return ResponseEntity.ok(
-                mediaService.getByActivity(activity)
-        );
-    }
+                return ResponseEntity.ok(
+                                mediaService.getByActivity(activity));
+        }
 
-    /**
-     * Retrieves media records filtered by year and media type.
-     *
-     * @param year excursion year
-     * @param type media type
-     * @return filtered media list
-     */
-    @GetMapping("/filter")
-    public ResponseEntity<List<MediaResponse>> getByYearAndType(
-            @RequestParam Integer year,
-            @RequestParam com.hernandolopera.gallery_service.model.MediaType type) {
+        /**
+         * Retrieves media records filtered by year and media type.
+         *
+         * @param year excursion year
+         * @param type media type
+         * @return filtered media list
+         */
+        @GetMapping("/filter")
+        public ResponseEntity<List<MediaResponse>> getByYearAndType(
+                        @RequestParam Integer year,
+                        @RequestParam com.hernandolopera.gallery_service.model.MediaType type) {
 
-        return ResponseEntity.ok(
-                mediaService.getByYearAndType(year, type)
-        );
-    }
+                return ResponseEntity.ok(
+                                mediaService.getByYearAndType(year, type));
+        }
 
-    /**
-     * Retrieves media records filtered by year and excursion.
-     *
-     * @param year excursion year
-     * @param excursion excursion name
-     * @return filtered media list
-     */
-    @GetMapping("/filter/excursion")
-    public ResponseEntity<List<MediaResponse>> getByYearAndExcursion(
-            @RequestParam Integer year,
-            @RequestParam String excursion) {
+        /**
+         * Retrieves media records filtered by year and excursion.
+         *
+         * @param year      excursion year
+         * @param excursion excursion name
+         * @return filtered media list
+         */
+        @GetMapping("/filter/excursion")
+        public ResponseEntity<List<MediaResponse>> getByYearAndExcursion(
+                        @RequestParam Integer year,
+                        @RequestParam String excursion) {
 
-        return ResponseEntity.ok(
-                mediaService.getByYearAndExcursion(
-                        year,
-                        excursion
-                )
-        );
-    }
+                return ResponseEntity.ok(
+                                mediaService.getByYearAndExcursion(
+                                                year,
+                                                excursion));
+        }
 
-    /**
-     * Deletes a media record and its Cloudinary file.
-     *
-     * @param id media identifier
-     * @return no content response
-     */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(
-            @PathVariable String id) {
+        @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        public ResponseEntity<MediaResponse> update(
+                        @PathVariable String id,
+                        @RequestPart("file") MultipartFile file,
+                        @RequestPart("data") String data) throws Exception {
 
-        mediaService.delete(id);
+                CreatedMediaRequest request = objectMapper.readValue(
+                                data,
+                                CreatedMediaRequest.class);
 
-        return ResponseEntity.noContent().build();
-    }
+                MediaResponse response = mediaService.update(
+                                id,
+                                file,
+                                request);
+
+                return ResponseEntity.ok(response);
+        }
+
+        /**
+         * Deletes a media record and its Cloudinary file.
+         *
+         * @param id media identifier
+         * @return no content response
+         */
+        @DeleteMapping("/{id}")
+        public ResponseEntity<Void> delete(
+                        @PathVariable String id) {
+
+                mediaService.delete(id);
+
+                return ResponseEntity.noContent().build();
+        }
 }
