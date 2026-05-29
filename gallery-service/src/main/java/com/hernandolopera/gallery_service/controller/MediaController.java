@@ -165,6 +165,24 @@ public class MediaController {
                                                 excursion));
         }
 
+        @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        public ResponseEntity<MediaResponse> update(
+                        @PathVariable String id,
+                        @RequestPart("file") MultipartFile file,
+                        @RequestPart("data") String data) throws Exception {
+
+                CreatedMediaRequest request = objectMapper.readValue(
+                                data,
+                                CreatedMediaRequest.class);
+
+                MediaResponse response = mediaService.update(
+                                id,
+                                file,
+                                request);
+
+                return ResponseEntity.ok(response);
+        }
+
         /**
          * Deletes a media record and its Cloudinary file.
          *
