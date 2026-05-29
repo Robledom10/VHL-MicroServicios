@@ -1,6 +1,7 @@
 package com.hernandolopera.gallery_service.service.impl;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -18,11 +19,11 @@ import com.hernandolopera.gallery_service.repository.MediaRepository;
 import com.hernandolopera.gallery_service.service.interfaces.MediaService;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j; // 👈 Agregado para ver logs reales
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j // 👈 Anotación de Lombok para habilitar el objeto 'log'
+@Slf4j
 public class MediaServiceImpl implements MediaService {
 
     private final MediaRepository mediaRepository;
@@ -30,42 +31,51 @@ public class MediaServiceImpl implements MediaService {
     private final Cloudinary cloudinary;
 
     @Override
-    public MediaResponse create(MultipartFile file, CreatedMediaRequest request) {
+    public List<MediaResponse> create(List<MultipartFile> files, CreatedMediaRequest request) {
+
+        List<MediaResponse> responses = new ArrayList<>();
+
         try {
+
             String folder = String.format(
                     "gallery-service/excursions/%d/%s",
                     request.getYear(),
                     request.getExcursion().toLowerCase().replace(" ", "-"));
 
-            log.info("Iniciando subida de archivo a Cloudinary en la carpeta: {}", folder);
+            log.info("Iniciando subida múltiple de archivos a Cloudinary");
 
-            // Configuramos un timeout local para que Cloudinary no congele el hilo de Java
-            var options = ObjectUtils.asMap(
-                    "folder", folder,
-                    "timeout", 3000 // 👈 Fuerza a Cloudinary a abortar tras 3 segundos si no responde
-            );
+            for (MultipartFile file : files) {
 
-            var uploadResult = cloudinary.uploader().upload(file.getBytes(), options);
-            log.info("Subida exitosa a Cloudinary. Public ID: {}", uploadResult.get("public_id"));
+                var options = ObjectUtils.asMap(
+                        "folder", folder,
+                        "timeout", 3000);
 
-            Media media = Media.builder()
-                    .url(uploadResult.get("secure_url").toString())
-                    .publicId(uploadResult.get("public_id").toString())
-                    .type(request.getType())
-                    .year(request.getYear())
-                    .excursion(request.getExcursion())
-                    .activity(request.getActivity())
-                    .folder(folder)
-                    .createdAt(LocalDateTime.now())
-                    .build();
+                var uploadResult = cloudinary.uploader().upload(file.getBytes(), options);
 
-            Media savedMedia = mediaRepository.save(media);
-            return mediaMapper.toResponse(savedMedia);
+                log.info("Archivo subido correctamente: {}", uploadResult.get("public_id"));
+
+                Media media = Media.builder()
+                        .url(uploadResult.get("secure_url").toString())
+                        .publicId(uploadResult.get("public_id").toString())
+                        .type(request.getType())
+                        .year(request.getYear())
+                        .excursion(request.getExcursion())
+                        .activity(request.getActivity())
+                        .folder(folder)
+                        .createdAt(LocalDateTime.now())
+                        .build();
+
+                Media savedMedia = mediaRepository.save(media);
+
+                responses.add(mediaMapper.toResponse(savedMedia));
+            }
+
+            return responses;
 
         } catch (Exception e) {
-            // 🟥 CRÍTICO: Esto pintará en tu consola de Docker el verdadero error (Falta de
-            // credenciales, Red, etc.)
+
             log.error("Error fatal al subir los medios a Cloudinary. Causa real: ", e);
+
             throw new RuntimeException("Error uploading media: " + e.getMessage(), e);
         }
     }
@@ -123,13 +133,17 @@ public class MediaServiceImpl implements MediaService {
                     .orElseThrow(() -> new ResourceNotFoundException("Media not found with id: " + id));
 
             log.info("Eliminando archivo de Cloudinary con public_id: {}", media.getPublicId());
+
             cloudinary.uploader().destroy(media.getPublicId(), ObjectUtils.emptyMap());
 
             mediaRepository.delete(media);
+
             log.info("Registro eliminado de MongoDB con éxito.");
 
         } catch (Exception e) {
+
             log.error("Error al eliminar los medios. Causa real: ", e);
+
             throw new RuntimeException("Error deleting media: " + e.getMessage(), e);
         }
     }
