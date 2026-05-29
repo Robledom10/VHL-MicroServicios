@@ -127,6 +127,67 @@ public class MediaServiceImpl implements MediaService {
     }
 
     @Override
+    public MediaResponse update(
+            String id,
+            MultipartFile file,
+            CreatedMediaRequest request) {
+
+        try {
+
+            Media media = mediaRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Media not found with id: " + id));
+
+            log.info("Eliminando imagen anterior de Cloudinary: {}", media.getPublicId());
+
+            cloudinary.uploader().destroy(
+                    media.getPublicId(),
+                    ObjectUtils.emptyMap());
+
+            String folder = String.format(
+                    "gallery-service/excursions/%d/%s",
+                    request.getYear(),
+                    request.getExcursion().toLowerCase().replace(" ", "-"));
+
+            var options = ObjectUtils.asMap(
+                    "folder", folder,
+                    "timeout", 3000);
+
+            log.info("Subiendo nueva imagen a Cloudinary");
+
+            var uploadResult = cloudinary.uploader().upload(
+                    file.getBytes(),
+                    options);
+
+            media.setUrl(
+                    uploadResult.get("secure_url").toString());
+
+            media.setPublicId(
+                    uploadResult.get("public_id").toString());
+
+            media.setType(request.getType());
+            media.setYear(request.getYear());
+            media.setExcursion(request.getExcursion());
+            media.setActivity(request.getActivity());
+            media.setFolder(folder);
+
+            Media updatedMedia = mediaRepository.save(media);
+
+            log.info("Imagen actualizada correctamente");
+
+            return mediaMapper.toResponse(updatedMedia);
+
+        } catch (Exception e) {
+
+            log.error("Error actualizando media: ", e);
+
+            throw new RuntimeException(
+                    "Error updating media: " + e.getMessage(),
+                    e);
+        }
+    }
+
+    @Override
     public void delete(String id) {
         try {
             Media media = mediaRepository.findById(id)

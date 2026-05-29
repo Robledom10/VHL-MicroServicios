@@ -15,6 +15,12 @@ public interface MediaService {
             CreatedMediaRequest request
     );
 
+    MediaResponse update(
+            String id,
+            MultipartFile file,
+            CreatedMediaRequest request
+    );
+
     List<MediaResponse> getAll();
 
     MediaResponse getById(String id);
