@@ -13,10 +13,19 @@ spring:
 
     properties:
       hibernate:
-
         dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
 
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_ID_CLIENT}
+            client-secret: ${GOOGLE_SECRET_CLIENT}
+            scope:
+              - email
+              - profile
 
 logging:
   level:

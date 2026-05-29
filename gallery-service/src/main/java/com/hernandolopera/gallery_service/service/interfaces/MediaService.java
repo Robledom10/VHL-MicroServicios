@@ -25,7 +25,7 @@ public interface MediaService {
 
     List<MediaResponse> getByExcursion(String excursion);
 
-    List<MediaResponse> getByLocation(String location);
+    List<MediaResponse> getByActivity(String activity);
 
     List<MediaResponse> getByYearAndType(
             Integer year,

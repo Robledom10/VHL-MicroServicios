@@ -17,7 +17,7 @@ public class MediaMapper {
                 .type(media.getType())
                 .year(media.getYear())
                 .excursion(media.getExcursion())
-                .location(media.getLocation())
+                .activity(media.getActivity())
                 .folder(media.getFolder())
                 .createdAt(media.getCreatedAt())
                 .build();

@@ -13,7 +13,6 @@ import com.hernandolopera.gallery_service.dto.request.CreatedMediaRequest;
 import com.hernandolopera.gallery_service.dto.response.MediaResponse;
 import com.hernandolopera.gallery_service.service.interfaces.MediaService;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import tools.jackson.databind.ObjectMapper;
 
@@ -129,15 +128,15 @@ public class MediaController {
     /**
      * Retrieves media records filtered by location.
      *
-     * @param location excursion location
+     * @param activity excursion location
      * @return filtered media list
      */
-    @GetMapping("/location/{location}")
-    public ResponseEntity<List<MediaResponse>> getByLocation(
-            @PathVariable String location) {
+    @GetMapping("/activity/{activity}")
+    public ResponseEntity<List<MediaResponse>> getByActivity(
+            @PathVariable String activity) {
 
         return ResponseEntity.ok(
-                mediaService.getByLocation(location)
+                mediaService.getByActivity(activity)
         );
     }
 

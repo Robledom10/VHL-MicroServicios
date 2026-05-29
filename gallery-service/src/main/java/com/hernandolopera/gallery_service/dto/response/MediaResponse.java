@@ -23,7 +23,7 @@ public class MediaResponse {
 
     private String excursion;
 
-    private String location;
+    private String activity;
 
     private String folder;
 

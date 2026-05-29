@@ -54,7 +54,7 @@ public class MediaServiceImpl implements MediaService {
                     .type(request.getType())
                     .year(request.getYear())
                     .excursion(request.getExcursion())
-                    .location(request.getLocation())
+                    .activity(request.getActivity())
                     .folder(folder)
                     .createdAt(LocalDateTime.now())
                     .build();
@@ -102,8 +102,8 @@ public class MediaServiceImpl implements MediaService {
     }
 
     @Override
-    public List<MediaResponse> getByLocation(String location) {
-        return mediaRepository.findByLocation(location).stream().map(mediaMapper::toResponse).toList();
+    public List<MediaResponse> getByActivity(String activity) {
+        return mediaRepository.findByActivity(activity).stream().map(mediaMapper::toResponse).toList();
     }
 
     @Override

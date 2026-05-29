@@ -38,7 +38,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (path.contains("/login") ||
                 path.contains("/register") ||
                 path.contains("/tokens/") ||
-                path.contains("/check-blacklist")) {
+                path.contains("/check-blacklist") ||
+                path.contains("/google-login")) {
 
             filterChain.doFilter(request, response);
             return;

@@ -80,4 +80,10 @@ public class User {
 
     @Column(name = "profile_completed", nullable = false)
     private Boolean profileCompleted = false;
+
+    @Column(name = "provider")
+    private String provider;
+
+    @Column(name = "avatar")
+    private String avatar;
 }

@@ -2,6 +2,8 @@ package com.hernandolopera.operation_servicio.controlador;
 
 import com.hernandolopera.operation_servicio.servicio.ServicioPaqueteTuristico;
 import com.hernandolopera.operation_servicio.transferencia.DatosOperacion.*;
+
+import io.micrometer.common.lang.NonNull;
 import jakarta.validation.Valid;
 import java.math.BigDecimal;
 import java.net.URI;
@@ -26,14 +28,16 @@ public class ControladorPaqueteTuristico {
 
     @GetMapping
     public ResponseEntity<Page<RespuestaPaqueteTuristico>> buscar(@RequestParam(required = false) String categoria,
-        @RequestParam(required = false) String destino, @RequestParam(required = false) String busqueda,
-        @RequestParam(required = false) BigDecimal precioMinimo, @RequestParam(required = false) BigDecimal precioMaximo,
-        @RequestParam(required = false) Boolean activo, @RequestParam(defaultValue = "0") int pagina,
-        @RequestParam(defaultValue = "10") int tamano, @RequestParam(defaultValue = "titulo") String ordenarPor,
-        @RequestParam(defaultValue = "asc") String direccion) {
-        Sort orden = "desc".equalsIgnoreCase(direccion) ? Sort.by(ordenarPor).descending() : Sort.by(ordenarPor).ascending();
+            @RequestParam(required = false) String destino, @RequestParam(required = false) String busqueda,
+            @RequestParam(required = false) BigDecimal precioMinimo,
+            @RequestParam(required = false) BigDecimal precioMaximo,
+            @RequestParam(required = false) Boolean activo, @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(defaultValue = "10") int tamano, @RequestParam(defaultValue = "titulo") String ordenarPor,
+            @RequestParam(defaultValue = "asc") String direccion) {
+        Sort orden = "desc".equalsIgnoreCase(direccion) ? Sort.by(ordenarPor).descending()
+                : Sort.by(ordenarPor).ascending();
         return ResponseEntity.ok(servicio.buscar(categoria, destino, busqueda, precioMinimo, precioMaximo, activo,
-            PageRequest.of(pagina, tamano, orden)));
+                PageRequest.of(pagina, tamano, orden)));
     }
 
     @GetMapping("/{id}")
@@ -42,7 +46,8 @@ public class ControladorPaqueteTuristico {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<RespuestaPaqueteTuristico> actualizar(@PathVariable Integer id, @Valid @RequestBody SolicitudPaqueteTuristico solicitud) {
+    public ResponseEntity<RespuestaPaqueteTuristico> actualizar(@PathVariable Integer id,
+            @Valid @RequestBody SolicitudPaqueteTuristico solicitud) {
         return ResponseEntity.ok(servicio.actualizar(id, solicitud));
     }
 
