@@ -84,11 +84,8 @@ public class LoginService {
                 String role = user.getRole().getName();
 
                 // 🔐 JWT
-                String accessToken = jwtTokenProvider.generateToken(
-                                user.getId(),
-                                user.getEmail(),
-                                role);
-          
+                String accessToken = jwtTokenProvider.generateToken(user);
+
                 /**
                  * Generar Refresh Token
                  */

@@ -1,7 +1,5 @@
 package com.hernandolopera.auth_service.dto.request.admin;
 
-import java.util.Set;
-
 import lombok.Data;
 
 @Data

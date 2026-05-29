@@ -22,6 +22,6 @@ public class CreatedMediaRequest {
     @NotBlank(message = "Excursion is required")
     private String excursion;
 
-    @NotBlank(message = "Location is required")
-    private String location;
+    @NotBlank(message = "Activity is required")
+    private String activity;
 }

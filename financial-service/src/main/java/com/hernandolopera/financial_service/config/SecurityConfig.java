@@ -20,17 +20,16 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // ✅ WEBHOOK WOMPI PUBLICO
+                        // WEBHOOK WOMPI PUBLICO
                         .requestMatchers(
                                 "/api/webhook/**")
                         .permitAll()
 
-                        // ✅ CREAR LINK
+                        // CREAR LINK
                         .requestMatchers(
                                 "/api/payments/create-link")
                         .permitAll()
 
-                        // 🔒 TODO LO DEMÁS
                         .anyRequest().authenticated());
 
         return http.build();

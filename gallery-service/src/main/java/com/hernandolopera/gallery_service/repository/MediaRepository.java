@@ -15,7 +15,7 @@ public interface MediaRepository extends MongoRepository<Media, String> {
 
     List<Media> findByExcursion(String excursion);
 
-    List<Media> findByLocation(String location);
+    List<Media> findByActivity(String activity);
 
     List<Media> findByYearAndType(
             Integer year,

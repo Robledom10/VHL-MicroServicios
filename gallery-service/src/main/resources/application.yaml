@@ -15,6 +15,12 @@ spring:
       authentication-database: admin
       repositories:
         enabled: true
+
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
   mongodb:
     uri: mongodb://root:root@db-gallery:27017/gallery_db?authSource=admin
     host: db-gallery

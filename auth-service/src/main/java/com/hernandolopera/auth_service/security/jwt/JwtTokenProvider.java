@@ -9,12 +9,13 @@ import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.hernandolopera.auth_service.entity.auth.User;
+
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
 /**
- * Proveedor utilitario para la generación y validación de tokens JWT en el
- * microservicio de autenticación.
+ * Proveedor utilitario para la generación y validación de tokens JWT.
  */
 @Component
 public class JwtTokenProvider {
@@ -25,6 +26,7 @@ public class JwtTokenProvider {
     public JwtTokenProvider(
             @Value("${app.jwt.secret}") String jwtSecret,
             @Value("${app.jwt.expiration}") long jwtExpiration) {
+
         this.JWT_SECRET = jwtSecret;
         this.JWT_EXPIRATION = jwtExpiration;
     }
@@ -34,17 +36,14 @@ public class JwtTokenProvider {
     }
 
     /**
-     * Genera un nuevo token JWT utilizando el email del usuario como sujeto
-     * (subject).
-     *
-     * @param email Email a incrustar en el token
-     * @return El token en formato String
+     * 🔥 Generar token desde User directamente
      */
-    public String generateToken(Integer userId, String email, String role) {
+    public String generateToken(User user) {
+
         return Jwts.builder()
-                .subject(email)
-                .claim("userId", userId)
-                .claim("role", role)
+                .subject(user.getEmail())
+                .claim("userId", user.getId())
+                .claim("role", user.getRole().getName())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + JWT_EXPIRATION))
                 .signWith(getSigningKey())
@@ -52,31 +51,23 @@ public class JwtTokenProvider {
     }
 
     /**
-     * Verifica la validez de un token y obtiene el respectivo email (subject).
-     *
-     * @param token El token recibido
-     * @return El correo electrónico almacenado en el token
-     * @throws io.jsonwebtoken.JwtException si el token está manipulado o expirado
+     * Obtener email desde JWT
      */
     public String getEmailFromToken(String token) {
+
         return Jwts.parser()
-                .verifyWith(getSigningKey()) // Nuevo método de verificación
+                .verifyWith(getSigningKey())
                 .build()
-                .parseSignedClaims(token) // Parseo moderno
-                .getPayload() // Obtenemos el cuerpo (payload)
+                .parseSignedClaims(token)
+                .getPayload()
                 .getSubject();
     }
 
     /**
-     * Verifica la validez de un token y obtiene el respectivo id
-     * 
-     * @param token
-     * @return El id almacenado en el token
-     * @throws io.jsonwebtoken.ClaimJwtException si el token esta manipulado o
-     *                                           expirado
+     * Obtener userId desde JWT
      */
-
     public Integer getUserIdFromToken(String token) {
+
         return Jwts.parser()
                 .verifyWith(getSigningKey())
                 .build()
@@ -86,15 +77,10 @@ public class JwtTokenProvider {
     }
 
     /**
-     * Verifica la validez de un token y obtiene el respectivo role
-     * 
-     * @param token
-     * @return El role almacenado en el token
-     * @throws io.jsonwebtoken.ClaimJwtException si el token esta manipulado o
-     *                                           expirado
+     * Obtener role desde JWT
      */
-
     public String getRoleFromToken(String token) {
+
         return Jwts.parser()
                 .verifyWith(getSigningKey())
                 .build()
@@ -104,14 +90,10 @@ public class JwtTokenProvider {
     }
 
     /**
-     * Obtiene la fecha de expiración del JWT.
-     * Esto se usa para guardar el token en blacklist
-     * hasta que expire naturalmente.
-     *
-     * @param token JWT recibido
-     * @return fecha de expiración del token
+     * Obtener fecha de expiración
      */
     public LocalDateTime getExpirationDate(String token) {
+
         Date expiration = Jwts.parser()
                 .verifyWith(getSigningKey())
                 .build()
