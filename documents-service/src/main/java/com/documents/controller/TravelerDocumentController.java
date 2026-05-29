@@ -1,5 +1,6 @@
-import com.documental.entity.TravelerDocument;
-import com.documental.service.TravelerDocumentService;
+package com.documents.controller;
+import com.documents.entity.TravelerDocument;
+import com.documents.service.TravelerDocumentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

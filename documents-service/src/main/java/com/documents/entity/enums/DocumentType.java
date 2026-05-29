@@ -1,3 +1,4 @@
+package com.documents.entity.enums;
 public enum DocumentType {
     cedula,
     pasaporte,

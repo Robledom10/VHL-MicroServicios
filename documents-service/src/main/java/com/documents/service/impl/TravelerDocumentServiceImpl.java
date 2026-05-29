@@ -1,8 +1,9 @@
-import com.documental.entity.TravelerDocument;
-import com.documental.entity.enums.DocumentStatus;
-import com.documental.entity.enums.DocumentType;
-import com.documental.repository.TravelerDocumentRepository;
-import com.documental.service.TravelerDocumentService;
+package com.documents.service.impl;
+import com.documents.entity.TravelerDocument;
+import com.documents.entity.enums.DocumentStatus;
+import com.documents.entity.enums.DocumentType;
+import com.documents.repository.TravelerDocumentRepository;
+import com.documents.service.TravelerDocumentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
