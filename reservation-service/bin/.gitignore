@@ -1,0 +1,6 @@
+# Archivos de compilación Java
+target/
+
+# Archivos de clase
+*.class
+
