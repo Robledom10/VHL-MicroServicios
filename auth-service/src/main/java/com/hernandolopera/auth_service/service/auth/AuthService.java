@@ -60,7 +60,7 @@ public class AuthService {
             User user = userRepository.findByEmail(email)
                     .orElseGet(() -> {
 
-                        Role role = roleRepository.findByName("ROLE_CLIENT")
+                        Role role = roleRepository.findByName("CLIENT")
                                 .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
 
                         User newUser = new User();

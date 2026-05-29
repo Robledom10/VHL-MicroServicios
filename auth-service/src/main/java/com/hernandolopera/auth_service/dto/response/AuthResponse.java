@@ -17,4 +17,9 @@ public class AuthResponse {
     private String accessToken;
     private String refreshToken;
     private UserLoginResponse user;
+
+    /**
+     * ! Tener en cuenta para el futuro 
+        //?private boolean isNewUser;
+    */
 }
