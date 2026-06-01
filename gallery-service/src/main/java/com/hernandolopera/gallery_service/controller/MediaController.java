@@ -14,7 +14,7 @@ import com.hernandolopera.gallery_service.dto.response.MediaResponse;
 import com.hernandolopera.gallery_service.service.interfaces.MediaService;
 
 import lombok.RequiredArgsConstructor;
-import tools.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 @RequestMapping("/api/media")
@@ -24,7 +24,7 @@ public class MediaController {
 
         private final MediaService mediaService;
 
-        private final ObjectMapper objectMapper;
+        private final ObjectMapper objectMapper = new ObjectMapper();
 
         /**
          * Uploads a media file to Cloudinary and stores its metadata in MongoDB.
@@ -168,7 +168,7 @@ public class MediaController {
         @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
         public ResponseEntity<MediaResponse> update(
                         @PathVariable String id,
-                        @RequestPart("file") MultipartFile file,
+                        @RequestPart(value = "file", required = false) MultipartFile file,
                         @RequestPart("data") String data) throws Exception {
 
                 CreatedMediaRequest request = objectMapper.readValue(
