@@ -10,7 +10,13 @@ import com.hernandolopera.gallery_service.model.MediaType;
 
 public interface MediaService {
 
-    MediaResponse create(
+    List<MediaResponse> create(
+            List<MultipartFile> files,
+            CreatedMediaRequest request
+    );
+
+    MediaResponse update(
+            String id,
             MultipartFile file,
             CreatedMediaRequest request
     );
@@ -25,7 +31,7 @@ public interface MediaService {
 
     List<MediaResponse> getByExcursion(String excursion);
 
-    List<MediaResponse> getByLocation(String location);
+    List<MediaResponse> getByActivity(String activity);
 
     List<MediaResponse> getByYearAndType(
             Integer year,

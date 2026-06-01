@@ -47,10 +47,12 @@ public class JwtFilter implements GlobalFilter, Ordered {
         List<String> publicRoutes = List.of(
                 "/api/auth/login",
                 "/api/auth/register",
+                "/api/auth/google-login",
                 "/api/auth/tokens/refresh",
                 "/api/auth/tokens/logout",
                 "/api/auth/check-blacklist",
-                "/api/webhook");
+                "/api/webhook",
+                "/api/media");
 
         boolean isPublic = publicRoutes.stream()
                 .anyMatch(path::startsWith);

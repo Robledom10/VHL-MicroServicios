@@ -167,6 +167,9 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       APP_JWT_SECRET: ${JWT_SECRET}
       APP_JWT_EXPIRATION: ${JWT_EXPIRATION}
+
+      GOOGLE_ID_CLIENT: ${GOOGLE_ID_CLIENT}
+      GOOGLE_SECRET_CLIENT: ${GOOGLE_SECRET_CLIENT}
     ports:
       - "${AUTH_SERVICE_PORT}:8081"
     networks:
@@ -241,7 +244,6 @@ services:
     networks:
       - microservices-net
 
-
   # =========================================================
   # FINANCIAL SERVICE
   # =========================================================
@@ -297,7 +299,7 @@ services:
       - "${OPERATION_SERVICE_PORT}:8086"
     networks:
       - microservices-net
-      
+
   # =========================================================
   # API GATEWAY
   # =========================================================

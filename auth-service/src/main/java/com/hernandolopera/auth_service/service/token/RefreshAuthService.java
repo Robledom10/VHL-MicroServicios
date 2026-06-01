@@ -40,17 +40,12 @@ public class RefreshAuthService {
         refreshTokenService.deleteByToken(refreshTokenValue);
         RefreshToken newToken = refreshTokenService.createRefreshToken(user);
 
-
         // Antes: user.getRoles().stream().map(...)
         String role = user.getRole().getName();
 
-        String newAccessToken = jwtTokenProvider.generateToken(
-                user.getId(),
-                user.getEmail(),
-                role);
+        String newAccessToken = jwtTokenProvider.generateToken(user);
 
-
-                UserLoginResponse userLoginResponse = new UserLoginResponse(
+        UserLoginResponse userLoginResponse = new UserLoginResponse(
                 user.getId(),
                 user.getFirstName(),
                 user.getLastName(),

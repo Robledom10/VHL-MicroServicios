@@ -56,7 +56,7 @@ public class Media {
      * - Antioquia
      * - San Andres Islands
      */
-    private String location;
+    private String activity;
 
     /**
      * Cloudinary folder structure

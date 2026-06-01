@@ -31,6 +31,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/auth/login",
                                 "/api/auth/register",
+                                "/api/auth/google-login",
                                 "/api/auth/tokens/**",
                                 "/api/auth/check-blacklist")
                         .permitAll()

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.hernandolopera.auth_service.dto.request.auth.GoogleLoginRequest;
 import com.hernandolopera.auth_service.dto.request.auth.LoginRequest;
 import com.hernandolopera.auth_service.dto.request.auth.RegisterRequest;
 import com.hernandolopera.auth_service.dto.response.AuthResponse;
@@ -57,6 +58,29 @@ public class AuthEntryPointController {
         auth.setRefreshToken(null);
 
         return ResponseEntity.ok(auth);
+    }
+
+    @PostMapping("/google-login")
+    public ResponseEntity<AuthResponse> googleLogin(
+            @RequestBody GoogleLoginRequest request,
+            HttpServletResponse response) {
+
+        AuthResponse auth = authService.googleLogin(request);
+
+        Cookie refreshCookie = new Cookie(
+                "refreshToken",
+                auth.getRefreshToken());
+
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setSecure(false); // true en producción
+        refreshCookie.setPath("/");
+        refreshCookie.setMaxAge(7 * 24 * 60 * 60);
+
+        response.addCookie(refreshCookie);
+
+        auth.setRefreshToken(null);
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(auth);
     }
 
     @GetMapping("/check-blacklist")

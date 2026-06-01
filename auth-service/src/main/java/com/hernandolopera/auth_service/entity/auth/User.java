@@ -20,7 +20,7 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "user") // Asegúrate que en tu BD la tabla sea "user" y no "users"
+@Table(name = "user")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,14 +38,16 @@ public class User {
 
     private String phone;
 
-    @Column(name = "password_hash", nullable = false)
+    // 🛠️ CORRECCIÓN 1: Se cambia a nullable = true porque Google no da contraseñas.
+    @Column(name = "password_hash", nullable = true)
     private String password;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "document_type")
     private DocumentType documentType;
 
-    @Column(name = "document_number", nullable = false, unique = true)
+    // 🛠️ CORRECCIÓN 2: Ya estaba bien en Java (nullable = true), asegúrate de reflejarlo en la BD.
+    @Column(name = "document_number", nullable = true, unique = true)
     private String documentNumber;
 
     @Column(name = "birth_date")
@@ -73,11 +75,16 @@ public class User {
     @Column(name = "is_active", nullable = false)
     private Boolean active = true;
 
-    // 🔥 CAMBIO CRÍTICO: FetchType.EAGER para evitar el Error 500 en /me
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "fk_id_rol", nullable = false)
     private Role role;
 
     @Column(name = "profile_completed", nullable = false)
     private Boolean profileCompleted = false;
-}
+
+    @Column(name = "provider")
+    private String provider;
+
+    @Column(name = "avatar")
+    private String avatar;
+} 
