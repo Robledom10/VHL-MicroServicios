@@ -1,0 +1,103 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  main:
+    web-application-type: reactive
+
+  cloud:
+    gateway:
+      routes:
+        # =========================================================
+        # AUTH SERVICE
+        # =========================================================
+
+        - id: auth-service
+          uri: http://auth-service:8081
+          predicates:
+            - Path=/api/auth/**,/api/admin/**,/api/roles/**
+
+        # =========================================================
+        # RESERVATION SERVICE
+        # =========================================================
+
+        - id: reservation-service
+          uri: http://reservation-service:8082
+          predicates:
+            - Path=/api/v1/reservas/**,/api/v1/viajeros/**,/api/v1/confirmaciones/**
+
+        # =========================================================
+        # TOURIST CATALOG SERVICE
+        # =========================================================
+
+        - id: tourist-catalog-service
+          uri: http://tourist-catalog-service:8083
+          predicates:
+            - Path=/api/categorias/**,/api/paquetes/**,/api/proveedores/**
+
+        # =========================================================
+        # GALLERY SERVICE
+        # =========================================================
+
+        - id: gallery-service
+          uri: http://gallery-service:8084
+          predicates:
+            - Path=/api/media/**
+
+        # =========================================================
+        # FINANCIAL SERVICE
+        # =========================================================
+
+        - id: financial-service
+          uri: http://financial-service:8085
+          predicates:
+            - Path=/api/payments/**,/api/webhook/**
+
+      # =========================================================
+      # CORS
+      # =========================================================
+
+        - id: operation_service
+          uri: http://operation-service:8084
+          predicates:
+            - Path=/api/v1/operaciones/**
+
+      globalcors:
+        corsConfigurations:
+          "[/**]":
+            allowedOrigins:
+              - "http://localhost:4200"
+
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+
+            allowedHeaders:
+              - "*"
+
+            allowCredentials: true
+
+      # =========================================================
+      # DEFAULT FILTERS
+      # =========================================================
+
+      default-filters:
+        - name: DedupeResponseHeader
+          args:
+            name: Access-Control-Allow-Origin Access-Control-Allow-Credentials
+            strategy: RETAIN_UNIQUE
+
+# =========================================================
+# JWT
+# =========================================================
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration: ${JWT_EXPIRATION}
