@@ -2,7 +2,7 @@ services:
   # =========================================================
   # AUTH DATABASE
   # =========================================================
-  auth-db:
+  db-auth:
     image: mysql:8
     container_name: auth-db
     restart: always
@@ -98,7 +98,7 @@ services:
       # =========================================================
   # FINANCIAL DATABASE
   # =========================================================
-  financial-db:
+  db-financial:
     image: mysql:8
     container_name: financial-db
     restart: always
