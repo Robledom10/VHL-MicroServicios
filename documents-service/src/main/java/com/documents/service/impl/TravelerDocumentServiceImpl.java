@@ -89,4 +89,29 @@ public class TravelerDocumentServiceImpl
 
         return repository.findByUserId(userId);
     }
+
+    @Override
+        public List<TravelerDocument>
+        getDocumentsByStatus(
+        DocumentStatus status
+        ){
+
+        return repository.findByStatus(
+            status
+        );
+        }
+
+    @Override
+        public TravelerDocument getDocument(
+        Integer documentId
+        ){
+
+        return repository.findById(
+            documentId
+        ).orElseThrow(
+            () -> new RuntimeException(
+                    "Documento no encontrado"
+            )
+        );
+        }    
 }

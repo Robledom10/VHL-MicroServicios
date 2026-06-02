@@ -38,4 +38,7 @@ public class ContractAcceptance {
 
     @Column(name = "accepted_at")
     private LocalDateTime acceptedAt;
+
+    @Column(name = "electronic_signature")
+    private String electronicSignature;
 }

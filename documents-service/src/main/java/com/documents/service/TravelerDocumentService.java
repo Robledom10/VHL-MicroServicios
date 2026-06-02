@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.documents.entity.TravelerDocument;
+import com.documents.entity.enums.DocumentStatus;
 
 public interface TravelerDocumentService {
 
@@ -17,4 +18,12 @@ public interface TravelerDocumentService {
     List<TravelerDocument> getUserDocuments(
             Integer userId
     );
+
+    List<TravelerDocument> getDocumentsByStatus(
+        DocumentStatus status
+        );
+
+    TravelerDocument getDocument(
+        Integer documentId
+        );
 }

@@ -1,4 +1,6 @@
 package com.documents.entity;
+import java.time.LocalDateTime;
+
 import com.documents.entity.enums.ValidationResult;
 import com.documents.entity.enums.ValidationSource;
 
@@ -31,6 +33,9 @@ public class DocumentValidation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_validation")
     private Integer idValidation;
+
+    @Column(name = "validation_date")
+    private LocalDateTime validationDate;
 
     @ManyToOne
     @JoinColumn(name = "fk_id_document")

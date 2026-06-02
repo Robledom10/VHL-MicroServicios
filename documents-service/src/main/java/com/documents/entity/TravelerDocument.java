@@ -1,4 +1,6 @@
 package com.documents.entity;
+import java.time.LocalDateTime;
+
 import com.documents.entity.enums.DocumentStatus;
 import com.documents.entity.enums.DocumentType;
 
@@ -39,6 +41,12 @@ public class TravelerDocument {
 
     @Column(name = "file_url")
     private String fileUrl;
+
+    @Column(name = "reservation_id")
+    private Integer reservationId;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
     @Enumerated(EnumType.STRING)
     private DocumentStatus status;
