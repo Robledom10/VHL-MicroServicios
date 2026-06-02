@@ -1,13 +1,11 @@
 spring:
   application:
     name: operation-service
-
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://mysql:3306/trip_operations_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC}
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3310/trip_operations_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC}
     username: ${SPRING_DATASOURCE_USERNAME:root}
     password: ${SPRING_DATASOURCE_PASSWORD:root}
     driver-class-name: com.mysql.cj.jdbc.Driver
-
   jpa:
     hibernate:
       ddl-auto: update
@@ -16,12 +14,10 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
-
 server:
   port: 8086
   servlet:
     context-path: /
-
 logging:
   level:
     root: INFO

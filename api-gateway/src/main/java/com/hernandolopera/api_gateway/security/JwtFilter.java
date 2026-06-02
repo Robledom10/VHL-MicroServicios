@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -43,6 +44,7 @@ public class JwtFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 
         String path = exchange.getRequest().getURI().getPath();
+        HttpMethod method = exchange.getRequest().getMethod();
 
         List<String> publicRoutes = List.of(
                 "/api/auth/login",
@@ -56,8 +58,11 @@ public class JwtFilter implements GlobalFilter, Ordered {
 
         boolean isPublic = publicRoutes.stream()
                 .anyMatch(path::startsWith);
+        boolean isPreflight = HttpMethod.OPTIONS.equals(method);
+        boolean isPublicCatalogRead = HttpMethod.GET.equals(method)
+                && (path.equals("/api/paquetes") || path.startsWith("/api/paquetes/"));
 
-        if (isPublic) {
+        if (isPublic || isPreflight || isPublicCatalogRead) {
             return chain.filter(exchange);
         }
 
@@ -95,7 +100,12 @@ public class JwtFilter implements GlobalFilter, Ordered {
                     }
 
                     System.out.println("GATEWAY PATH: [" + path + "]");
-                    return chain.filter(exchange);
+                    ServerWebExchange exchangeConUsuario = exchange.mutate()
+                            .request(exchange.getRequest().mutate()
+                                    .header("X-User-Email", jwtTokenProvider.getEmailFromToken(token))
+                                    .build())
+                            .build();
+                    return chain.filter(exchangeConUsuario);
                 });
     }
 

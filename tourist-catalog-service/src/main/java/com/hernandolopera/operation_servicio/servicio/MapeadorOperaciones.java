@@ -10,10 +10,10 @@ import org.springframework.stereotype.Component;
 public class MapeadorOperaciones {
     RespuestaPaqueteTuristico aRespuestaPaquete(PaqueteTuristico paquete) {
         return new RespuestaPaqueteTuristico(paquete.id, paquete.titulo, paquete.descripcion, paquete.destino,
-            paquete.duracionDias, paquete.precio, paquete.cupo, paquete.fechaInicio, paquete.fechaFin,
+            paquete.destinos, paquete.duracionDias, paquete.precio, paquete.cupo, paquete.fechaInicio,
             paquete.lugarSalida, paquete.horaSalida, paquete.alojamiento, paquete.tipoHabitacion,
-            paquete.tipoTransporte, paquete.fotoVerticalUrl, paquete.fotoHorizontalUrl, paquete.incluye,
-            paquete.noIncluye, paquete.politicasCancelacion, paquete.activo, paquete.categoria.id, paquete.categoria.nombre,
+            paquete.tipoTransporte, paquete.tiposTransporte, paquete.fotoVerticalUrl, paquete.fotoHorizontalUrl, paquete.incluye,
+            paquete.noIncluye, paquete.politicasCancelacion, paquete.activo,
             paquete.itinerario.stream().sorted(Comparator.comparing(a -> a.numeroDia)).map(this::aRespuestaActividad).toList());
     }
 
@@ -32,5 +32,10 @@ public class MapeadorOperaciones {
     RespuestaProveedor aRespuestaProveedor(ProveedorTuristico proveedor) {
         return new RespuestaProveedor(proveedor.id, proveedor.nombre, proveedor.tipoProveedor,
             proveedor.correo, proveedor.telefono, proveedor.activo);
+    }
+
+    RespuestaComentarioPaquete aRespuestaComentario(ComentarioPaquete comentario) {
+        return new RespuestaComentarioPaquete(comentario.id, comentario.paqueteTuristico.id, comentario.comentario,
+            comentario.puntaje, comentario.autor, comentario.fechaCreacion);
     }
 }
