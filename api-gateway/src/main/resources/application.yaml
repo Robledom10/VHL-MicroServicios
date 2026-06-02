@@ -33,11 +33,7 @@ spring:
         - id: tourist-catalog-service
           uri: http://tourist-catalog-service:8083
           predicates:
-<<<<<<< Updated upstream
-            - Path=/api/categorias/**,/api/paquetes/**,/api/proveedores/**
-=======
             - Path=/api/paquetes/**,/api/proveedores/**
->>>>>>> Stashed changes
 
         # =========================================================
         # GALLERY SERVICE
@@ -48,27 +44,18 @@ spring:
             - Path=/api/media/**
 
         # =========================================================
-<<<<<<< Updated upstream
         # FINANCIAL SERVICE
         # =========================================================
-
         - id: financial-service
           uri: http://financial-service:8085
           predicates:
             - Path=/api/payments/**,/api/webhook/**
 
-      # =========================================================
-      # CORS
-      # =========================================================
-
-        - id: operation_service
-          uri: http://operation-service:8084
-=======
+        # =========================================================
         # OPERATION SERVICE
         # =========================================================
         - id: operation-service
-          uri: http://operation-service:8085
->>>>>>> Stashed changes
+          uri: http://operation-service:8086
           predicates:
             - Path=/api/v1/operaciones/**
 
