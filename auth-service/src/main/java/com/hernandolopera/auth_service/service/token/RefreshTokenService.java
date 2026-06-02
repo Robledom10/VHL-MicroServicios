@@ -22,11 +22,12 @@ public class RefreshTokenService {
     // 🔹 Crear refresh token
     public RefreshToken createRefreshToken(User user) {
 
-        refreshTokenRepository.findByUser(user)
-                .ifPresent(refreshTokenRepository::delete);
-
-        RefreshToken refreshToken = new RefreshToken();
-        refreshToken.setUser(user);
+        RefreshToken refreshToken = refreshTokenRepository.findByUser(user)
+                .orElseGet(() -> {
+                    RefreshToken newRefreshToken = new RefreshToken();
+                    newRefreshToken.setUser(user);
+                    return newRefreshToken;
+                });
         refreshToken.setToken(UUID.randomUUID().toString());
         refreshToken.setExpiryDate(LocalDateTime.now().plusDays(7));
 
