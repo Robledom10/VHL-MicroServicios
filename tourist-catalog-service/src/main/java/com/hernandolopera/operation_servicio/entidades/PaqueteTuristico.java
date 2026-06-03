@@ -31,7 +31,7 @@ public class PaqueteTuristico {
     @Column(name = "duration_days", nullable = false)
     public Integer duracionDias;
 
-    @Column(name = "price", precision = 12, scale = 2, nullable = false)
+    @Column(name = "price", precision = 15, scale = 2, nullable = false)
     public BigDecimal precio;
 
     @Column(name = "quota", nullable = false)
