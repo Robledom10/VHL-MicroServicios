@@ -87,6 +87,11 @@ public class PaqueteTuristico {
     @Column(name = "description", nullable = false, length = 255)
     public List<String> politicasCancelacion = new ArrayList<>();
 
+    @ElementCollection
+    @CollectionTable(name = "package_requirement", joinColumns = @JoinColumn(name = "fk_id_package"))
+    @Column(name = "description", nullable = false, length = 255)
+    public List<String> requisitos = new ArrayList<>();
+
     public void reemplazarItinerario(List<ActividadItinerario> actividades) {
         itinerario.clear();
         actividades.forEach(actividad -> {
@@ -95,13 +100,15 @@ public class PaqueteTuristico {
         });
     }
 
-    public void reemplazarListasDelDetalle(List<String> incluye, List<String> noIncluye, List<String> politicasCancelacion) {
+    public void reemplazarListasDelDetalle(List<String> incluye, List<String> noIncluye, List<String> politicasCancelacion, List<String> requisitos) {
         this.incluye.clear();
         this.incluye.addAll(incluye);
         this.noIncluye.clear();
         this.noIncluye.addAll(noIncluye);
         this.politicasCancelacion.clear();
         this.politicasCancelacion.addAll(politicasCancelacion);
+        this.requisitos.clear();
+        this.requisitos.addAll(requisitos);
     }
 
     public void reemplazarDestinos(List<String> destinos) {

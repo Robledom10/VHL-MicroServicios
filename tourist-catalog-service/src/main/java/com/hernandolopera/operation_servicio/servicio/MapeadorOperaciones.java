@@ -13,7 +13,7 @@ public class MapeadorOperaciones {
             paquete.destinos, paquete.duracionDias, paquete.precio, paquete.cupo, paquete.fechaInicio,
             paquete.lugarSalida, paquete.horaSalida, paquete.alojamiento, paquete.tipoHabitacion,
             paquete.tipoTransporte, paquete.tiposTransporte, paquete.fotoVerticalUrl, paquete.fotoHorizontalUrl, paquete.incluye,
-            paquete.noIncluye, paquete.politicasCancelacion, paquete.activo,
+            paquete.noIncluye, paquete.politicasCancelacion, paquete.requisitos, paquete.activo,
             paquete.itinerario.stream().sorted(Comparator.comparing(a -> a.numeroDia)).map(this::aRespuestaActividad).toList());
     }
 

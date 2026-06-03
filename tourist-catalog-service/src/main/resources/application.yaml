@@ -1,6 +1,10 @@
 spring:
   application:
     name: tourist-catalog-service
+  servlet:
+    multipart:
+      max-file-size: 15MB
+      max-request-size: 30MB
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3309/catalogo_turistico_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC}
     username: ${SPRING_DATASOURCE_USERNAME:root}

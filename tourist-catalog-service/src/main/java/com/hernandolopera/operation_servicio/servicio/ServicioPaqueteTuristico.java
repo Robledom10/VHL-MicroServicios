@@ -40,6 +40,11 @@ public class ServicioPaqueteTuristico {
         "50% de reembolso hasta 48 horas antes",
         "No hay reembolso el mismo dia"
     );
+    private static final List<String> REQUISITOS_DEFECTO = List.of(
+        "Cedula de ciudadania obligatoria",
+        "Edad minima: 5 anos",
+        "Pago completo antes del viaje"
+    );
 
     private final RepositorioPaqueteTuristico repositorioPaquete;
     private final MapeadorOperaciones mapeador;
@@ -85,6 +90,13 @@ public class ServicioPaqueteTuristico {
         repositorioPaquete.save(paquete);
     }
 
+    @Transactional
+    public void eliminarPermanente(Integer id) {
+        PaqueteTuristico paquete = repositorioPaquete.findById(id)
+            .orElseThrow(() -> new RecursoNoEncontradoExcepcion("No existe el paquete turistico con id " + id));
+        repositorioPaquete.delete(paquete);
+    }
+
     PaqueteTuristico buscarActivo(Integer id) {
         PaqueteTuristico paquete = repositorioPaquete.findById(id)
             .orElseThrow(() -> new RecursoNoEncontradoExcepcion("No existe el paquete turistico con id " + id));
@@ -120,7 +132,8 @@ public class ServicioPaqueteTuristico {
         paquete.reemplazarListasDelDetalle(
             normalizarLista(solicitud.incluye(), INCLUYE_DEFECTO),
             normalizarLista(solicitud.noIncluye(), NO_INCLUYE_DEFECTO),
-            normalizarLista(solicitud.politicasCancelacion(), POLITICAS_CANCELACION_DEFECTO)
+            normalizarLista(solicitud.politicasCancelacion(), POLITICAS_CANCELACION_DEFECTO),
+            normalizarLista(solicitud.requisitos(), REQUISITOS_DEFECTO)
         );
     }
 

@@ -65,4 +65,10 @@ public class ControladorPaqueteTuristico {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/{id}/permanente")
+    public ResponseEntity<Void> eliminarPermanente(@PathVariable Integer id) {
+        servicio.eliminarPermanente(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }

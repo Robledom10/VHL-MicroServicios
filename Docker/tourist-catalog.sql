@@ -75,6 +75,12 @@ CREATE TABLE package_cancellation_policy (
     FOREIGN KEY (fk_id_package) REFERENCES `package`(id_package)
 );
 
+CREATE TABLE package_requirement (
+    fk_id_package INT NOT NULL,
+    description VARCHAR(255) NOT NULL,
+    FOREIGN KEY (fk_id_package) REFERENCES `package`(id_package)
+);
+
 CREATE TABLE package_comment (
     id_comment INT AUTO_INCREMENT PRIMARY KEY,
     fk_id_package INT NOT NULL,

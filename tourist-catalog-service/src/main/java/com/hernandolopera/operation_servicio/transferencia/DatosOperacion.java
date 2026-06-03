@@ -23,6 +23,7 @@ public final class DatosOperacion {
         List<@NotBlank String> tiposTransporte,
         String fotoVerticalUrl, String fotoHorizontalUrl, List<@NotBlank String> incluye,
         List<@NotBlank String> noIncluye, List<@NotBlank String> politicasCancelacion,
+        List<String> requisitos,
         @Valid List<SolicitudActividadItinerario> itinerario) {}
     public record RespuestaPaqueteTuristico(Integer id, String titulo, String descripcion, String destino,
         List<String> destinos,
@@ -30,7 +31,7 @@ public final class DatosOperacion {
         String lugarSalida, LocalTime horaSalida, String alojamiento, String tipoHabitacion, String tipoTransporte,
         List<String> tiposTransporte,
         String fotoVerticalUrl, String fotoHorizontalUrl, List<String> incluye, List<String> noIncluye,
-        List<String> politicasCancelacion, Boolean activo, List<RespuestaActividadItinerario> itinerario) {}
+        List<String> politicasCancelacion, List<String> requisitos, Boolean activo, List<RespuestaActividadItinerario> itinerario) {}
     public record RespuestaImagenPaquete(String url) {}
 
     public record SolicitudComentarioPaquete(@NotBlank String comentario, @NotNull @Min(1) @Max(5) Integer puntaje) {}
