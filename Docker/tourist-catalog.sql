@@ -7,7 +7,7 @@ CREATE TABLE `package` (
     description VARCHAR(255),
     destination VARCHAR(150) NOT NULL,
     duration_days INT NOT NULL,
-    price DECIMAL(12,2) NOT NULL,
+    price DECIMAL(15,2) NOT NULL,
     quota INT NOT NULL,
     start_date DATE NOT NULL,
     departure_place VARCHAR(150),
