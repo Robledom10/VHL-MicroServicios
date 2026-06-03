@@ -4,7 +4,7 @@ services:
   # =========================================================
   auth-db:
     image: mysql:8
-    container_name: auth-db
+    container_name: db-auth
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -156,13 +156,13 @@ services:
     container_name: auth-service
     restart: always
     depends_on:
-      auth-db:
+      db-auth:
         condition: service_healthy
     env_file:
       - .env
     environment:
       SPRING_PROFILES_ACTIVE: dev
-      SPRING_DATASOURCE_URL: jdbc:mysql://auth-db:3306/${AUTH_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_URL: jdbc:mysql://db-auth:3306/${AUTH_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       APP_JWT_SECRET: ${JWT_SECRET}
