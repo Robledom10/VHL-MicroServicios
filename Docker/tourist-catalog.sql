@@ -7,7 +7,7 @@ CREATE TABLE `package` (
     description VARCHAR(255),
     destination VARCHAR(150) NOT NULL,
     duration_days INT NOT NULL,
-    price DECIMAL(10,2) NOT NULL,
+    price DECIMAL(15,2) NOT NULL,
     quota INT NOT NULL,
     start_date DATE NOT NULL,
     departure_place VARCHAR(150),
@@ -70,6 +70,12 @@ CREATE TABLE package_exclusion (
 );
 
 CREATE TABLE package_cancellation_policy (
+    fk_id_package INT NOT NULL,
+    description VARCHAR(255) NOT NULL,
+    FOREIGN KEY (fk_id_package) REFERENCES `package`(id_package)
+);
+
+CREATE TABLE package_requirement (
     fk_id_package INT NOT NULL,
     description VARCHAR(255) NOT NULL,
     FOREIGN KEY (fk_id_package) REFERENCES `package`(id_package)

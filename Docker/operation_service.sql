@@ -2,17 +2,17 @@ CREATE DATABASE IF NOT EXISTS trip_operations_db;
 USE trip_operations_db;
 
 CREATE TABLE IF NOT EXISTS trip_departure (
-    id_trip INT AUTO_INCREMENT PRIMARY KEY,
-    id_user INT NOT NULL,
-    id_package INT NOT NULL,
+    id_trip BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_user BIGINT NOT NULL,
+    id_package BIGINT NOT NULL,
     departure_date DATE NOT NULL,
     return_date DATE NOT NULL,
     status ENUM('programado','en_curso','finalizado','cancelado') NOT NULL DEFAULT 'programado'
 );
 
 CREATE TABLE IF NOT EXISTS transport_assignment (
-    id_transport INT AUTO_INCREMENT PRIMARY KEY,
-    fk_id_trip INT NOT NULL,
+    id_transport BIGINT AUTO_INCREMENT PRIMARY KEY,
+    fk_id_trip BIGINT NOT NULL,
     company VARCHAR(100) NOT NULL,
     vehicle_type VARCHAR(100) NOT NULL,
     plate VARCHAR(20) NOT NULL,
@@ -26,9 +26,9 @@ CREATE TABLE IF NOT EXISTS transport_assignment (
 );
 
 CREATE TABLE IF NOT EXISTS lodging_assignment (
-    id_lodging INT AUTO_INCREMENT PRIMARY KEY,
-    fk_id_trip INT NOT NULL,
-    id_traveler INT,
+    id_lodging BIGINT AUTO_INCREMENT PRIMARY KEY,
+    fk_id_trip BIGINT NOT NULL,
+    id_traveler BIGINT,
     hotel_name VARCHAR(150) NOT NULL,
     address VARCHAR(255) NOT NULL,
     room_number VARCHAR(60),
@@ -39,9 +39,9 @@ CREATE TABLE IF NOT EXISTS lodging_assignment (
 );
 
 CREATE TABLE IF NOT EXISTS trip_incident (
-    id_incident INT AUTO_INCREMENT PRIMARY KEY,
-    fk_id_trip INT NOT NULL,
-    id_traveler INT,
+    id_incident BIGINT AUTO_INCREMENT PRIMARY KEY,
+    fk_id_trip BIGINT NOT NULL,
+    id_traveler BIGINT,
     type VARCHAR(100) NOT NULL,
     description VARCHAR(255) NOT NULL,
     severity VARCHAR(30),
@@ -52,20 +52,20 @@ CREATE TABLE IF NOT EXISTS trip_incident (
 );
 
 CREATE TABLE IF NOT EXISTS traveler_check_in (
-    id_check_in INT AUTO_INCREMENT PRIMARY KEY,
-    fk_id_trip INT NOT NULL,
-    id_traveler INT NOT NULL,
+    id_check_in BIGINT AUTO_INCREMENT PRIMARY KEY,
+    fk_id_trip BIGINT NOT NULL,
+    id_traveler BIGINT NOT NULL,
     qr_code VARCHAR(180) NOT NULL,
-    id_reservation INT,
+    id_reservation BIGINT,
     check_in_date DATETIME NOT NULL,
     UNIQUE KEY uk_check_in_trip_traveler (fk_id_trip, id_traveler),
     FOREIGN KEY (fk_id_trip) REFERENCES trip_departure(id_trip)
 );
 
 CREATE TABLE IF NOT EXISTS traveler_medical_info (
-    id_medical_info INT AUTO_INCREMENT PRIMARY KEY,
-    fk_id_trip INT NOT NULL,
-    id_traveler INT NOT NULL,
+    id_medical_info BIGINT AUTO_INCREMENT PRIMARY KEY,
+    fk_id_trip BIGINT NOT NULL,
+    id_traveler BIGINT NOT NULL,
     blood_type VARCHAR(10) NOT NULL,
     allergies VARCHAR(500),
     medications VARCHAR(500),
@@ -76,9 +76,9 @@ CREATE TABLE IF NOT EXISTS traveler_medical_info (
 );
 
 CREATE TABLE IF NOT EXISTS emergency_contact (
-    id_contact INT AUTO_INCREMENT PRIMARY KEY,
-    fk_id_trip INT NOT NULL,
-    id_traveler INT NOT NULL,
+    id_contact BIGINT AUTO_INCREMENT PRIMARY KEY,
+    fk_id_trip BIGINT NOT NULL,
+    id_traveler BIGINT NOT NULL,
     full_name VARCHAR(120) NOT NULL,
     relationship VARCHAR(80) NOT NULL,
     phone VARCHAR(30) NOT NULL,
@@ -88,8 +88,8 @@ CREATE TABLE IF NOT EXISTS emergency_contact (
 );
 
 CREATE TABLE IF NOT EXISTS notification_history (
-    id_notification INT AUTO_INCREMENT PRIMARY KEY,
-    fk_id_trip INT NOT NULL,
+    id_notification BIGINT AUTO_INCREMENT PRIMARY KEY,
+    fk_id_trip BIGINT NOT NULL,
     subject VARCHAR(150) NOT NULL,
     message VARCHAR(1000) NOT NULL,
     channel VARCHAR(30) NOT NULL,
