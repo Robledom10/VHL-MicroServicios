@@ -1,0 +1,51 @@
+{
+  "info": {
+    "_postman_id": "d3197096-4ec3-41e9-97e7-8b16eabfb531",
+    "name": "Documents Service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "55289793",
+    "_collection_link": "https://go.postman.co/collection/55289793-d3197096-4ec3-41e9-97e7-8b16eabfb531?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Documentos",
+      "item": [
+        {
+          "name": "New Request",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
+        }
+      ],
+      "auth": {
+        "type": "bearer"
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
