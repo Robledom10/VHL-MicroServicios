@@ -9,6 +9,7 @@ import com.hernandolopera.auth_service.dto.request.auth.GoogleLoginRequest;
 import com.hernandolopera.auth_service.dto.request.auth.LoginRequest;
 import com.hernandolopera.auth_service.dto.request.auth.RegisterRequest;
 import com.hernandolopera.auth_service.dto.response.AuthResponse;
+import com.hernandolopera.auth_service.dto.response.UserLoginResponse;
 import com.hernandolopera.auth_service.entity.token.RefreshToken;
 import com.hernandolopera.auth_service.entity.auth.Role;
 import com.hernandolopera.auth_service.entity.auth.User;
@@ -93,9 +94,17 @@ public class AuthService {
 
             RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
+            UserLoginResponse userResponse = new UserLoginResponse(
+                    user.getId(),
+                    user.getFirstName(),
+                    user.getLastName(),
+                    user.getEmail(),
+                    user.getRole().getName());
+
             return AuthResponse.builder()
                     .accessToken(accessToken)
                     .refreshToken(refreshToken.getToken())
+                    .user(userResponse)
                     .build();
 
         } catch (Exception e) {
