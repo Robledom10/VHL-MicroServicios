@@ -9,6 +9,7 @@ import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaInformac
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaNotificacion;
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaTransporte;
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaViaje;
+import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudActualizarEstadoIncidente;
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudAlojamiento;
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudCheckIn;
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudContactoEmergencia;
@@ -26,6 +27,7 @@ import com.hernandolopera.operation_service.entidades.NotificacionViaje;
 import com.hernandolopera.operation_service.entidades.SalidaViaje;
 import com.hernandolopera.operation_service.entidades.TransporteAsignado;
 import com.hernandolopera.operation_service.excepciones.ExcepcionReglaNegocio;
+import com.hernandolopera.operation_service.excepciones.RecursoNoEncontradoExcepcion;
 import com.hernandolopera.operation_service.repositorios.RepositorioAlojamientoAsignado;
 import com.hernandolopera.operation_service.repositorios.RepositorioCheckInViajero;
 import com.hernandolopera.operation_service.repositorios.RepositorioContactoEmergencia;
@@ -61,6 +63,10 @@ public class ServicioOperacion {
     private final RepositorioIncidenteViaje repositorioIncidente;
     private final RepositorioNotificacionViaje repositorioNotificacion;
 
+    // =========================================================
+    // CREATE
+    // =========================================================
+
     public RespuestaViaje crearViaje(SolicitudViaje solicitud) {
         if (!solicitud.fechaRegreso().isAfter(solicitud.fechaSalida())) {
             throw new ExcepcionReglaNegocio("La fecha de regreso debe ser posterior a la fecha de salida");
@@ -85,7 +91,6 @@ public class ServicioOperacion {
             throw new ExcepcionReglaNegocio("La capacidad del transporte no cubre la cantidad de viajeros");
         }
 
-        // HU7.1: transport_assignment stores the assigned vehicle and validates capacity before saving.
         TransporteAsignado transporte = TransporteAsignado.builder()
             .idViaje(idViaje)
             .tipoTransporte(solicitud.tipoTransporte())
@@ -114,7 +119,6 @@ public class ServicioOperacion {
             throw new ExcepcionReglaNegocio("El viajero ya tiene check-in registrado para este viaje");
         }
 
-        // HU7.2: traveler_check_in prevents duplicate check-ins by trip and traveler.
         CheckInViajero checkIn = CheckInViajero.builder()
             .idViaje(idViaje)
             .idViajero(solicitud.idViajero())
@@ -147,7 +151,6 @@ public class ServicioOperacion {
             throw new ExcepcionReglaNegocio("La habitacion no esta disponible en las fechas solicitadas");
         }
 
-        // HU7.3: lodging_assignment keeps hotel, room, address and stay dates for each traveler.
         AlojamientoAsignado alojamiento = AlojamientoAsignado.builder()
             .idViaje(idViaje)
             .idViajero(solicitud.idViajero())
@@ -172,7 +175,6 @@ public class ServicioOperacion {
         validarViajeExistente(solicitud.idViaje());
         validarTipoSangre(solicitud.tipoSangre());
 
-        // HU7.4: traveler_medical_info centralizes medical data for operational response.
         InformacionMedica informacion = InformacionMedica.builder()
             .idViaje(solicitud.idViaje())
             .idViajero(idViajero)
@@ -196,7 +198,6 @@ public class ServicioOperacion {
         validarIdPositivo(solicitud.idViaje(), "idViaje");
         validarViajeExistente(solicitud.idViaje());
 
-        // HU7.5: emergency_contact stores phone and email after request validation.
         ContactoEmergencia contacto = ContactoEmergencia.builder()
             .idViaje(solicitud.idViaje())
             .idViajero(idViajero)
@@ -218,7 +219,6 @@ public class ServicioOperacion {
             validarIdPositivo(solicitud.idViajero(), "idViajero");
         }
 
-        // HU7.6: trip_incident starts in pending status and remains linked to the trip.
         IncidenteViaje incidente = IncidenteViaje.builder()
             .idViaje(idViaje)
             .idViajero(solicitud.idViajero())
@@ -242,7 +242,6 @@ public class ServicioOperacion {
             throw new ExcepcionReglaNegocio("No existen viajeros asociados al viaje para enviar la notificacion");
         }
 
-        // HU7.7: notification_history records messages even when the real delivery provider is external.
         NotificacionViaje notificacion = NotificacionViaje.builder()
             .idViaje(idViaje)
             .asunto(solicitud.asunto())
@@ -256,6 +255,81 @@ public class ServicioOperacion {
 
         NotificacionViaje guardada = repositorioNotificacion.save(notificacion);
         return mapearNotificacion(guardada, "Notificacion registrada para envio correctamente");
+    }
+
+    // =========================================================
+    // READ (LIST)
+    // =========================================================
+
+    @Transactional(readOnly = true)
+    public List<RespuestaViaje> listarViajes() {
+        return repositorioSalidaViaje.findAll()
+            .stream()
+            .map(v -> mapearViaje(v, null))
+            .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<RespuestaTransporte> listarTransportes(Long idViaje) {
+        validarIdPositivo(idViaje, "idViaje");
+        return repositorioTransporte.findAllByIdViaje(idViaje)
+            .stream()
+            .map(t -> mapearTransporte(t, null))
+            .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<RespuestaCheckIn> listarCheckIns(Long idViaje) {
+        validarIdPositivo(idViaje, "idViaje");
+        return repositorioCheckIn.findAllByIdViaje(idViaje)
+            .stream()
+            .map(c -> mapearCheckIn(c, null))
+            .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<RespuestaAlojamiento> listarAlojamientos(Long idViaje) {
+        validarIdPositivo(idViaje, "idViaje");
+        return repositorioAlojamiento.findAllByIdViaje(idViaje)
+            .stream()
+            .map(a -> mapearAlojamiento(a, null))
+            .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<RespuestaInformacionMedica> listarInformacionMedica(Long idViaje) {
+        validarIdPositivo(idViaje, "idViaje");
+        return repositorioInformacionMedica.findAllByIdViaje(idViaje)
+            .stream()
+            .map(i -> mapearInformacionMedica(i, null))
+            .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<RespuestaContactoEmergencia> listarContactos(Long idViaje) {
+        validarIdPositivo(idViaje, "idViaje");
+        return repositorioContactoEmergencia.findAllByIdViaje(idViaje)
+            .stream()
+            .map(c -> mapearContacto(c, null))
+            .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<RespuestaIncidente> listarIncidentes(Long idViaje) {
+        validarIdPositivo(idViaje, "idViaje");
+        return repositorioIncidente.findAllByIdViaje(idViaje)
+            .stream()
+            .map(i -> mapearIncidente(i, null))
+            .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<RespuestaNotificacion> listarNotificaciones(Long idViaje) {
+        validarIdPositivo(idViaje, "idViaje");
+        return repositorioNotificacion.findAllByIdViaje(idViaje)
+            .stream()
+            .map(n -> mapearNotificacion(n, null))
+            .toList();
     }
 
     @Transactional(readOnly = true)
@@ -282,8 +356,72 @@ public class ServicioOperacion {
         );
     }
 
+    // =========================================================
+    // UPDATE
+    // =========================================================
+
+    public RespuestaTransporte actualizarTransporte(Long idViaje, Long id, SolicitudTransporte solicitud) {
+        validarIdPositivo(idViaje, "idViaje");
+        validarIdPositivo(id, "id");
+        if (solicitud.capacidad() < solicitud.cantidadViajeros()) {
+            throw new ExcepcionReglaNegocio("La capacidad del transporte no cubre la cantidad de viajeros");
+        }
+        TransporteAsignado transporte = repositorioTransporte.findById(id)
+            .orElseThrow(() -> new RecursoNoEncontradoExcepcion("Transporte no encontrado con id: " + id));
+        transporte.setTipoTransporte(solicitud.tipoTransporte());
+        transporte.setEmpresa(solicitud.empresa());
+        transporte.setPlaca(solicitud.placa());
+        transporte.setConductor(solicitud.conductor());
+        transporte.setTelefonoConductor(solicitud.telefonoConductor());
+        transporte.setCapacidad(solicitud.capacidad());
+        transporte.setCantidadViajeros(solicitud.cantidadViajeros());
+        transporte.setFechaSalida(solicitud.fechaSalida());
+        TransporteAsignado guardado = repositorioTransporte.save(transporte);
+        log.info("Transporte {} actualizado para el viaje {}", guardado.getId(), idViaje);
+        return mapearTransporte(guardado, "Transporte actualizado correctamente");
+    }
+
+    public RespuestaIncidente actualizarEstadoIncidente(Long id, SolicitudActualizarEstadoIncidente solicitud) {
+        IncidenteViaje incidente = repositorioIncidente.findById(id)
+            .orElseThrow(() -> new RecursoNoEncontradoExcepcion("Incidente no encontrado con id: " + id));
+        incidente.setEstado(solicitud.estado());
+        IncidenteViaje guardado = repositorioIncidente.save(incidente);
+        return mapearIncidente(guardado, "Estado del incidente actualizado correctamente");
+    }
+
+    public RespuestaInformacionMedica actualizarInformacionMedica(
+        Long idViajero, Long id, SolicitudInformacionMedica solicitud
+    ) {
+        InformacionMedica info = repositorioInformacionMedica.findById(id)
+            .orElseThrow(() -> new RecursoNoEncontradoExcepcion("Informacion medica no encontrada con id: " + id));
+        validarTipoSangre(solicitud.tipoSangre());
+        info.setTipoSangre(solicitud.tipoSangre().toUpperCase(Locale.ROOT));
+        info.setAlergias(solicitud.alergias());
+        info.setMedicamentos(solicitud.medicamentos());
+        info.setCondicionesMedicas(solicitud.condicionesMedicas());
+        info.setTelefonoMedico(solicitud.telefonoMedico());
+        InformacionMedica guardada = repositorioInformacionMedica.save(info);
+        return mapearInformacionMedica(guardada, "Informacion medica actualizada correctamente");
+    }
+
+    public RespuestaContactoEmergencia actualizarContacto(
+        Long idViajero, Long id, SolicitudContactoEmergencia solicitud
+    ) {
+        ContactoEmergencia contacto = repositorioContactoEmergencia.findById(id)
+            .orElseThrow(() -> new RecursoNoEncontradoExcepcion("Contacto de emergencia no encontrado con id: " + id));
+        contacto.setNombre(solicitud.nombre());
+        contacto.setParentesco(solicitud.parentesco());
+        contacto.setTelefono(solicitud.telefono());
+        contacto.setCorreo(solicitud.correo());
+        ContactoEmergencia guardado = repositorioContactoEmergencia.save(contacto);
+        return mapearContacto(guardado, "Contacto de emergencia actualizado correctamente");
+    }
+
+    // =========================================================
+    // PRIVATE HELPERS
+    // =========================================================
+
     private void validarCodigoQr(Long idViaje, SolicitudCheckIn solicitud) {
-        // HU7.2: the QR is accepted only when it has a basic valid payload and the traveler can be linked.
         if (solicitud.codigoQr().trim().length() < 8) {
             throw new ExcepcionReglaNegocio("El codigo QR no tiene un formato valido");
         }
@@ -306,7 +444,6 @@ public class ServicioOperacion {
     }
 
     private int calcularViajerosRegistrados(Long idViaje) {
-        // HU7.8: dashboard metrics use the largest traveler evidence available in operation tables.
         long total = Math.max(repositorioCheckIn.countViajerosByIdViaje(idViaje), repositorioAlojamiento.countViajerosByIdViaje(idViaje));
         total = Math.max(total, repositorioInformacionMedica.countViajerosByIdViaje(idViaje));
         total = Math.max(total, repositorioContactoEmergencia.countViajerosByIdViaje(idViaje));

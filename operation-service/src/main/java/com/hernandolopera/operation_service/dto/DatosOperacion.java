@@ -221,6 +221,11 @@ public final class DatosOperacion {
     ) {
     }
 
+    public record SolicitudActualizarEstadoIncidente(
+        @NotBlank String estado
+    ) {
+    }
+
     public record RespuestaOperacion(
         String mensaje,
         Object datos
