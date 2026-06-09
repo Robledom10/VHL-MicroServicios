@@ -2,6 +2,7 @@ package com.hernandolopera.operation_service.repositorios;
 
 import com.hernandolopera.operation_service.entidades.AlojamientoAsignado;
 import java.time.LocalDate;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -28,4 +29,6 @@ public interface RepositorioAlojamientoAsignado extends JpaRepository<Alojamient
         @Param("fechaIngreso") LocalDate fechaIngreso,
         @Param("fechaSalida") LocalDate fechaSalida
     );
+
+    List<AlojamientoAsignado> findAllByIdViaje(Long idViaje);
 }

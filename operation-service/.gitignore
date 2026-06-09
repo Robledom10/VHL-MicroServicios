@@ -1,0 +1,9 @@
+# Archivos de compilación Java
+target/
+bin/
+
+# Archivos de clase
+*.class
+
+# Logs
+*.log

@@ -33,6 +33,9 @@ public class AlojamientoAsignado {
     @Column(name = "id_traveler")
     private Long idViajero;
 
+    @Column(name = "traveler_name", length = 150)
+    private String nombreViajero;
+
     @Column(name = "hotel_name", nullable = false, length = 150)
     private String hotel;
 
