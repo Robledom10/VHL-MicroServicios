@@ -83,6 +83,7 @@ public final class DatosOperacion {
 
     public record SolicitudAlojamiento(
         @NotNull Long idViajero,
+        String nombreViajero,
         @NotBlank String hotel,
         @NotBlank String habitacion,
         @NotBlank String direccion,
@@ -95,6 +96,7 @@ public final class DatosOperacion {
         Long id,
         Long idViaje,
         Long idViajero,
+        String nombreViajero,
         String hotel,
         String habitacion,
         String direccion,
@@ -112,7 +114,8 @@ public final class DatosOperacion {
         @Size(max = 500) String medicamentos,
         @Size(max = 500) String condicionesMedicas,
         @Pattern(regexp = "^\\+?[0-9\\s-]{7,20}$", message = "El telefono medico no tiene un formato valido")
-        String telefonoMedico
+        String telefonoMedico,
+        String nombreViajero
     ) {
     }
 
@@ -126,7 +129,8 @@ public final class DatosOperacion {
         String condicionesMedicas,
         String telefonoMedico,
         LocalDateTime fechaRegistro,
-        String mensaje
+        String mensaje,
+        String nombreViajero
     ) {
     }
 
@@ -136,7 +140,8 @@ public final class DatosOperacion {
         @NotBlank String parentesco,
         @Pattern(regexp = "^\\+?[0-9\\s-]{7,20}$", message = "El telefono no tiene un formato valido")
         @NotBlank String telefono,
-        @Email String correo
+        @Email String correo,
+        String nombreViajero
     ) {
     }
 
@@ -149,7 +154,8 @@ public final class DatosOperacion {
         String telefono,
         String correo,
         LocalDateTime fechaRegistro,
-        String mensaje
+        String mensaje,
+        String nombreViajero
     ) {
     }
 

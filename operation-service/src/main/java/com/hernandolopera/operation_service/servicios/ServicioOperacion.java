@@ -154,6 +154,7 @@ public class ServicioOperacion {
         AlojamientoAsignado alojamiento = AlojamientoAsignado.builder()
             .idViaje(idViaje)
             .idViajero(solicitud.idViajero())
+            .nombreViajero(solicitud.nombreViajero())
             .hotel(solicitud.hotel())
             .habitacion(solicitud.habitacion())
             .direccion(solicitud.direccion())
@@ -183,6 +184,7 @@ public class ServicioOperacion {
             .medicamentos(solicitud.medicamentos())
             .condicionesMedicas(solicitud.condicionesMedicas())
             .telefonoMedico(solicitud.telefonoMedico())
+            .nombreViajero(solicitud.nombreViajero())
             .fechaRegistro(LocalDateTime.now())
             .build();
 
@@ -205,6 +207,7 @@ public class ServicioOperacion {
             .parentesco(solicitud.parentesco())
             .telefono(solicitud.telefono())
             .correo(solicitud.correo())
+            .nombreViajero(solicitud.nombreViajero())
             .fechaRegistro(LocalDateTime.now())
             .build();
 
@@ -360,6 +363,58 @@ public class ServicioOperacion {
     // UPDATE
     // =========================================================
 
+    public RespuestaViaje actualizarViaje(Long id, SolicitudViaje solicitud) {
+        validarIdPositivo(id, "id");
+        if (!solicitud.fechaRegreso().isAfter(solicitud.fechaSalida())) {
+            throw new ExcepcionReglaNegocio("La fecha de regreso debe ser posterior a la fecha de salida");
+        }
+        SalidaViaje viaje = repositorioSalidaViaje.findById(id)
+            .orElseThrow(() -> new RecursoNoEncontradoExcepcion("Viaje no encontrado con id: " + id));
+        viaje.setFechaSalida(solicitud.fechaSalida());
+        viaje.setFechaRegreso(solicitud.fechaRegreso());
+        SalidaViaje guardado = repositorioSalidaViaje.save(viaje);
+        log.info("Viaje {} actualizado", guardado.getId());
+        return mapearViaje(guardado, "Viaje actualizado correctamente");
+    }
+
+    public void eliminarViaje(Long id) {
+        validarIdPositivo(id, "id");
+        if (!repositorioSalidaViaje.existsById(id)) {
+            throw new RecursoNoEncontradoExcepcion("Viaje no encontrado con id: " + id);
+        }
+        repositorioSalidaViaje.deleteById(id);
+        log.info("Viaje {} eliminado", id);
+    }
+
+    public void eliminarInformacionMedica(Long idViajero, Long id) {
+        validarIdPositivo(id, "id");
+        if (!repositorioInformacionMedica.existsById(id)) {
+            throw new RecursoNoEncontradoExcepcion("Informacion medica no encontrada con id: " + id);
+        }
+        repositorioInformacionMedica.deleteById(id);
+        log.info("Informacion medica {} eliminada", id);
+    }
+
+    public RespuestaAlojamiento actualizarAlojamiento(Long idViaje, Long id, SolicitudAlojamiento solicitud) {
+        validarIdPositivo(idViaje, "idViaje");
+        validarIdPositivo(id, "id");
+        if (!solicitud.fechaSalida().isAfter(solicitud.fechaIngreso())) {
+            throw new ExcepcionReglaNegocio("La fecha de salida debe ser posterior a la fecha de ingreso");
+        }
+        AlojamientoAsignado alojamiento = repositorioAlojamiento.findById(id)
+            .orElseThrow(() -> new RecursoNoEncontradoExcepcion("Alojamiento no encontrado con id: " + id));
+        alojamiento.setIdViajero(solicitud.idViajero());
+        alojamiento.setNombreViajero(solicitud.nombreViajero());
+        alojamiento.setHotel(solicitud.hotel());
+        alojamiento.setHabitacion(solicitud.habitacion());
+        alojamiento.setDireccion(solicitud.direccion());
+        alojamiento.setFechaIngreso(solicitud.fechaIngreso());
+        alojamiento.setFechaSalida(solicitud.fechaSalida());
+        AlojamientoAsignado guardado = repositorioAlojamiento.save(alojamiento);
+        log.info("Alojamiento {} actualizado para el viaje {}", guardado.getId(), idViaje);
+        return mapearAlojamiento(guardado, "Alojamiento actualizado correctamente");
+    }
+
     public RespuestaTransporte actualizarTransporte(Long idViaje, Long id, SolicitudTransporte solicitud) {
         validarIdPositivo(idViaje, "idViaje");
         validarIdPositivo(id, "id");
@@ -381,6 +436,20 @@ public class ServicioOperacion {
         return mapearTransporte(guardado, "Transporte actualizado correctamente");
     }
 
+    public RespuestaIncidente actualizarIncidente(Long id, SolicitudIncidente solicitud) {
+        validarIdPositivo(id, "id");
+        IncidenteViaje incidente = repositorioIncidente.findById(id)
+            .orElseThrow(() -> new RecursoNoEncontradoExcepcion("Incidente no encontrado con id: " + id));
+        incidente.setTipo(solicitud.tipo());
+        incidente.setDescripcion(solicitud.descripcion());
+        incidente.setSeveridad(solicitud.severidad());
+        incidente.setReportadoPor(solicitud.reportadoPor());
+        incidente.setIdViajero(solicitud.idViajero());
+        IncidenteViaje guardado = repositorioIncidente.save(incidente);
+        log.info("Incidente {} actualizado", guardado.getId());
+        return mapearIncidente(guardado, "Incidente actualizado correctamente");
+    }
+
     public RespuestaIncidente actualizarEstadoIncidente(Long id, SolicitudActualizarEstadoIncidente solicitud) {
         IncidenteViaje incidente = repositorioIncidente.findById(id)
             .orElseThrow(() -> new RecursoNoEncontradoExcepcion("Incidente no encontrado con id: " + id));
@@ -400,6 +469,7 @@ public class ServicioOperacion {
         info.setMedicamentos(solicitud.medicamentos());
         info.setCondicionesMedicas(solicitud.condicionesMedicas());
         info.setTelefonoMedico(solicitud.telefonoMedico());
+        info.setNombreViajero(solicitud.nombreViajero());
         InformacionMedica guardada = repositorioInformacionMedica.save(info);
         return mapearInformacionMedica(guardada, "Informacion medica actualizada correctamente");
     }
@@ -413,6 +483,7 @@ public class ServicioOperacion {
         contacto.setParentesco(solicitud.parentesco());
         contacto.setTelefono(solicitud.telefono());
         contacto.setCorreo(solicitud.correo());
+        contacto.setNombreViajero(solicitud.nombreViajero());
         ContactoEmergencia guardado = repositorioContactoEmergencia.save(contacto);
         return mapearContacto(guardado, "Contacto de emergencia actualizado correctamente");
     }
@@ -524,6 +595,7 @@ public class ServicioOperacion {
             alojamiento.getId(),
             alojamiento.getIdViaje(),
             alojamiento.getIdViajero(),
+            alojamiento.getNombreViajero(),
             alojamiento.getHotel(),
             alojamiento.getHabitacion(),
             alojamiento.getDireccion(),
@@ -545,7 +617,8 @@ public class ServicioOperacion {
             informacion.getCondicionesMedicas(),
             informacion.getTelefonoMedico(),
             informacion.getFechaRegistro(),
-            mensaje
+            mensaje,
+            informacion.getNombreViajero()
         );
     }
 
@@ -559,7 +632,8 @@ public class ServicioOperacion {
             contacto.getTelefono(),
             contacto.getCorreo(),
             contacto.getFechaRegistro(),
-            mensaje
+            mensaje,
+            contacto.getNombreViajero()
         );
     }
 

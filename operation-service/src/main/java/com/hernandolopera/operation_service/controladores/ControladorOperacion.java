@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -178,6 +179,32 @@ public class ControladorOperacion {
     // PUT / PATCH — actualizar
     // =========================================================
 
+    @PutMapping("/viajes/{id}")
+    public ResponseEntity<RespuestaViaje> actualizarViaje(
+        @PathVariable Long id,
+        @Valid @RequestBody SolicitudViaje solicitud
+    ) {
+        log.info("PUT /api/v1/operaciones/viajes/{}", id);
+        return ResponseEntity.ok(servicioOperacion.actualizarViaje(id, solicitud));
+    }
+
+    @DeleteMapping("/viajes/{id}")
+    public ResponseEntity<Void> eliminarViaje(@PathVariable Long id) {
+        log.info("DELETE /api/v1/operaciones/viajes/{}", id);
+        servicioOperacion.eliminarViaje(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/viajes/{idViaje}/alojamientos/{id}")
+    public ResponseEntity<RespuestaAlojamiento> actualizarAlojamiento(
+        @PathVariable Long idViaje,
+        @PathVariable Long id,
+        @Valid @RequestBody SolicitudAlojamiento solicitud
+    ) {
+        log.info("PUT /api/v1/operaciones/viajes/{}/alojamientos/{}", idViaje, id);
+        return ResponseEntity.ok(servicioOperacion.actualizarAlojamiento(idViaje, id, solicitud));
+    }
+
     @PutMapping("/viajes/{idViaje}/transporte/{id}")
     public ResponseEntity<RespuestaTransporte> actualizarTransporte(
         @PathVariable Long idViaje,
@@ -186,6 +213,15 @@ public class ControladorOperacion {
     ) {
         log.info("PUT /api/v1/operaciones/viajes/{}/transporte/{}", idViaje, id);
         return ResponseEntity.ok(servicioOperacion.actualizarTransporte(idViaje, id, solicitud));
+    }
+
+    @PutMapping("/incidentes/{id}")
+    public ResponseEntity<RespuestaIncidente> actualizarIncidente(
+        @PathVariable Long id,
+        @Valid @RequestBody SolicitudIncidente solicitud
+    ) {
+        log.info("PUT /api/v1/operaciones/incidentes/{}", id);
+        return ResponseEntity.ok(servicioOperacion.actualizarIncidente(id, solicitud));
     }
 
     @PatchMapping("/incidentes/{id}/estado")
@@ -205,6 +241,16 @@ public class ControladorOperacion {
     ) {
         log.info("PUT /api/v1/operaciones/viajeros/{}/informacion-medica/{}", idViajero, id);
         return ResponseEntity.ok(servicioOperacion.actualizarInformacionMedica(idViajero, id, solicitud));
+    }
+
+    @DeleteMapping("/viajeros/{idViajero}/informacion-medica/{id}")
+    public ResponseEntity<Void> eliminarInformacionMedica(
+        @PathVariable Long idViajero,
+        @PathVariable Long id
+    ) {
+        log.info("DELETE /api/v1/operaciones/viajeros/{}/informacion-medica/{}", idViajero, id);
+        servicioOperacion.eliminarInformacionMedica(idViajero, id);
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/viajeros/{idViajero}/contactos-emergencia/{id}")
