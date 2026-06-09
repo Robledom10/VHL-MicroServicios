@@ -301,23 +301,23 @@ services:
     networks:
       - microservices-net
     
-     # ─────────────────────────────────────────────────────
+  # ─────────────────────────────────────────────────────
   #  API del chatbot (FastAPI + pdfplumber + ollama SDK)
   #  Conecta al Ollama que ya corre en el HOST (:11434)
   # ─────────────────────────────────────────────────────
-  chatbot-service:
-    build: ./chatbot-service
-    container_name: chatbot-service
-    restart: unless-stopped
-    environment:
-      # host.docker.internal → resuelve al host en Windows/Mac
-      # En Linux cambiar por la IP del host (p.ej. 172.17.0.1)
-      CHATBOT_OLLAMA_HOST: ${CHATBOT_OLLAMA_HOST:-http://host.docker.internal:11434}
-      CHATBOT_CHAT_MODEL: ${CHATBOT_CHAT_MODEL:-qwen3:8b}
-      CHATBOT_SAFEGUARD_MODEL: ${CHATBOT_SAFEGUARD_MODEL:-llama-guard3:8b}
-      CHATBOT_OCR_MODEL: ${CHATBOT_OCR_MODEL:-llava:7b}
-    ports:
-      - "${CHATBOT_SERVICE_PORT:-8090}:8000"
+  # chatbot-service:
+  #   build: ./chatbot-service
+  #   container_name: chatbot-service
+  #   restart: unless-stopped
+  #   environment:
+  #     # host.docker.internal → resuelve al host en Windows/Mac
+  #     # En Linux cambiar por la IP del host (p.ej. 172.17.0.1)
+  #     CHATBOT_OLLAMA_HOST: ${CHATBOT_OLLAMA_HOST:-http://host.docker.internal:11434}
+  #     CHATBOT_CHAT_MODEL: ${CHATBOT_CHAT_MODEL:-qwen3:8b}
+  #     CHATBOT_SAFEGUARD_MODEL: ${CHATBOT_SAFEGUARD_MODEL:-llama-guard3:8b}
+  #     CHATBOT_OCR_MODEL: ${CHATBOT_OCR_MODEL:-llava:7b}
+  #   ports:
+  #     - "${CHATBOT_SERVICE_PORT:-8090}:8000"
  
 
   # =========================================================
