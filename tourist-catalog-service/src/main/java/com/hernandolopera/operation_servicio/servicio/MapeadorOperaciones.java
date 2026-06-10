@@ -31,7 +31,10 @@ public class MapeadorOperaciones {
 
     RespuestaProveedor aRespuestaProveedor(ProveedorTuristico proveedor) {
         return new RespuestaProveedor(proveedor.id, proveedor.nombre, proveedor.tipoProveedor,
-            proveedor.correo, proveedor.telefono, proveedor.activo);
+            proveedor.correo, proveedor.telefono, proveedor.activo,
+            proveedor.tipoVehiculo, proveedor.placa, proveedor.conductor, proveedor.telefonoConductor,
+            proveedor.capacidad, proveedor.direccion, proveedor.especialidad, proveedor.idioma,
+            proveedor.tipoComida, proveedor.notas);
     }
 
     RespuestaComentarioPaquete aRespuestaComentario(ComentarioPaquete comentario) {

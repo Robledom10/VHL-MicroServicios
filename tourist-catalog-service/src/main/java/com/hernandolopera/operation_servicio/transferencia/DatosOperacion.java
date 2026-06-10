@@ -39,9 +39,13 @@ public final class DatosOperacion {
         String autor, LocalDateTime fechaCreacion) {}
 
     public record SolicitudProveedor(@NotBlank String nombre, @NotBlank String tipoProveedor,
-        @Email String correo, String telefono) {}
+        @Email String correo, String telefono,
+        String tipoVehiculo, String placa, String conductor, String telefonoConductor, Integer capacidad,
+        String direccion, String especialidad, String idioma, String tipoComida, String notas) {}
     public record RespuestaProveedor(Integer id, String nombre, String tipoProveedor,
-        String correo, String telefono, Boolean activo) {}
+        String correo, String telefono, Boolean activo,
+        String tipoVehiculo, String placa, String conductor, String telefonoConductor, Integer capacidad,
+        String direccion, String especialidad, String idioma, String tipoComida, String notas) {}
 
     public record RespuestaErrorApi(LocalDateTime fecha, int estado, String error, String mensaje,
         String ruta, Map<String, String> campos) {}

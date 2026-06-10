@@ -31,4 +31,6 @@ public interface RepositorioAlojamientoAsignado extends JpaRepository<Alojamient
     );
 
     List<AlojamientoAsignado> findAllByIdViaje(Long idViaje);
+
+    void deleteAllByIdViaje(Long idViaje);
 }

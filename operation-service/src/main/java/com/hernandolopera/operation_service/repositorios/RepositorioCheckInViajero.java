@@ -18,4 +18,6 @@ public interface RepositorioCheckInViajero extends JpaRepository<CheckInViajero,
     long countViajerosByIdViaje(@Param("idViaje") Long idViaje);
 
     List<CheckInViajero> findAllByIdViaje(Long idViaje);
+
+    void deleteAllByIdViaje(Long idViaje);
 }

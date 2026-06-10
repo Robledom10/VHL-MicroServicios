@@ -10,4 +10,6 @@ public interface RepositorioIncidenteViaje extends JpaRepository<IncidenteViaje,
     long countByIdViajeAndEstado(Long idViaje, String estado);
 
     List<IncidenteViaje> findAllByIdViaje(Long idViaje);
+
+    void deleteAllByIdViaje(Long idViaje);
 }

@@ -13,4 +13,6 @@ public interface RepositorioInformacionMedica extends JpaRepository<InformacionM
     long countViajerosByIdViaje(@Param("idViaje") Long idViaje);
 
     List<InformacionMedica> findAllByIdViaje(Long idViaje);
+
+    void deleteAllByIdViaje(Long idViaje);
 }
