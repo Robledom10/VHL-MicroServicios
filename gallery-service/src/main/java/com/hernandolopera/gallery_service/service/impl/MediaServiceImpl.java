@@ -48,10 +48,10 @@ public class MediaServiceImpl implements MediaService {
 
                         log.info("Iniciando subida múltiple de archivos a Cloudinary");
 
-                        loopArchivos: for (MultipartFile file : files) {
+                        for (MultipartFile file : files) {
 
                                 if (file == null || file.isEmpty()) {
-                                        continue loopArchivos;
+                                        continue;
                                 }
 
                                 log.info("====================================");
@@ -61,18 +61,25 @@ public class MediaServiceImpl implements MediaService {
                                 Map<?, ?> uploadResult;
 
                                 if (request.getType() == MediaType.VIDEO) {
+
                                         log.info("Subiendo VIDEO con uploadLarge()");
+
                                         uploadResult = cloudinary.uploader().uploadLarge(
-                                                        file.getInputStream(),
+                                                        file.getBytes(),
                                                         ObjectUtils.asMap(
                                                                         "folder", folder,
                                                                         "resource_type", "video",
                                                                         "chunk_size", 20000000));
+
                                 } else {
+
                                         log.info("Subiendo IMAGEN con upload()");
+
                                         uploadResult = cloudinary.uploader().upload(
-                                                        file.getInputStream(),
-                                                        ObjectUtils.asMap("folder", folder, "resource_type", "image"));
+                                                        file.getBytes(),
+                                                        ObjectUtils.asMap(
+                                                                        "folder", folder,
+                                                                        "resource_type", "image"));
                                 }
 
                                 log.info("UPLOAD RESULT: {}", uploadResult);
@@ -80,7 +87,9 @@ public class MediaServiceImpl implements MediaService {
                                 if (uploadResult == null
                                                 || uploadResult.get("secure_url") == null
                                                 || uploadResult.get("public_id") == null) {
-                                        throw new RuntimeException("Cloudinary no retornó secure_url o public_id");
+
+                                        throw new RuntimeException(
+                                                        "Cloudinary no retornó secure_url o public_id");
                                 }
 
                                 Media media = Media.builder()
@@ -95,16 +104,23 @@ public class MediaServiceImpl implements MediaService {
                                                 .build();
 
                                 Media savedMedia = mediaRepository.save(media);
-                                responses.add(mediaMapper.toResponse(savedMedia));
 
-                                log.info("Archivo guardado correctamente: {}", savedMedia.getPublicId());
+                                responses.add(
+                                                mediaMapper.toResponse(savedMedia));
+
+                                log.info("Archivo guardado correctamente: {}",
+                                                savedMedia.getPublicId());
                         }
 
                         return responses;
 
                 } catch (Exception e) {
+
                         log.error("Error fatal al subir medios a Cloudinary", e);
-                        throw new RuntimeException("Error uploading media: " + e.getMessage(), e);
+
+                        throw new RuntimeException(
+                                        "Error uploading media: " + e.getMessage(),
+                                        e);
                 }
         }
 

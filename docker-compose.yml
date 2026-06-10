@@ -2,9 +2,9 @@ services:
   # =========================================================
   # AUTH DATABASE
   # =========================================================
-  auth-db:
+  db-auth:
     image: mysql:8
-    container_name: auth-db
+    container_name: db-auth
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -98,9 +98,9 @@ services:
       # =========================================================
   # FINANCIAL DATABASE
   # =========================================================
-  financial-db:
+  db-financial:
     image: mysql:8
-    container_name: financial-db
+    container_name: db-financial
     restart: always
 
     environment:
@@ -156,13 +156,13 @@ services:
     container_name: auth-service
     restart: always
     depends_on:
-      auth-db:
+      db-auth:
         condition: service_healthy
     env_file:
       - .env
     environment:
       SPRING_PROFILES_ACTIVE: dev
-      SPRING_DATASOURCE_URL: jdbc:mysql://auth-db:3306/${AUTH_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_URL: jdbc:mysql://db-auth:3306/${AUTH_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       APP_JWT_SECRET: ${JWT_SECRET}
@@ -209,7 +209,7 @@ services:
     env_file:
       - .env
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db-catalog:3306/${CATALOG_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_URL: jdbc:mysql://db-catalog:3306/catalogo_turistico_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     ports:
@@ -255,7 +255,7 @@ services:
     restart: always
 
     depends_on:
-      financial-db:
+      db-financial:
         condition: service_healthy
 
     env_file:
@@ -264,7 +264,7 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: dev
 
-      SPRING_DATASOURCE_URL: jdbc:mysql://financial-db:3306/${FINANCIAL_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_URL: jdbc:mysql://db-financial:3306/${FINANCIAL_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
 
       SPRING_DATASOURCE_USERNAME: root
 
@@ -292,6 +292,7 @@ services:
     env_file:
       - .env
     environment:
+      SERVER_PORT: 8086
       SPRING_DATASOURCE_URL: jdbc:mysql://db-operation:3306/${OPERATION_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -299,6 +300,25 @@ services:
       - "${OPERATION_SERVICE_PORT}:8086"
     networks:
       - microservices-net
+    
+     # ─────────────────────────────────────────────────────
+  #  API del chatbot (FastAPI + pdfplumber + ollama SDK)
+  #  Conecta al Ollama que ya corre en el HOST (:11434)
+  # ─────────────────────────────────────────────────────
+  chatbot-service:
+    build: ./chatbot-service
+    container_name: chatbot-service
+    restart: unless-stopped
+    environment:
+      # host.docker.internal → resuelve al host en Windows/Mac
+      # En Linux cambiar por la IP del host (p.ej. 172.17.0.1)
+      CHATBOT_OLLAMA_HOST: ${CHATBOT_OLLAMA_HOST:-http://host.docker.internal:11434}
+      CHATBOT_CHAT_MODEL: ${CHATBOT_CHAT_MODEL:-qwen3:8b}
+      CHATBOT_SAFEGUARD_MODEL: ${CHATBOT_SAFEGUARD_MODEL:-llama-guard3:8b}
+      CHATBOT_OCR_MODEL: ${CHATBOT_OCR_MODEL:-llava:7b}
+    ports:
+      - "${CHATBOT_SERVICE_PORT:-8090}:8000"
+ 
 
   # =========================================================
   # API GATEWAY

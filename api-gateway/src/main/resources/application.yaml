@@ -14,7 +14,6 @@ spring:
         # =========================================================
         # AUTH SERVICE
         # =========================================================
-
         - id: auth-service
           uri: http://auth-service:8081
           predicates:
@@ -23,7 +22,6 @@ spring:
         # =========================================================
         # RESERVATION SERVICE
         # =========================================================
-
         - id: reservation-service
           uri: http://reservation-service:8082
           predicates:
@@ -32,16 +30,14 @@ spring:
         # =========================================================
         # TOURIST CATALOG SERVICE
         # =========================================================
-
         - id: tourist-catalog-service
           uri: http://tourist-catalog-service:8083
           predicates:
-            - Path=/api/categorias/**,/api/paquetes/**,/api/proveedores/**
+            - Path=/api/paquetes/**,/api/proveedores/**
 
         # =========================================================
         # GALLERY SERVICE
         # =========================================================
-
         - id: gallery-service
           uri: http://gallery-service:8084
           predicates:
@@ -50,43 +46,40 @@ spring:
         # =========================================================
         # FINANCIAL SERVICE
         # =========================================================
-
         - id: financial-service
           uri: http://financial-service:8085
           predicates:
             - Path=/api/payments/**,/api/webhook/**
 
-      # =========================================================
-      # CORS
-      # =========================================================
-
-        - id: operation_service
-          uri: http://operation-service:8084
+        # =========================================================
+        # OPERATION SERVICE
+        # =========================================================
+        - id: operation-service
+          uri: http://operation-service:8086
           predicates:
             - Path=/api/v1/operaciones/**
 
+      # =========================================================
+      # CORS
+      # =========================================================
       globalcors:
         corsConfigurations:
           "[/**]":
             allowedOrigins:
               - "http://localhost:4200"
-
             allowedMethods:
               - GET
               - POST
               - PUT
               - DELETE
               - OPTIONS
-
             allowedHeaders:
               - "*"
-
             allowCredentials: true
 
       # =========================================================
       # DEFAULT FILTERS
       # =========================================================
-
       default-filters:
         - name: DedupeResponseHeader
           args:
@@ -96,7 +89,6 @@ spring:
 # =========================================================
 # JWT
 # =========================================================
-
 app:
   jwt:
     secret: ${JWT_SECRET}

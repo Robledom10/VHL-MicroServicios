@@ -1,0 +1,290 @@
+{
+  "info": {
+    "name": "Operation Service",
+    "description": "Pruebas HTTP end-to-end para operation-service pasando por API Gateway. Ejecuta primero 00 Auth / Registrar usuario QA y 00 Auth / Login para guardar el Bearer token. Los requests se ejecutan en orden para que las variables (idViaje, idTransporte, etc.) se encadenen correctamente.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{token}}", "type": "string" }
+    ]
+  },
+  "variable": [
+    { "key": "baseUrl",             "value": "http://localhost:8080" },
+    { "key": "token",               "value": "" },
+    { "key": "authEmail",           "value": "operation.qa.postman@test.com" },
+    { "key": "authPassword",        "value": "Password123" },
+    { "key": "documentNumber",      "value": "999000222" },
+    { "key": "idViaje",             "value": "" },
+    { "key": "idViajero",           "value": "101" },
+    { "key": "idViajeroSecundario", "value": "102" },
+    { "key": "idReserva",           "value": "9001" },
+    { "key": "habitacion",          "value": "501" },
+    { "key": "idTransporte",        "value": "" },
+    { "key": "idAlojamiento",       "value": "" },
+    { "key": "idInfoMedica",        "value": "" },
+    { "key": "idContacto",          "value": "" },
+    { "key": "idIncidente",         "value": "" }
+  ],
+  "item": [
+    {
+      "name": "00 Auth por Gateway",
+      "auth": { "type": "noauth" },
+      "item": [
+        {
+          "name": "Registrar usuario QA",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 201 o usuario ya existe', function () {", "  pm.expect([201, 409]).to.include(pm.response.code);", "});"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"firstName\": \"Operation\",\n  \"lastName\": \"QA\",\n  \"email\": \"{{authEmail}}\",\n  \"password\": \"{{authPassword}}\",\n  \"documentType\": \"Cedula Ciudadania\",\n  \"documentNumber\": \"{{documentNumber}}\",\n  \"phone\": \"3001234567\",\n  \"birthDate\": \"1995-01-01\",\n  \"state\": \"Bogota\",\n  \"city\": \"Bogota\",\n  \"address\": \"Centro\"\n}" }, "url": "{{baseUrl}}/api/auth/register" }
+        },
+        {
+          "name": "Login y guardar token",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });", "const json = pm.response.json();", "const token = json.accessToken || json.token || json.jwt;", "pm.test('respuesta contiene token', function () {", "  pm.expect(token).to.be.a('string').and.not.empty;", "});", "pm.collectionVariables.set('token', token);"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{authEmail}}\",\n  \"password\": \"{{authPassword}}\"\n}" }, "url": "{{baseUrl}}/api/auth/login" }
+        }
+      ]
+    },
+    {
+      "name": "01 Seguridad Gateway",
+      "item": [
+        {
+          "name": "Sin token debe responder 401",
+          "auth": { "type": "noauth" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('gateway bloquea sin token', function () {", "  pm.response.to.have.status(401);", "});"] } }],
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/v1/operaciones/viajes/1/dashboard" }
+        }
+      ]
+    },
+    {
+      "name": "02 Viajes",
+      "item": [
+        {
+          "name": "Crear viaje",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 201', function () { pm.response.to.have.status(201); });", "const json = pm.response.json();", "pm.test('viaje programado', function () {", "  pm.expect(json.id).to.exist;", "  pm.expect(json.estado).to.eql('programado');", "});", "pm.collectionVariables.set('idViaje', json.id);", "pm.collectionVariables.set('habitacion', '501-' + json.id);"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"idUsuario\": 1,\n  \"idPaquete\": 1,\n  \"fechaSalida\": \"2026-08-10\",\n  \"fechaRegreso\": \"2026-08-15\"\n}" }, "url": "{{baseUrl}}/api/v1/operaciones/viajes" }
+        },
+        {
+          "name": "Listar viajes",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });", "const json = pm.response.json();", "pm.test('lista y contiene el viaje creado', function () {", "  pm.expect(json).to.be.an('array');", "  pm.expect(json.some(v => v.id === Number(pm.collectionVariables.get('idViaje')))).to.eql(true);", "});"] } }],
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/v1/operaciones/viajes" }
+        },
+        {
+          "name": "Actualizar viaje",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });", "const json = pm.response.json();", "pm.test('fechas actualizadas', function () {", "  pm.expect(json.id).to.eql(Number(pm.collectionVariables.get('idViaje')));", "  pm.expect(json.fechaSalida).to.eql('2026-09-10');", "  pm.expect(json.fechaRegreso).to.eql('2026-09-15');", "});"] } }],
+          "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"idUsuario\": 1,\n  \"idPaquete\": 1,\n  \"fechaSalida\": \"2026-09-10\",\n  \"fechaRegreso\": \"2026-09-15\"\n}" }, "url": "{{baseUrl}}/api/v1/operaciones/viajes/{{idViaje}}" }
+        },
+        {
+          "name": "Validar fechas invalidas",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 409 por regla de negocio', function () {", "  pm.response.to.have.status(409);", "});"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"idUsuario\": 1,\n  \"idPaquete\": 1,\n  \"fechaSalida\": \"2026-08-15\",\n  \"fechaRegreso\": \"2026-08-10\"\n}" }, "url": "{{baseUrl}}/api/v1/operaciones/viajes" }
+        }
+      ]
+    },
+    {
+      "name": "03 HU7.1 Transporte",
+      "item": [
+        {
+          "name": "Asignar transporte",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 201', function () { pm.response.to.have.status(201); });", "const json = pm.response.json();", "pm.test('transporte asociado al viaje', function () {", "  pm.expect(json.idViaje).to.eql(Number(pm.collectionVariables.get('idViaje')));", "  pm.expect(json.capacidad).to.be.above(json.cantidadViajeros - 1);", "});", "pm.collectionVariables.set('idTransporte', json.id);"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"tipoTransporte\": \"Bus\",\n  \"empresa\": \"Transportes Andinos\",\n  \"placa\": \"OP{{idViaje}}\",\n  \"conductor\": \"Carlos Rojas\",\n  \"telefonoConductor\": \"3001234567\",\n  \"capacidad\": 40,\n  \"cantidadViajeros\": 25,\n  \"fechaSalida\": \"2026-09-10T07:00:00\"\n}" }, "url": "{{baseUrl}}/api/v1/operaciones/viajes/{{idViaje}}/transporte" }
+        },
+        {
+          "name": "Listar transportes del viaje",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });", "const json = pm.response.json();", "pm.test('lista con al menos un transporte', function () {", "  pm.expect(json).to.be.an('array').and.have.length.above(0);", "  pm.expect(json.some(t => t.id === Number(pm.collectionVariables.get('idTransporte')))).to.eql(true);", "});"] } }],
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/v1/operaciones/viajes/{{idViaje}}/transporte" }
+        },
+        {
+          "name": "Actualizar transporte",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });", "const json = pm.response.json();", "pm.test('transporte actualizado', function () {", "  pm.expect(json.id).to.eql(Number(pm.collectionVariables.get('idTransporte')));", "  pm.expect(json.tipoTransporte).to.eql('Van');", "  pm.expect(json.empresa).to.eql('Transportes Andinos V2');", "});"] } }],
+          "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"tipoTransporte\": \"Van\",\n  \"empresa\": \"Transportes Andinos V2\",\n  \"placa\": \"OP{{idViaje}}V2\",\n  \"conductor\": \"Pedro Ruiz\",\n  \"telefonoConductor\": \"3109876543\",\n  \"capacidad\": 15,\n  \"cantidadViajeros\": 10,\n  \"fechaSalida\": \"2026-09-10T07:00:00\"\n}" }, "url": "{{baseUrl}}/api/v1/operaciones/viajes/{{idViaje}}/transporte/{{idTransporte}}" }
+        },
+        {
+          "name": "Validar capacidad insuficiente",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 409', function () { pm.response.to.have.status(409); });"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"tipoTransporte\": \"Van\",\n  \"empresa\": \"Transportes Andinos\",\n  \"placa\": \"BAD{{idViaje}}\",\n  \"conductor\": \"Carlos Rojas\",\n  \"telefonoConductor\": \"3001234567\",\n  \"capacidad\": 5,\n  \"cantidadViajeros\": 10,\n  \"fechaSalida\": \"2026-09-10T07:00:00\"\n}" }, "url": "{{baseUrl}}/api/v1/operaciones/viajes/{{idViaje}}/transporte" }
+        }
+      ]
+    },
+    {
+      "name": "04 HU7.3 Alojamiento",
+      "item": [
+        {
+          "name": "Asignar alojamiento",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 201', function () { pm.response.to.have.status(201); });", "const json = pm.response.json();", "pm.test('alojamiento asociado', function () {", "  pm.expect(json.idViajero).to.eql(Number(pm.collectionVariables.get('idViajero')));", "  pm.expect(json.habitacion).to.eql(pm.collectionVariables.get('habitacion'));", "});", "pm.collectionVariables.set('idAlojamiento', json.id);"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"idViajero\": {{idViajero}},\n  \"hotel\": \"Hotel Central\",\n  \"habitacion\": \"{{habitacion}}\",\n  \"direccion\": \"Calle 10 # 20-30\",\n  \"fechaIngreso\": \"2026-09-10\",\n  \"fechaSalida\": \"2026-09-15\"\n}" }, "url": "{{baseUrl}}/api/v1/operaciones/viajes/{{idViaje}}/alojamientos" }
+        },
+        {
+          "name": "Listar alojamientos del viaje",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });", "const json = pm.response.json();", "pm.test('lista con alojamiento registrado', function () {", "  pm.expect(json).to.be.an('array').and.have.length.above(0);", "  pm.expect(json.some(a => a.id === Number(pm.collectionVariables.get('idAlojamiento')))).to.eql(true);", "});"] } }],
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/v1/operaciones/viajes/{{idViaje}}/alojamientos" }
+        },
+        {
+          "name": "Actualizar alojamiento",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });", "const json = pm.response.json();", "pm.test('alojamiento actualizado', function () {", "  pm.expect(json.id).to.eql(Number(pm.collectionVariables.get('idAlojamiento')));", "  pm.expect(json.hotel).to.eql('Hotel Boutique');", "  pm.expect(json.direccion).to.eql('Carrera 5 # 10-20');", "});"] } }],
+          "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"idViajero\": {{idViajero}},\n  \"hotel\": \"Hotel Boutique\",\n  \"habitacion\": \"{{habitacion}}\",\n  \"direccion\": \"Carrera 5 # 10-20\",\n  \"fechaIngreso\": \"2026-09-10\",\n  \"fechaSalida\": \"2026-09-15\"\n}" }, "url": "{{baseUrl}}/api/v1/operaciones/viajes/{{idViaje}}/alojamientos/{{idAlojamiento}}" }
+        },
+        {
+          "name": "Controlar alojamiento duplicado por viajero",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 409', function () { pm.response.to.have.status(409); });"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"idViajero\": {{idViajero}},\n  \"hotel\": \"Hotel Central\",\n  \"habitacion\": \"{{habitacion}}\",\n  \"direccion\": \"Calle 10 # 20-30\",\n  \"fechaIngreso\": \"2026-09-10\",\n  \"fechaSalida\": \"2026-09-15\"\n}" }, "url": "{{baseUrl}}/api/v1/operaciones/viajes/{{idViaje}}/alojamientos" }
+        },
+        {
+          "name": "Validar habitacion ocupada",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 409', function () { pm.response.to.have.status(409); });"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"idViajero\": {{idViajeroSecundario}},\n  \"hotel\": \"Hotel Central\",\n  \"habitacion\": \"{{habitacion}}\",\n  \"direccion\": \"Calle 10 # 20-30\",\n  \"fechaIngreso\": \"2026-09-11\",\n  \"fechaSalida\": \"2026-09-14\"\n}" }, "url": "{{baseUrl}}/api/v1/operaciones/viajes/{{idViaje}}/alojamientos" }
+        }
+      ]
+    },
+    {
+      "name": "05 HU7.4 Informacion medica",
+      "item": [
+        {
+          "name": "Registrar informacion medica",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 201', function () { pm.response.to.have.status(201); });", "const json = pm.response.json();", "pm.test('tipo de sangre y nombreViajero correctos', function () {", "  pm.expect(json.tipoSangre).to.eql('O+');", "  pm.expect(json.nombreViajero).to.eql('Juan Perez QA');", "});", "pm.collectionVariables.set('idInfoMedica', json.id);"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"idViaje\": {{idViaje}},\n  \"tipoSangre\": \"O+\",\n  \"alergias\": \"Ninguna\",\n  \"medicamentos\": \"Ninguno\",\n  \"condicionesMedicas\": \"Sin restricciones\",\n  \"telefonoMedico\": \"3007654321\",\n  \"nombreViajero\": \"Juan Perez QA\"\n}" }, "url": "{{baseUrl}}/api/v1/operaciones/viajeros/{{idViajero}}/informacion-medica" }
+        },
+        {
+          "name": "Listar informacion medica del viaje",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });", "const json = pm.response.json();", "pm.test('lista con el registro medico', function () {", "  pm.expect(json).to.be.an('array').and.have.length.above(0);", "  pm.expect(json.some(r => r.id === Number(pm.collectionVariables.get('idInfoMedica')))).to.eql(true);", "});"] } }],
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/v1/operaciones/viajes/{{idViaje}}/informacion-medica" }
+        },
+        {
+          "name": "Actualizar informacion medica",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });", "const json = pm.response.json();", "pm.test('informacion medica actualizada', function () {", "  pm.expect(json.id).to.eql(Number(pm.collectionVariables.get('idInfoMedica')));", "  pm.expect(json.tipoSangre).to.eql('A+');", "  pm.expect(json.alergias).to.eql('Polen');", "  pm.expect(json.nombreViajero).to.eql('Juan Perez QA');", "});"] } }],
+          "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"idViaje\": {{idViaje}},\n  \"tipoSangre\": \"A+\",\n  \"alergias\": \"Polen\",\n  \"medicamentos\": \"Cetirizina\",\n  \"condicionesMedicas\": \"Rinitis alergica\",\n  \"telefonoMedico\": \"3007654321\",\n  \"nombreViajero\": \"Juan Perez QA\"\n}" }, "url": "{{baseUrl}}/api/v1/operaciones/viajeros/{{idViajero}}/informacion-medica/{{idInfoMedica}}" }
+        },
+        {
+          "name": "Eliminar informacion medica",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 204 sin contenido', function () {", "  pm.response.to.have.status(204);", "});"] } }],
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/api/v1/operaciones/viajeros/{{idViajero}}/informacion-medica/{{idInfoMedica}}" }
+        },
+        {
+          "name": "Validar tipo de sangre invalido",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 409', function () { pm.response.to.have.status(409); });"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"idViaje\": {{idViaje}},\n  \"tipoSangre\": \"ZZ\",\n  \"alergias\": \"Ninguna\",\n  \"medicamentos\": \"Ninguno\",\n  \"condicionesMedicas\": \"Sin restricciones\",\n  \"telefonoMedico\": \"3007654321\",\n  \"nombreViajero\": \"Test Invalido\"\n}" }, "url": "{{baseUrl}}/api/v1/operaciones/viajeros/{{idViajero}}/informacion-medica" }
+        }
+      ]
+    },
+    {
+      "name": "06 HU7.5 Contactos emergencia",
+      "item": [
+        {
+          "name": "Registrar contacto de emergencia",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 201', function () { pm.response.to.have.status(201); });", "const json = pm.response.json();", "pm.test('contacto asociado al viajero con nombreViajero', function () {", "  pm.expect(json.idViajero).to.eql(Number(pm.collectionVariables.get('idViajero')));", "  pm.expect(json.correo).to.eql('contacto.operacion@test.com');", "  pm.expect(json.nombreViajero).to.eql('Juan Perez QA');", "});", "pm.collectionVariables.set('idContacto', json.id);"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"idViaje\": {{idViaje}},\n  \"nombre\": \"Ana Gomez\",\n  \"parentesco\": \"Madre\",\n  \"telefono\": \"3001112233\",\n  \"correo\": \"contacto.operacion@test.com\",\n  \"nombreViajero\": \"Juan Perez QA\"\n}" }, "url": "{{baseUrl}}/api/v1/operaciones/viajeros/{{idViajero}}/contactos-emergencia" }
+        },
+        {
+          "name": "Listar contactos del viaje",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });", "const json = pm.response.json();", "pm.test('lista con contacto registrado', function () {", "  pm.expect(json).to.be.an('array').and.have.length.above(0);", "  pm.expect(json.some(c => c.id === Number(pm.collectionVariables.get('idContacto')))).to.eql(true);", "});"] } }],
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/v1/operaciones/viajes/{{idViaje}}/contactos-emergencia" }
+        },
+        {
+          "name": "Actualizar contacto de emergencia",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });", "const json = pm.response.json();", "pm.test('contacto actualizado', function () {", "  pm.expect(json.id).to.eql(Number(pm.collectionVariables.get('idContacto')));", "  pm.expect(json.nombre).to.eql('Maria Lopez');", "  pm.expect(json.parentesco).to.eql('Hermana');", "  pm.expect(json.nombreViajero).to.eql('Juan Perez QA');", "});"] } }],
+          "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"idViaje\": {{idViaje}},\n  \"nombre\": \"Maria Lopez\",\n  \"parentesco\": \"Hermana\",\n  \"telefono\": \"3109876543\",\n  \"correo\": \"maria.actualizada@test.com\",\n  \"nombreViajero\": \"Juan Perez QA\"\n}" }, "url": "{{baseUrl}}/api/v1/operaciones/viajeros/{{idViajero}}/contactos-emergencia/{{idContacto}}" }
+        },
+        {
+          "name": "Validar correo invalido",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 400', function () { pm.response.to.have.status(400); });"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"idViaje\": {{idViaje}},\n  \"nombre\": \"Ana Gomez\",\n  \"parentesco\": \"Madre\",\n  \"telefono\": \"3001112233\",\n  \"correo\": \"correo-invalido\",\n  \"nombreViajero\": \"Test Invalido\"\n}" }, "url": "{{baseUrl}}/api/v1/operaciones/viajeros/{{idViajeroSecundario}}/contactos-emergencia" }
+        }
+      ]
+    },
+    {
+      "name": "07 HU7.2 Check-in QR",
+      "item": [
+        {
+          "name": "Registrar check-in",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 201', function () { pm.response.to.have.status(201); });", "const json = pm.response.json();", "pm.test('check-in asociado', function () {", "  pm.expect(json.idViajero).to.eql(Number(pm.collectionVariables.get('idViajero')));", "  pm.expect(json.idReserva).to.eql(Number(pm.collectionVariables.get('idReserva')));", "});"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"idViajero\": {{idViajero}},\n  \"codigoQr\": \"QR-OP-{{idViaje}}-{{idViajero}}\",\n  \"idReserva\": {{idReserva}}\n}" }, "url": "{{baseUrl}}/api/v1/operaciones/viajes/{{idViaje}}/checkins" }
+        },
+        {
+          "name": "Listar check-ins del viaje",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });", "const json = pm.response.json();", "pm.test('lista con check-in del viajero', function () {", "  pm.expect(json).to.be.an('array').and.have.length.above(0);", "  pm.expect(json.some(c => c.idViajero === Number(pm.collectionVariables.get('idViajero')))).to.eql(true);", "});"] } }],
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/v1/operaciones/viajes/{{idViaje}}/checkins" }
+        },
+        {
+          "name": "Controlar check-in duplicado",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 409', function () { pm.response.to.have.status(409); });"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"idViajero\": {{idViajero}},\n  \"codigoQr\": \"QR-OP-{{idViaje}}-{{idViajero}}\",\n  \"idReserva\": {{idReserva}}\n}" }, "url": "{{baseUrl}}/api/v1/operaciones/viajes/{{idViaje}}/checkins" }
+        },
+        {
+          "name": "Validar QR invalido",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 409', function () { pm.response.to.have.status(409); });"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"idViajero\": {{idViajeroSecundario}},\n  \"codigoQr\": \"BAD\",\n  \"idReserva\": {{idReserva}}\n}" }, "url": "{{baseUrl}}/api/v1/operaciones/viajes/{{idViaje}}/checkins" }
+        }
+      ]
+    },
+    {
+      "name": "08 HU7.6 Incidentes",
+      "item": [
+        {
+          "name": "Registrar incidente",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 201', function () { pm.response.to.have.status(201); });", "const json = pm.response.json();", "pm.test('incidente pendiente con severidad MEDIA', function () {", "  pm.expect(json.estado).to.eql('pendiente');", "  pm.expect(json.severidad).to.eql('MEDIA');", "});", "pm.collectionVariables.set('idIncidente', json.id);"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"tipo\": \"Retraso\",\n  \"descripcion\": \"Retraso de 30 minutos en punto de encuentro\",\n  \"severidad\": \"media\",\n  \"idViajero\": {{idViajero}},\n  \"reportadoPor\": \"Coordinador operativo\"\n}" }, "url": "{{baseUrl}}/api/v1/operaciones/viajes/{{idViaje}}/incidentes" }
+        },
+        {
+          "name": "Listar incidentes del viaje",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });", "const json = pm.response.json();", "pm.test('lista con incidente registrado', function () {", "  pm.expect(json).to.be.an('array').and.have.length.above(0);", "  pm.expect(json.some(i => i.id === Number(pm.collectionVariables.get('idIncidente')))).to.eql(true);", "});"] } }],
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/v1/operaciones/viajes/{{idViaje}}/incidentes" }
+        },
+        {
+          "name": "Actualizar incidente completo",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });", "const json = pm.response.json();", "pm.test('tipo y severidad actualizados', function () {", "  pm.expect(json.id).to.eql(Number(pm.collectionVariables.get('idIncidente')));", "  pm.expect(json.tipo).to.eql('Perdida de equipaje');", "  pm.expect(json.severidad).to.eql('ALTA');", "});"] } }],
+          "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"tipo\": \"Perdida de equipaje\",\n  \"descripcion\": \"El viajero reporta perdida de maleta en la terminal\",\n  \"severidad\": \"alta\",\n  \"idViajero\": {{idViajero}},\n  \"reportadoPor\": \"Coordinador senior\"\n}" }, "url": "{{baseUrl}}/api/v1/operaciones/incidentes/{{idIncidente}}" }
+        },
+        {
+          "name": "Actualizar estado del incidente",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });", "const json = pm.response.json();", "pm.test('estado actualizado a resuelto', function () {", "  pm.expect(json.id).to.eql(Number(pm.collectionVariables.get('idIncidente')));", "  pm.expect(json.estado).to.eql('resuelto');", "});"] } }],
+          "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"estado\": \"resuelto\"\n}" }, "url": "{{baseUrl}}/api/v1/operaciones/incidentes/{{idIncidente}}/estado" }
+        },
+        {
+          "name": "Validar incidente sin descripcion",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 400', function () { pm.response.to.have.status(400); });"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"tipo\": \"Retraso\",\n  \"descripcion\": \"\",\n  \"severidad\": \"media\",\n  \"idViajero\": {{idViajero}},\n  \"reportadoPor\": \"Coordinador operativo\"\n}" }, "url": "{{baseUrl}}/api/v1/operaciones/viajes/{{idViaje}}/incidentes" }
+        }
+      ]
+    },
+    {
+      "name": "09 HU7.7 Notificaciones",
+      "item": [
+        {
+          "name": "Enviar notificacion con destinatarios",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 201', function () { pm.response.to.have.status(201); });", "const json = pm.response.json();", "pm.test('notificacion con 2 destinatarios enviada', function () {", "  pm.expect(json.estado).to.eql('ENVIADA');", "  pm.expect(json.totalDestinatarios).to.eql(2);", "});"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"asunto\": \"Cambio de horario\",\n  \"mensaje\": \"La salida se realizara a las 7:00 a.m.\",\n  \"canal\": \"email\",\n  \"destinatarios\": [{{idViajero}}, {{idViajeroSecundario}}]\n}" }, "url": "{{baseUrl}}/api/v1/operaciones/viajes/{{idViaje}}/notificaciones" }
+        },
+        {
+          "name": "Enviar notificacion a viajeros del viaje",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 201', function () { pm.response.to.have.status(201); });", "const json = pm.response.json();", "pm.test('usa viajeros registrados', function () {", "  pm.expect(json.totalDestinatarios).to.be.above(0);", "});"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"asunto\": \"Recordatorio\",\n  \"mensaje\": \"Recuerda llevar documento de identidad.\",\n  \"canal\": \"sms\",\n  \"destinatarios\": []\n}" }, "url": "{{baseUrl}}/api/v1/operaciones/viajes/{{idViaje}}/notificaciones" }
+        },
+        {
+          "name": "Listar notificaciones del viaje",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });", "const json = pm.response.json();", "pm.test('todas las notificaciones ENVIADAS', function () {", "  pm.expect(json).to.be.an('array').and.have.length.above(0);", "  pm.expect(json.every(n => n.estado === 'ENVIADA')).to.eql(true);", "});"] } }],
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/v1/operaciones/viajes/{{idViaje}}/notificaciones" }
+        }
+      ]
+    },
+    {
+      "name": "10 HU7.8 Dashboard",
+      "item": [
+        {
+          "name": "Obtener dashboard operativo",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });", "const json = pm.response.json();", "pm.test('metricas consolidadas del viaje', function () {", "  pm.expect(json.idViaje).to.eql(Number(pm.collectionVariables.get('idViaje')));", "  pm.expect(json.transportesAsignados).to.be.above(0);", "  pm.expect(json.alojamientosAsignados).to.be.above(0);", "  pm.expect(json.incidentesRegistrados).to.be.above(0);", "  pm.expect(json.notificacionesEnviadas).to.be.above(0);", "  pm.expect(json.porcentajeCheckIn).to.be.a('number');", "});"] } }],
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/v1/operaciones/viajes/{{idViaje}}/dashboard" }
+        }
+      ]
+    },
+    {
+      "name": "11 Limpieza",
+      "description": "Ejecutar al final. Elimina el viaje de prueba para no dejar datos sucios.",
+      "item": [
+        {
+          "name": "Eliminar viaje (cleanup)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 204 sin contenido', function () {", "  pm.response.to.have.status(204);", "});", "pm.collectionVariables.set('idViaje', '');"] } }],
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/api/v1/operaciones/viajes/{{idViaje}}" }
+        }
+      ]
+    }
+  ]
+}

@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/proveedores")
+@RequestMapping("/api/proveedores")
 public class ControladorProveedor {
     private final ServicioProveedor servicio;
     public ControladorProveedor(ServicioProveedor servicio) { this.servicio = servicio; }
@@ -17,11 +17,15 @@ public class ControladorProveedor {
     @PostMapping
     public ResponseEntity<RespuestaProveedor> crear(@Valid @RequestBody SolicitudProveedor solicitud) {
         RespuestaProveedor respuesta = servicio.crear(solicitud);
-        return ResponseEntity.created(URI.create("/proveedores/" + respuesta.id())).body(respuesta);
+        return ResponseEntity.created(URI.create("/api/proveedores/" + respuesta.id())).body(respuesta);
     }
 
     @GetMapping
-    public ResponseEntity<List<RespuestaProveedor>> buscarTodos() {
+    public ResponseEntity<List<RespuestaProveedor>> buscarTodos(
+            @RequestParam(required = false) String tipo) {
+        if (tipo != null && !tipo.isBlank()) {
+            return ResponseEntity.ok(servicio.buscarPorTipo(tipo));
+        }
         return ResponseEntity.ok(servicio.buscarTodos());
     }
 

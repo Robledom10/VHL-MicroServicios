@@ -47,6 +47,9 @@ public class InformacionMedica {
     @Column(name = "medical_phone", length = 30)
     private String telefonoMedico;
 
+    @Column(name = "traveler_name", length = 150)
+    private String nombreViajero;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime fechaRegistro;
 }

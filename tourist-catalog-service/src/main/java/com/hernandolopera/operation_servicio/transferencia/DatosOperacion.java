@@ -12,30 +12,40 @@ import java.util.Map;
 public final class DatosOperacion {
     private DatosOperacion() {}
 
-    public record SolicitudCategoria(@NotBlank String nombre, String descripcion) {}
-    public record RespuestaCategoria(Integer id, String nombre, String descripcion, Boolean activo) {}
-
     public record SolicitudActividadItinerario(@NotNull @Min(1) Integer numeroDia, @NotBlank String titulo) {}
     public record RespuestaActividadItinerario(Integer id, Integer numeroDia, String titulo, Integer idPaquete) {}
 
-    public record SolicitudPaqueteTuristico(@NotBlank String titulo, String descripcion, @NotBlank String destino,
+    public record SolicitudPaqueteTuristico(@NotBlank String titulo, String descripcion, String destino,
+        List<@NotBlank String> destinos,
         @NotNull @Min(1) Integer duracionDias, @NotNull @DecimalMin("0.01") BigDecimal precio,
-        @NotNull @Min(1) Integer cupo, @NotNull LocalDate fechaInicio, @NotNull LocalDate fechaFin,
+        @NotNull @Min(1) Integer cupo, @NotNull LocalDate fechaInicio,
         String lugarSalida, LocalTime horaSalida, String alojamiento, String tipoHabitacion, String tipoTransporte,
+        List<@NotBlank String> tiposTransporte,
         String fotoVerticalUrl, String fotoHorizontalUrl, List<@NotBlank String> incluye,
         List<@NotBlank String> noIncluye, List<@NotBlank String> politicasCancelacion,
-        @NotNull Integer idCategoria, @Valid List<SolicitudActividadItinerario> itinerario) {}
+        List<String> requisitos,
+        @Valid List<SolicitudActividadItinerario> itinerario) {}
     public record RespuestaPaqueteTuristico(Integer id, String titulo, String descripcion, String destino,
-        Integer duracionDias, BigDecimal precio, Integer cupo, LocalDate fechaInicio, LocalDate fechaFin,
+        List<String> destinos,
+        Integer duracionDias, BigDecimal precio, Integer cupo, LocalDate fechaInicio,
         String lugarSalida, LocalTime horaSalida, String alojamiento, String tipoHabitacion, String tipoTransporte,
+        List<String> tiposTransporte,
         String fotoVerticalUrl, String fotoHorizontalUrl, List<String> incluye, List<String> noIncluye,
-        List<String> politicasCancelacion, Boolean activo, Integer idCategoria, String categoria,
-        List<RespuestaActividadItinerario> itinerario) {}
+        List<String> politicasCancelacion, List<String> requisitos, Boolean activo, List<RespuestaActividadItinerario> itinerario) {}
+    public record RespuestaImagenPaquete(String url) {}
+
+    public record SolicitudComentarioPaquete(@NotBlank String comentario, @NotNull @Min(1) @Max(5) Integer puntaje) {}
+    public record RespuestaComentarioPaquete(Integer id, Integer idPaquete, String comentario, Integer puntaje,
+        String autor, LocalDateTime fechaCreacion) {}
 
     public record SolicitudProveedor(@NotBlank String nombre, @NotBlank String tipoProveedor,
-        @Email String correo, String telefono) {}
+        @Email String correo, String telefono,
+        String tipoVehiculo, String placa, String conductor, String telefonoConductor, Integer capacidad,
+        String direccion, String especialidad, String idioma, String tipoComida, String notas) {}
     public record RespuestaProveedor(Integer id, String nombre, String tipoProveedor,
-        String correo, String telefono, Boolean activo) {}
+        String correo, String telefono, Boolean activo,
+        String tipoVehiculo, String placa, String conductor, String telefonoConductor, Integer capacidad,
+        String direccion, String especialidad, String idioma, String tipoComida, String notas) {}
 
     public record RespuestaErrorApi(LocalDateTime fecha, int estado, String error, String mensaje,
         String ruta, Map<String, String> campos) {}
