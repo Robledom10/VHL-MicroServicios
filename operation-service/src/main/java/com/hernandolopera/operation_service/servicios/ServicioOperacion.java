@@ -1,6 +1,8 @@
 package com.hernandolopera.operation_service.servicios;
 
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaAlojamiento;
+import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaGuia;
+import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaRestaurante;
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaCheckIn;
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaContactoEmergencia;
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaDashboard;
@@ -11,6 +13,8 @@ import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaTranspor
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaViaje;
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudActualizarEstadoIncidente;
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudAlojamiento;
+import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudGuia;
+import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudRestaurante;
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudCheckIn;
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudContactoEmergencia;
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudIncidente;
@@ -19,6 +23,8 @@ import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudNotifica
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudTransporte;
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudViaje;
 import com.hernandolopera.operation_service.entidades.AlojamientoAsignado;
+import com.hernandolopera.operation_service.entidades.GuiaAsignado;
+import com.hernandolopera.operation_service.entidades.RestauranteViaje;
 import com.hernandolopera.operation_service.entidades.CheckInViajero;
 import com.hernandolopera.operation_service.entidades.ContactoEmergencia;
 import com.hernandolopera.operation_service.entidades.IncidenteViaje;
@@ -29,6 +35,8 @@ import com.hernandolopera.operation_service.entidades.TransporteAsignado;
 import com.hernandolopera.operation_service.excepciones.ExcepcionReglaNegocio;
 import com.hernandolopera.operation_service.excepciones.RecursoNoEncontradoExcepcion;
 import com.hernandolopera.operation_service.repositorios.RepositorioAlojamientoAsignado;
+import com.hernandolopera.operation_service.repositorios.RepositorioGuiaAsignado;
+import com.hernandolopera.operation_service.repositorios.RepositorioRestauranteViaje;
 import com.hernandolopera.operation_service.repositorios.RepositorioCheckInViajero;
 import com.hernandolopera.operation_service.repositorios.RepositorioContactoEmergencia;
 import com.hernandolopera.operation_service.repositorios.RepositorioIncidenteViaje;
@@ -62,6 +70,10 @@ public class ServicioOperacion {
     private final RepositorioContactoEmergencia repositorioContactoEmergencia;
     private final RepositorioIncidenteViaje repositorioIncidente;
     private final RepositorioNotificacionViaje repositorioNotificacion;
+    private final RepositorioGuiaAsignado repositorioGuia;
+    private final RepositorioRestauranteViaje repositorioRestaurante;
+    private final ServicioEmail servicioEmail;
+    private final ServicioWhatsApp servicioWhatsApp;
 
     // =========================================================
     // CREATE
@@ -167,6 +179,88 @@ public class ServicioOperacion {
         return mapearAlojamiento(guardado, "Alojamiento asignado correctamente");
     }
 
+    public RespuestaGuia asignarGuia(Long idViaje, SolicitudGuia solicitud) {
+        validarIdPositivo(idViaje, "idViaje");
+        validarViajeExistente(idViaje);
+        GuiaAsignado guia = GuiaAsignado.builder()
+            .idViaje(idViaje)
+            .nombreGuia(solicitud.nombreGuia())
+            .telefono(solicitud.telefono())
+            .correo(solicitud.correo())
+            .especialidad(solicitud.especialidad())
+            .idioma(solicitud.idioma())
+            .fechaRegistro(LocalDateTime.now())
+            .build();
+        return mapearGuia(repositorioGuia.save(guia), "Guía asignado correctamente");
+    }
+
+    public RespuestaGuia actualizarGuia(Long idViaje, Long idGuia, SolicitudGuia solicitud) {
+        validarIdPositivo(idViaje, "idViaje");
+        GuiaAsignado guia = repositorioGuia.findById(idGuia)
+            .orElseThrow(() -> new RecursoNoEncontradoExcepcion("Guía no encontrado"));
+        guia.setNombreGuia(solicitud.nombreGuia());
+        guia.setTelefono(solicitud.telefono());
+        guia.setCorreo(solicitud.correo());
+        guia.setEspecialidad(solicitud.especialidad());
+        guia.setIdioma(solicitud.idioma());
+        return mapearGuia(repositorioGuia.save(guia), "Guía actualizado correctamente");
+    }
+
+    @Transactional(readOnly = true)
+    public List<RespuestaGuia> listarGuias(Long idViaje) {
+        validarIdPositivo(idViaje, "idViaje");
+        return repositorioGuia.findAllByIdViaje(idViaje).stream()
+            .map(g -> mapearGuia(g, null)).toList();
+    }
+
+    public void eliminarGuia(Long idViaje, Long idGuia) {
+        validarIdPositivo(idViaje, "idViaje");
+        if (!repositorioGuia.existsById(idGuia))
+            throw new RecursoNoEncontradoExcepcion("Guía no encontrado");
+        repositorioGuia.deleteById(idGuia);
+    }
+
+    public RespuestaRestaurante asignarRestaurante(Long idViaje, SolicitudRestaurante solicitud) {
+        validarIdPositivo(idViaje, "idViaje");
+        validarViajeExistente(idViaje);
+        RestauranteViaje restaurante = RestauranteViaje.builder()
+            .idViaje(idViaje)
+            .nombreRestaurante(solicitud.nombreRestaurante())
+            .direccion(solicitud.direccion())
+            .telefono(solicitud.telefono())
+            .tipoComida(solicitud.tipoComida())
+            .notas(solicitud.notas())
+            .fechaRegistro(LocalDateTime.now())
+            .build();
+        return mapearRestaurante(repositorioRestaurante.save(restaurante), "Restaurante asignado correctamente");
+    }
+
+    public RespuestaRestaurante actualizarRestaurante(Long idViaje, Long idRestaurante, SolicitudRestaurante solicitud) {
+        validarIdPositivo(idViaje, "idViaje");
+        RestauranteViaje r = repositorioRestaurante.findById(idRestaurante)
+            .orElseThrow(() -> new RecursoNoEncontradoExcepcion("Restaurante no encontrado"));
+        r.setNombreRestaurante(solicitud.nombreRestaurante());
+        r.setDireccion(solicitud.direccion());
+        r.setTelefono(solicitud.telefono());
+        r.setTipoComida(solicitud.tipoComida());
+        r.setNotas(solicitud.notas());
+        return mapearRestaurante(repositorioRestaurante.save(r), "Restaurante actualizado correctamente");
+    }
+
+    @Transactional(readOnly = true)
+    public List<RespuestaRestaurante> listarRestaurantes(Long idViaje) {
+        validarIdPositivo(idViaje, "idViaje");
+        return repositorioRestaurante.findAllByIdViaje(idViaje).stream()
+            .map(r -> mapearRestaurante(r, null)).toList();
+    }
+
+    public void eliminarRestaurante(Long idViaje, Long idRestaurante) {
+        validarIdPositivo(idViaje, "idViaje");
+        if (!repositorioRestaurante.existsById(idRestaurante))
+            throw new RecursoNoEncontradoExcepcion("Restaurante no encontrado");
+        repositorioRestaurante.deleteById(idRestaurante);
+    }
+
     public RespuestaInformacionMedica registrarInformacionMedica(
         Long idViajero,
         SolicitudInformacionMedica solicitud
@@ -240,16 +334,22 @@ public class ServicioOperacion {
     public RespuestaNotificacion enviarNotificacion(Long idViaje, SolicitudNotificacion solicitud) {
         validarIdPositivo(idViaje, "idViaje");
         validarViajeExistente(idViaje);
-        int totalDestinatarios = calcularTotalDestinatarios(idViaje, solicitud.destinatarios());
+
+        List<String> contactos = solicitud.contactos() != null ? solicitud.contactos() : List.of();
+        int totalDestinatarios = contactos.isEmpty()
+            ? calcularTotalDestinatarios(idViaje, solicitud.destinatarios())
+            : contactos.size();
+
         if (totalDestinatarios == 0) {
             throw new ExcepcionReglaNegocio("No existen viajeros asociados al viaje para enviar la notificacion");
         }
 
+        String canalUpper = solicitud.canal().toUpperCase(Locale.ROOT);
         NotificacionViaje notificacion = NotificacionViaje.builder()
             .idViaje(idViaje)
             .asunto(solicitud.asunto())
             .mensaje(solicitud.mensaje())
-            .canal(solicitud.canal().toUpperCase(Locale.ROOT))
+            .canal(canalUpper)
             .totalDestinatarios(totalDestinatarios)
             .destinatarios(serializarDestinatarios(solicitud.destinatarios()))
             .fechaEnvio(LocalDateTime.now())
@@ -257,6 +357,15 @@ public class ServicioOperacion {
             .build();
 
         NotificacionViaje guardada = repositorioNotificacion.save(notificacion);
+
+        if (!contactos.isEmpty()) {
+            if ("EMAIL".equals(canalUpper)) {
+                servicioEmail.enviarMasivo(contactos, solicitud.asunto(), solicitud.mensaje());
+            } else if ("WHATSAPP".equals(canalUpper)) {
+                servicioWhatsApp.enviarMasivo(contactos, solicitud.mensaje());
+            }
+        }
+
         return mapearNotificacion(guardada, "Notificacion registrada para envio correctamente");
     }
 
@@ -335,6 +444,24 @@ public class ServicioOperacion {
             .toList();
     }
 
+    @Transactional
+    public RespuestaNotificacion actualizarNotificacion(Long idViaje, Long id, SolicitudNotificacion solicitud) {
+        validarIdPositivo(idViaje, "idViaje");
+        NotificacionViaje notificacion = repositorioNotificacion.findById(id)
+            .orElseThrow(() -> new RecursoNoEncontradoExcepcion("No existe la notificacion con id " + id));
+        notificacion.setAsunto(solicitud.asunto());
+        notificacion.setMensaje(solicitud.mensaje());
+        return mapearNotificacion(repositorioNotificacion.save(notificacion), "Notificacion actualizada");
+    }
+
+    @Transactional
+    public void eliminarNotificacion(Long idViaje, Long id) {
+        validarIdPositivo(idViaje, "idViaje");
+        if (!repositorioNotificacion.existsById(id))
+            throw new RecursoNoEncontradoExcepcion("No existe la notificacion con id " + id);
+        repositorioNotificacion.deleteById(id);
+    }
+
     @Transactional(readOnly = true)
     public RespuestaDashboard obtenerDashboard(Long idViaje) {
         validarIdPositivo(idViaje, "idViaje");
@@ -382,8 +509,15 @@ public class ServicioOperacion {
         if (!repositorioSalidaViaje.existsById(id)) {
             throw new RecursoNoEncontradoExcepcion("Viaje no encontrado con id: " + id);
         }
+        repositorioTransporte.deleteAllByIdViaje(id);
+        repositorioCheckIn.deleteAllByIdViaje(id);
+        repositorioAlojamiento.deleteAllByIdViaje(id);
+        repositorioInformacionMedica.deleteAllByIdViaje(id);
+        repositorioContactoEmergencia.deleteAllByIdViaje(id);
+        repositorioIncidente.deleteAllByIdViaje(id);
+        repositorioNotificacion.deleteAllByIdViaje(id);
         repositorioSalidaViaje.deleteById(id);
-        log.info("Viaje {} eliminado", id);
+        log.info("Viaje {} eliminado con todos sus datos asociados", id);
     }
 
     public void eliminarInformacionMedica(Long idViajero, Long id) {
@@ -604,6 +738,18 @@ public class ServicioOperacion {
             alojamiento.getFechaRegistro(),
             mensaje
         );
+    }
+
+    private RespuestaGuia mapearGuia(GuiaAsignado g, String mensaje) {
+        return new RespuestaGuia(g.getId(), g.getIdViaje(), g.getNombreGuia(),
+            g.getTelefono(), g.getCorreo(), g.getEspecialidad(), g.getIdioma(),
+            g.getFechaRegistro(), mensaje);
+    }
+
+    private RespuestaRestaurante mapearRestaurante(RestauranteViaje r, String mensaje) {
+        return new RespuestaRestaurante(r.getId(), r.getIdViaje(), r.getNombreRestaurante(),
+            r.getDireccion(), r.getTelefono(), r.getTipoComida(), r.getNotas(),
+            r.getFechaRegistro(), mensaje);
     }
 
     private RespuestaInformacionMedica mapearInformacionMedica(InformacionMedica informacion, String mensaje) {

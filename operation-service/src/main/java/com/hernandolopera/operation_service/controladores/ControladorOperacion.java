@@ -1,6 +1,10 @@
 package com.hernandolopera.operation_service.controladores;
 
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaAlojamiento;
+import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaGuia;
+import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaRestaurante;
+import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudGuia;
+import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudRestaurante;
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaCheckIn;
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaContactoEmergencia;
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaDashboard;
@@ -108,6 +112,18 @@ public class ControladorOperacion {
         return ResponseEntity.status(HttpStatus.CREATED).body(servicioOperacion.registrarIncidente(idViaje, solicitud));
     }
 
+    @PostMapping("/viajes/{idViaje}/guias")
+    public ResponseEntity<RespuestaGuia> asignarGuia(@PathVariable Long idViaje, @Valid @RequestBody SolicitudGuia solicitud) {
+        log.info("POST /api/v1/operaciones/viajes/{}/guias", idViaje);
+        return ResponseEntity.status(HttpStatus.CREATED).body(servicioOperacion.asignarGuia(idViaje, solicitud));
+    }
+
+    @PostMapping("/viajes/{idViaje}/restaurantes")
+    public ResponseEntity<RespuestaRestaurante> asignarRestaurante(@PathVariable Long idViaje, @Valid @RequestBody SolicitudRestaurante solicitud) {
+        log.info("POST /api/v1/operaciones/viajes/{}/restaurantes", idViaje);
+        return ResponseEntity.status(HttpStatus.CREATED).body(servicioOperacion.asignarRestaurante(idViaje, solicitud));
+    }
+
     @PostMapping("/viajes/{idViaje}/notificaciones")
     public ResponseEntity<RespuestaNotificacion> enviarNotificacion(
         @PathVariable Long idViaje,
@@ -145,6 +161,18 @@ public class ControladorOperacion {
         return ResponseEntity.ok(servicioOperacion.listarAlojamientos(idViaje));
     }
 
+    @GetMapping("/viajes/{idViaje}/guias")
+    public ResponseEntity<List<RespuestaGuia>> listarGuias(@PathVariable Long idViaje) {
+        log.info("GET /api/v1/operaciones/viajes/{}/guias", idViaje);
+        return ResponseEntity.ok(servicioOperacion.listarGuias(idViaje));
+    }
+
+    @GetMapping("/viajes/{idViaje}/restaurantes")
+    public ResponseEntity<List<RespuestaRestaurante>> listarRestaurantes(@PathVariable Long idViaje) {
+        log.info("GET /api/v1/operaciones/viajes/{}/restaurantes", idViaje);
+        return ResponseEntity.ok(servicioOperacion.listarRestaurantes(idViaje));
+    }
+
     @GetMapping("/viajes/{idViaje}/informacion-medica")
     public ResponseEntity<List<RespuestaInformacionMedica>> listarInformacionMedica(@PathVariable Long idViaje) {
         log.info("GET /api/v1/operaciones/viajes/{}/informacion-medica", idViaje);
@@ -167,6 +195,21 @@ public class ControladorOperacion {
     public ResponseEntity<List<RespuestaNotificacion>> listarNotificaciones(@PathVariable Long idViaje) {
         log.info("GET /api/v1/operaciones/viajes/{}/notificaciones", idViaje);
         return ResponseEntity.ok(servicioOperacion.listarNotificaciones(idViaje));
+    }
+
+    @PutMapping("/viajes/{idViaje}/notificaciones/{id}")
+    public ResponseEntity<RespuestaNotificacion> actualizarNotificacion(
+        @PathVariable Long idViaje, @PathVariable Long id,
+        @Valid @RequestBody SolicitudNotificacion solicitud) {
+        log.info("PUT /api/v1/operaciones/viajes/{}/notificaciones/{}", idViaje, id);
+        return ResponseEntity.ok(servicioOperacion.actualizarNotificacion(idViaje, id, solicitud));
+    }
+
+    @DeleteMapping("/viajes/{idViaje}/notificaciones/{id}")
+    public ResponseEntity<Void> eliminarNotificacion(@PathVariable Long idViaje, @PathVariable Long id) {
+        log.info("DELETE /api/v1/operaciones/viajes/{}/notificaciones/{}", idViaje, id);
+        servicioOperacion.eliminarNotificacion(idViaje, id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/viajes/{idViaje}/dashboard")
@@ -215,6 +258,18 @@ public class ControladorOperacion {
         return ResponseEntity.ok(servicioOperacion.actualizarTransporte(idViaje, id, solicitud));
     }
 
+    @PutMapping("/viajes/{idViaje}/guias/{id}")
+    public ResponseEntity<RespuestaGuia> actualizarGuia(@PathVariable Long idViaje, @PathVariable Long id, @Valid @RequestBody SolicitudGuia solicitud) {
+        log.info("PUT /api/v1/operaciones/viajes/{}/guias/{}", idViaje, id);
+        return ResponseEntity.ok(servicioOperacion.actualizarGuia(idViaje, id, solicitud));
+    }
+
+    @PutMapping("/viajes/{idViaje}/restaurantes/{id}")
+    public ResponseEntity<RespuestaRestaurante> actualizarRestaurante(@PathVariable Long idViaje, @PathVariable Long id, @Valid @RequestBody SolicitudRestaurante solicitud) {
+        log.info("PUT /api/v1/operaciones/viajes/{}/restaurantes/{}", idViaje, id);
+        return ResponseEntity.ok(servicioOperacion.actualizarRestaurante(idViaje, id, solicitud));
+    }
+
     @PutMapping("/incidentes/{id}")
     public ResponseEntity<RespuestaIncidente> actualizarIncidente(
         @PathVariable Long id,
@@ -261,5 +316,19 @@ public class ControladorOperacion {
     ) {
         log.info("PUT /api/v1/operaciones/viajeros/{}/contactos-emergencia/{}", idViajero, id);
         return ResponseEntity.ok(servicioOperacion.actualizarContacto(idViajero, id, solicitud));
+    }
+
+    @DeleteMapping("/viajes/{idViaje}/guias/{id}")
+    public ResponseEntity<Void> eliminarGuia(@PathVariable Long idViaje, @PathVariable Long id) {
+        log.info("DELETE /api/v1/operaciones/viajes/{}/guias/{}", idViaje, id);
+        servicioOperacion.eliminarGuia(idViaje, id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/viajes/{idViaje}/restaurantes/{id}")
+    public ResponseEntity<Void> eliminarRestaurante(@PathVariable Long idViaje, @PathVariable Long id) {
+        log.info("DELETE /api/v1/operaciones/viajes/{}/restaurantes/{}", idViaje, id);
+        servicioOperacion.eliminarRestaurante(idViaje, id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -13,4 +13,6 @@ public interface RepositorioContactoEmergencia extends JpaRepository<ContactoEme
     long countViajerosByIdViaje(@Param("idViaje") Long idViaje);
 
     List<ContactoEmergencia> findAllByIdViaje(Long idViaje);
+
+    void deleteAllByIdViaje(Long idViaje);
 }
