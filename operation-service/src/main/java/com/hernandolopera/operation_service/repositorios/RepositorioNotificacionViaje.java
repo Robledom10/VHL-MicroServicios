@@ -8,4 +8,6 @@ public interface RepositorioNotificacionViaje extends JpaRepository<Notificacion
     long countByIdViaje(Long idViaje);
 
     List<NotificacionViaje> findAllByIdViaje(Long idViaje);
+
+    void deleteAllByIdViaje(Long idViaje);
 }

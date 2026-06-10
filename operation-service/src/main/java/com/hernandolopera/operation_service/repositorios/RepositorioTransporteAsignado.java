@@ -8,4 +8,6 @@ public interface RepositorioTransporteAsignado extends JpaRepository<TransporteA
     long countByIdViaje(Long idViaje);
 
     List<TransporteAsignado> findAllByIdViaje(Long idViaje);
+
+    void deleteAllByIdViaje(Long idViaje);
 }

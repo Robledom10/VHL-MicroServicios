@@ -159,6 +159,50 @@ public final class DatosOperacion {
     ) {
     }
 
+    public record SolicitudGuia(
+        @NotBlank String nombreGuia,
+        @Pattern(regexp = "^\\+?[0-9\\s-]{7,20}$", message = "Teléfono inválido") String telefono,
+        @Email String correo,
+        String especialidad,
+        String idioma
+    ) {
+    }
+
+    public record RespuestaGuia(
+        Long id,
+        Long idViaje,
+        String nombreGuia,
+        String telefono,
+        String correo,
+        String especialidad,
+        String idioma,
+        LocalDateTime fechaRegistro,
+        String mensaje
+    ) {
+    }
+
+    public record SolicitudRestaurante(
+        @NotBlank String nombreRestaurante,
+        String direccion,
+        String telefono,
+        String tipoComida,
+        @Size(max = 500) String notas
+    ) {
+    }
+
+    public record RespuestaRestaurante(
+        Long id,
+        Long idViaje,
+        String nombreRestaurante,
+        String direccion,
+        String telefono,
+        String tipoComida,
+        String notas,
+        LocalDateTime fechaRegistro,
+        String mensaje
+    ) {
+    }
+
     public record SolicitudIncidente(
         @NotBlank String tipo,
         @NotBlank @Size(max = 255) String descripcion,
@@ -186,7 +230,8 @@ public final class DatosOperacion {
         @NotBlank String asunto,
         @NotBlank @Size(max = 1000) String mensaje,
         @NotBlank String canal,
-        List<Long> destinatarios
+        List<Long> destinatarios,
+        List<String> contactos
     ) {
     }
 
