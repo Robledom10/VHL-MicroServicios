@@ -300,7 +300,7 @@ services:
       - "${OPERATION_SERVICE_PORT}:8086"
     networks:
       - microservices-net
-    
+
   # ─────────────────────────────────────────────────────
   #  API del chatbot (FastAPI + pdfplumber + ollama SDK)
   #  Conecta al Ollama que ya corre en el HOST (:11434)
@@ -318,8 +318,31 @@ services:
   #     CHATBOT_OCR_MODEL: ${CHATBOT_OCR_MODEL:-llava:7b}
   #   ports:
   #     - "${CHATBOT_SERVICE_PORT:-8090}:8000"
- 
 
+  # =========================================================
+  # ANALYTICS SERVICE
+  # =========================================================
+  analytics-service:
+    build: ./analytics-service
+    container_name: analytics-service
+    restart: always
+
+    env_file:
+      - .env
+
+    depends_on:
+      - auth-service
+      - reservation-service
+      - tourist-catalog-service
+      - gallery-service
+      - financial-service
+      - operation-service
+
+    ports:
+      - "${ANALYTICS_SERVICE_PORT}:8088"
+
+    networks:
+      - microservices-net
   # =========================================================
   # API GATEWAY
   # =========================================================
@@ -334,6 +357,7 @@ services:
       - gallery-service
       - operation-service
       - financial-service
+      - analytics-service
     env_file:
       - .env
     environment:

@@ -17,7 +17,7 @@ spring:
         - id: auth-service
           uri: http://auth-service:8081
           predicates:
-            - Path=/api/auth/**,/api/admin/**,/api/roles/**
+            - Path=/api/auth/**,/api/admin/**,/api/roles/**, /api/statistics/**
 
         # =========================================================
         # RESERVATION SERVICE
@@ -58,6 +58,14 @@ spring:
           uri: http://operation-service:8086
           predicates:
             - Path=/api/v1/operaciones/**
+
+        # =========================================================
+        # ANALYTICS SERVICE
+        # =========================================================
+        - id: analytics-service
+          uri: http://analytics-service:8088
+          predicates:
+            - Path=/api/analytics/**
 
       # =========================================================
       # CORS
