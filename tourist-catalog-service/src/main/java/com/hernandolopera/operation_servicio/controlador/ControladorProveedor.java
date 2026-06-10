@@ -21,7 +21,11 @@ public class ControladorProveedor {
     }
 
     @GetMapping
-    public ResponseEntity<List<RespuestaProveedor>> buscarTodos() {
+    public ResponseEntity<List<RespuestaProveedor>> buscarTodos(
+            @RequestParam(required = false) String tipo) {
+        if (tipo != null && !tipo.isBlank()) {
+            return ResponseEntity.ok(servicio.buscarPorTipo(tipo));
+        }
         return ResponseEntity.ok(servicio.buscarTodos());
     }
 
