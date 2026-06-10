@@ -23,6 +23,7 @@ public final class DatosOperacion {
         List<@NotBlank String> tiposTransporte,
         String fotoVerticalUrl, String fotoHorizontalUrl, List<@NotBlank String> incluye,
         List<@NotBlank String> noIncluye, List<@NotBlank String> politicasCancelacion,
+        List<String> requisitos,
         @Valid List<SolicitudActividadItinerario> itinerario) {}
     public record RespuestaPaqueteTuristico(Integer id, String titulo, String descripcion, String destino,
         List<String> destinos,
@@ -30,7 +31,7 @@ public final class DatosOperacion {
         String lugarSalida, LocalTime horaSalida, String alojamiento, String tipoHabitacion, String tipoTransporte,
         List<String> tiposTransporte,
         String fotoVerticalUrl, String fotoHorizontalUrl, List<String> incluye, List<String> noIncluye,
-        List<String> politicasCancelacion, Boolean activo, List<RespuestaActividadItinerario> itinerario) {}
+        List<String> politicasCancelacion, List<String> requisitos, Boolean activo, List<RespuestaActividadItinerario> itinerario) {}
     public record RespuestaImagenPaquete(String url) {}
 
     public record SolicitudComentarioPaquete(@NotBlank String comentario, @NotNull @Min(1) @Max(5) Integer puntaje) {}
@@ -38,9 +39,13 @@ public final class DatosOperacion {
         String autor, LocalDateTime fechaCreacion) {}
 
     public record SolicitudProveedor(@NotBlank String nombre, @NotBlank String tipoProveedor,
-        @Email String correo, String telefono) {}
+        @Email String correo, String telefono,
+        String tipoVehiculo, String placa, String conductor, String telefonoConductor, Integer capacidad,
+        String direccion, String especialidad, String idioma, String tipoComida, String notas) {}
     public record RespuestaProveedor(Integer id, String nombre, String tipoProveedor,
-        String correo, String telefono, Boolean activo) {}
+        String correo, String telefono, Boolean activo,
+        String tipoVehiculo, String placa, String conductor, String telefonoConductor, Integer capacidad,
+        String direccion, String especialidad, String idioma, String tipoComida, String notas) {}
 
     public record RespuestaErrorApi(LocalDateTime fecha, int estado, String error, String mensaje,
         String ruta, Map<String, String> campos) {}
