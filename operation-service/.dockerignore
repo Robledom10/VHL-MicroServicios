@@ -1,0 +1,9 @@
+# Recolector de contenedores base
+mvnw
+mvnw.cmd
+target/
+bin/
+.git
+.gitignore
+.env
+*.log

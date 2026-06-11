@@ -4,7 +4,6 @@ import com.hernandolopera.operation_servicio.excepcion.*;
 import com.hernandolopera.operation_servicio.entidades.*;
 import com.hernandolopera.operation_servicio.repositorio.*;
 import com.hernandolopera.operation_servicio.transferencia.DatosOperacion.*;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -17,8 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ServicioPaqueteTuristico {
-    private static final String ALOJAMIENTO_DEFECTO = "Hotel 3 estrellas o similar";
-    private static final String HABITACION_DEFECTO = "Habitacion multiple (compartida)";
     private static final String TRANSPORTE_DEFECTO = "Bus de turismo";
     private static final List<String> TRANSPORTES_PERMITIDOS = List.of("Bus de turismo", "Avion");
     private static final List<String> INCLUYE_DEFECTO = List.of(
@@ -75,11 +72,12 @@ public class ServicioPaqueteTuristico {
 
     @Transactional(readOnly = true)
     public Page<RespuestaPaqueteTuristico> buscar(String destino, String busqueda, Integer duracionDias,
-        LocalDate fechaInicio, Boolean activo, Pageable paginacion) {
+        Boolean activo, Pageable paginacion) {
         if (duracionDias != null && duracionDias < 1) {
             throw new ExcepcionReglaNegocio("La duracion debe ser de al menos 1 dia");
         }
-        return repositorioPaquete.buscar(destino, busqueda, duracionDias, fechaInicio, activo, paginacion)
+        return repositorioPaquete.buscar(destino, busqueda, duracionDias, activo, paginacion)
+
             .map(mapeador::aRespuestaPaquete);
     }
 
@@ -116,11 +114,8 @@ public class ServicioPaqueteTuristico {
         paquete.duracionDias = solicitud.duracionDias();
         paquete.precio = solicitud.precio();
         paquete.cupo = solicitud.cupo();
-        paquete.fechaInicio = solicitud.fechaInicio();
         paquete.lugarSalida = textoOpcional(solicitud.lugarSalida());
-        paquete.horaSalida = solicitud.horaSalida();
-        paquete.alojamiento = textoConDefecto(solicitud.alojamiento(), ALOJAMIENTO_DEFECTO);
-        paquete.tipoHabitacion = textoConDefecto(solicitud.tipoHabitacion(), HABITACION_DEFECTO);
+
         paquete.reemplazarTiposTransporte(tiposTransporte);
         paquete.fotoVerticalUrl = textoOpcional(solicitud.fotoVerticalUrl());
         paquete.fotoHorizontalUrl = textoOpcional(solicitud.fotoHorizontalUrl());

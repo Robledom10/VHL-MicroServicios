@@ -44,6 +44,9 @@ public class ContactoEmergencia {
     @Column(name = "email", length = 150)
     private String correo;
 
+    @Column(name = "traveler_name", length = 150)
+    private String nombreViajero;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime fechaRegistro;
 }

@@ -28,7 +28,13 @@ public class ServicioProveedor {
 
     @Transactional(readOnly = true)
     public List<RespuestaProveedor> buscarTodos() {
-        return repositorio.findAll().stream().map(mapeador::aRespuestaProveedor).toList();
+        return repositorio.findByActivoTrue().stream().map(mapeador::aRespuestaProveedor).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<RespuestaProveedor> buscarPorTipo(String tipo) {
+        return repositorio.findByTipoProveedorIgnoreCaseAndActivoTrue(tipo)
+            .stream().map(mapeador::aRespuestaProveedor).toList();
     }
 
     @Transactional
@@ -52,6 +58,18 @@ public class ServicioProveedor {
         proveedor.tipoProveedor = solicitud.tipoProveedor().trim();
         proveedor.correo = solicitud.correo() == null ? null : solicitud.correo().trim().toLowerCase();
         proveedor.telefono = solicitud.telefono() == null ? null : solicitud.telefono().trim();
+        proveedor.tipoVehiculo = trim(solicitud.tipoVehiculo());
+        proveedor.placa = trim(solicitud.placa());
+        proveedor.conductor = trim(solicitud.conductor());
+        proveedor.telefonoConductor = trim(solicitud.telefonoConductor());
+        proveedor.capacidad = solicitud.capacidad();
+        proveedor.direccion = trim(solicitud.direccion());
+        proveedor.especialidad = trim(solicitud.especialidad());
+        proveedor.idioma = trim(solicitud.idioma());
+        proveedor.tipoComida = trim(solicitud.tipoComida());
+        proveedor.notas = trim(solicitud.notas());
         return proveedor;
     }
+
+    private String trim(String value) { return value == null || value.isBlank() ? null : value.trim(); }
 }

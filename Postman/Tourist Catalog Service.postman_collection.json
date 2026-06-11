@@ -1,591 +1,189 @@
-﻿{
-    "info": {
-        "name": "Tourist Catalog Service",
-        "description": "Pruebas HTTP end-to-end para tourist-catalog-service pasando por API Gateway. Ejecuta primero Auth / Registrar usuario QA y Auth / Login para guardar el Bearer token.",
-        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+{
+  "info": {
+    "name": "Tourist Catalog Service",
+    "description": "Pruebas HTTP end-to-end para tourist-catalog-service pasando por API Gateway. Ejecuta primero Auth / Registrar usuario QA y Auth / Login para guardar el Bearer token.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{token}}", "type": "string" }
+    ]
+  },
+  "variable": [
+    { "key": "baseUrl",        "value": "http://localhost:8080" },
+    { "key": "gatewayUrl",     "value": "http://localhost:8080" },
+    { "key": "paqueteId",      "value": "" },
+    { "key": "proveedorId",    "value": "" },
+    { "key": "token",          "value": "" },
+    { "key": "authEmail",      "value": "catalog.qa.postman@test.com" },
+    { "key": "authPassword",   "value": "Password123" },
+    { "key": "documentNumber", "value": "999000111" }
+  ],
+  "item": [
+    {
+      "name": "Auth por Gateway",
+      "auth": { "type": "noauth" },
+      "item": [
+        {
+          "name": "Registrar usuario QA",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 201 o usuario ya existe', function () {", "  pm.expect([201, 409]).to.include(pm.response.code);", "});"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"firstName\": \"Catalog\",\n  \"lastName\": \"QA\",\n  \"email\": \"{{authEmail}}\",\n  \"password\": \"{{authPassword}}\",\n  \"documentType\": \"Cedula Ciudadania\",\n  \"documentNumber\": \"{{documentNumber}}\",\n  \"phone\": \"3001234567\",\n  \"birthDate\": \"1995-01-01\",\n  \"state\": \"Quindio\",\n  \"city\": \"Armenia\",\n  \"address\": \"Centro\"\n}" }, "url": "{{baseUrl}}/api/auth/register" }
+        },
+        {
+          "name": "Login y guardar token",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });", "const json = pm.response.json();", "pm.expect(json.accessToken).to.exist;", "pm.collectionVariables.set('token', json.accessToken);"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{authEmail}}\",\n  \"password\": \"{{authPassword}}\"\n}" }, "url": "{{baseUrl}}/api/auth/login" }
+        }
+      ]
     },
-    "auth": {
+    {
+      "name": "Catalogo por Gateway 8080",
+      "item": [
+        {
+          "name": "Health",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });", "pm.test('UP', function () { pm.expect(pm.response.json().status).to.eql('UP'); });"] } }],
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/actuator/health" }
+        },
+        {
+          "name": "Crear paquete",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 201', function () { pm.response.to.have.status(201); });", "const json = pm.response.json();", "pm.expect(json.id).to.exist;", "pm.collectionVariables.set('paqueteId', json.id);", "pm.expect(json.titulo).to.include('Eje Cafetero');", "pm.expect(json.destino).to.eql('Quindio');", "pm.expect(json.duracionDias).to.eql(3);", "pm.expect(json.tipoTransporte).to.eql('Bus de turismo');", "pm.expect(json.tiposTransporte).to.be.an('array').and.include('Bus de turismo');", "pm.expect(json.destinos).to.be.an('array').and.include('Quindio');", "pm.expect(json.requisitos).to.be.an('array').and.have.length(2);", "pm.expect(json.fotoVerticalUrl).to.eql('https://cdn.vhl.test/paquetes/eje-cafetero-vertical.jpg');", "pm.expect(json.fotoHorizontalUrl).to.eql('https://cdn.vhl.test/paquetes/eje-cafetero-horizontal.jpg');", "pm.expect(json.incluye).to.include('Seguro de viaje');", "pm.expect(json.noIncluye).to.include('Gastos personales');", "pm.expect(json.politicasCancelacion).to.have.length(3);", "pm.expect(json.itinerario).to.have.length(3);", "pm.expect(json.itinerario.map(i => i.numeroDia)).to.eql([1, 2, 3]);"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Eje Cafetero {{$timestamp}}\",\n  \"descripcion\": \"Paquete creado desde Postman con el flujo completo\",\n  \"destino\": \"Quindio\",\n  \"destinos\": [\"Quindio\", \"Montenegro\", \"Salento\"],\n  \"duracionDias\": 3,\n  \"precio\": 1250000.00,\n  \"cupo\": 20,\n  \"fechaInicio\": \"2026-07-10\",\n  \"lugarSalida\": \"Terminal de Transportes de Medellin\",\n  \"horaSalida\": \"06:30:00\",\n  \"alojamiento\": \"Hotel 3 estrellas o similar\",\n  \"tipoHabitacion\": \"Habitacion multiple (compartida)\",\n  \"tipoTransporte\": \"Bus de turismo\",\n  \"tiposTransporte\": [\"Bus de turismo\"],\n  \"fotoVerticalUrl\": \"https://cdn.vhl.test/paquetes/eje-cafetero-vertical.jpg\",\n  \"fotoHorizontalUrl\": \"https://cdn.vhl.test/paquetes/eje-cafetero-horizontal.jpg\",\n  \"incluye\": [\n    \"Transporte terrestre ida y regreso\",\n    \"Hospedaje en hotel 3 estrellas\",\n    \"Alimentacion (desayuno y cena)\",\n    \"Tours turisticos guiados\",\n    \"Seguro de viaje\"\n  ],\n  \"noIncluye\": [\n    \"Gastos personales\",\n    \"Bebidas alcoholicas\",\n    \"Souvenirs o compras personales\"\n  ],\n  \"politicasCancelacion\": [\n    \"Cancelacion gratuita hasta 5 dias antes del viaje\",\n    \"50% de reembolso hasta 48 horas antes\",\n    \"No hay devolucion el mismo dia del viaje\"\n  ],\n  \"requisitos\": [\n    \"Documento de identidad vigente\",\n    \"Seguro de viaje incluido en el paquete\"\n  ],\n  \"itinerario\": [\n    { \"numeroDia\": 1, \"titulo\": \"Llegada\" },\n    { \"numeroDia\": 2, \"titulo\": \"Tour cafetero\" },\n    { \"numeroDia\": 3, \"titulo\": \"Regreso\" }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/api/paquetes"
+          }
+        },
+        {
+          "name": "Buscar paquetes con filtro destino",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });", "const json = pm.response.json();", "pm.expect(json.content).to.be.an('array');", "pm.expect(json.content.some(p => p.id === Number(pm.collectionVariables.get('paqueteId')))).to.eql(true);"] } }],
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/paquetes?destino=Quindio&activo=true&pagina=0&tamano=5&ordenarPor=titulo&direccion=asc" }
+        },
+        {
+          "name": "Buscar paquetes con filtro busqueda",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });", "const json = pm.response.json();", "pm.test('busqueda retorna resultados', function () {", "  pm.expect(json.content).to.be.an('array');", "});"] } }],
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/paquetes?busqueda=Cafetero&pagina=0&tamano=10" }
+        },
+        {
+          "name": "Buscar paquete por id",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });", "const json = pm.response.json();", "pm.expect(json.id).to.eql(Number(pm.collectionVariables.get('paqueteId')));", "pm.expect(json.destinos).to.be.an('array').and.include('Quindio');", "pm.expect(json.tiposTransporte).to.be.an('array').and.include('Bus de turismo');", "pm.expect(json.requisitos).to.be.an('array').and.have.length(2);", "pm.expect(json.fotoVerticalUrl).to.eql('https://cdn.vhl.test/paquetes/eje-cafetero-vertical.jpg');", "pm.expect(json.fotoHorizontalUrl).to.eql('https://cdn.vhl.test/paquetes/eje-cafetero-horizontal.jpg');", "pm.expect(json.itinerario.map(i => i.numeroDia)).to.eql([1, 2, 3]);"] } }],
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/paquetes/{{paqueteId}}" }
+        },
+        {
+          "name": "Agregar comentario a paquete",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 201', function () { pm.response.to.have.status(201); });", "const json = pm.response.json();", "pm.expect(json.id).to.exist;", "pm.expect(json.idPaquete).to.eql(Number(pm.collectionVariables.get('paqueteId')));", "pm.expect(json.puntaje).to.eql(5);", "pm.expect(json.autor).to.eql(pm.collectionVariables.get('authEmail'));"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"comentario\": \"Excelente paquete para familias {{$timestamp}}\",\n  \"puntaje\": 5\n}" }, "url": "{{baseUrl}}/api/paquetes/{{paqueteId}}/comentarios" }
+        },
+        {
+          "name": "Listar comentarios de paquete",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });", "const json = pm.response.json();", "pm.expect(json).to.be.an('array');", "pm.expect(json.some(c => c.puntaje === 5)).to.eql(true);"] } }],
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/paquetes/{{paqueteId}}/comentarios" }
+        },
+        {
+          "name": "Actualizar paquete",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });", "const json = pm.response.json();", "pm.expect(json.id).to.eql(Number(pm.collectionVariables.get('paqueteId')));", "pm.expect(json.duracionDias).to.eql(4);", "pm.expect(json.tipoTransporte).to.eql('Avion');", "pm.expect(json.tiposTransporte).to.be.an('array').and.include('Avion');", "pm.expect(json.destinos).to.be.an('array').and.include('Armenia');", "pm.expect(json.requisitos).to.be.an('array').and.have.length(2);", "pm.expect(json.fotoVerticalUrl).to.eql('https://cdn.vhl.test/paquetes/eje-cafetero-vertical-v2.jpg');", "pm.expect(json.itinerario).to.have.length(4);", "pm.expect(json.itinerario.map(i => i.numeroDia)).to.eql([1, 2, 3, 4]);"] } }],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Eje Cafetero Actualizado {{$timestamp}}\",\n  \"descripcion\": \"Paquete actualizado desde Postman\",\n  \"destino\": \"Quindio\",\n  \"destinos\": [\"Quindio\", \"Armenia\", \"Montenegro\"],\n  \"duracionDias\": 4,\n  \"precio\": 1450000.00,\n  \"cupo\": 15,\n  \"fechaInicio\": \"2026-07-10\",\n  \"lugarSalida\": \"Terminal del Norte\",\n  \"horaSalida\": \"07:00:00\",\n  \"alojamiento\": \"Hotel campestre 4 estrellas\",\n  \"tipoHabitacion\": \"Habitacion doble\",\n  \"tipoTransporte\": \"Avion\",\n  \"tiposTransporte\": [\"Avion\"],\n  \"fotoVerticalUrl\": \"https://cdn.vhl.test/paquetes/eje-cafetero-vertical-v2.jpg\",\n  \"fotoHorizontalUrl\": \"https://cdn.vhl.test/paquetes/eje-cafetero-horizontal-v2.jpg\",\n  \"incluye\": [\n    \"Tiquetes aereos ida y regreso\",\n    \"Hospedaje en hotel campestre\",\n    \"Desayunos\",\n    \"Guia turistico\",\n    \"Seguro de viaje\"\n  ],\n  \"noIncluye\": [\n    \"Almuerzos no descritos\",\n    \"Gastos personales\"\n  ],\n  \"politicasCancelacion\": [\n    \"Cancelacion gratuita hasta 5 dias antes\",\n    \"50% de reembolso hasta 48 horas antes\",\n    \"No hay reembolso el mismo dia\"\n  ],\n  \"requisitos\": [\n    \"Pasaporte o cedula vigente\",\n    \"Seguro de viaje vigente\"\n  ],\n  \"itinerario\": [\n    { \"numeroDia\": 1, \"titulo\": \"Llegada\" },\n    { \"numeroDia\": 2, \"titulo\": \"Tour cafetero premium\" },\n    { \"numeroDia\": 3, \"titulo\": \"Salento y Valle del Cocora\" },\n    { \"numeroDia\": 4, \"titulo\": \"Regreso\" }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/api/paquetes/{{paqueteId}}"
+          }
+        },
+        {
+          "name": "Eliminar paquete (soft delete)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 204', function () { pm.response.to.have.status(204); });"] } }],
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/api/paquetes/{{paqueteId}}" }
+        },
+        {
+          "name": "Eliminar paquete permanente",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 204 eliminado permanentemente', function () {", "  pm.response.to.have.status(204);", "});"] } }],
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/api/paquetes/{{paqueteId}}/permanente" }
+        },
+        {
+          "name": "Subir imagen de paquete",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });", "const json = pm.response.json();", "pm.test('url de imagen devuelta', function () {", "  pm.expect(json.url).to.be.a('string').and.not.empty;", "});"] } }],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "src": [], "description": "Selecciona una imagen JPG o PNG desde tu equipo" }
+              ]
+            },
+            "url": "{{baseUrl}}/api/paquetes/imagenes"
+          }
+        },
+        {
+          "name": "Crear proveedor",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 201', function () { pm.response.to.have.status(201); });", "const json = pm.response.json();", "pm.expect(json.id).to.exist;", "pm.collectionVariables.set('proveedorId', json.id);"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Proveedor {{$timestamp}}\",\n  \"tipoProveedor\": \"TRANSPORTE\",\n  \"correo\": \"proveedor.{{$timestamp}}@test.com\",\n  \"telefono\": \"3001234567\"\n}" }, "url": "{{baseUrl}}/api/proveedores" }
+        },
+        {
+          "name": "Listar proveedores",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });", "pm.expect(pm.response.json()).to.be.an('array');"] } }],
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/proveedores" }
+        },
+        {
+          "name": "Actualizar proveedor",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });", "const json = pm.response.json();", "pm.expect(json.id).to.eql(Number(pm.collectionVariables.get('proveedorId')));", "pm.expect(json.tipoProveedor).to.eql('ALOJAMIENTO');", "pm.expect(json.activo).to.eql(true);"] } }],
+          "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Proveedor Actualizado {{$timestamp}}\",\n  \"tipoProveedor\": \"ALOJAMIENTO\",\n  \"correo\": \"proveedor.actualizado.{{$timestamp}}@test.com\",\n  \"telefono\": \"3007654321\"\n}" }, "url": "{{baseUrl}}/api/proveedores/{{proveedorId}}" }
+        },
+        {
+          "name": "Eliminar proveedor",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 204', function () { pm.response.to.have.status(204); });"] } }],
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/api/proveedores/{{proveedorId}}" }
+        },
+        {
+          "name": "Validacion paquete invalido",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 400', function () { pm.response.to.have.status(400); });", "pm.expect(pm.response.json().campos).to.be.an('object');"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"titulo\": \"\",\n  \"destino\": \"\",\n  \"duracionDias\": 0,\n  \"precio\": 0,\n  \"cupo\": 0,\n  \"fechaInicio\": \"2026-07-10\"\n}" }, "url": "{{baseUrl}}/api/paquetes" }
+        },
+        {
+          "name": "Validacion itinerario con dia repetido",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 409', function () { pm.response.to.have.status(409); });", "pm.expect(pm.response.json().mensaje).to.include('dias repetidos');"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"titulo\": \"Paquete con itinerario repetido {{$timestamp}}\",\n  \"descripcion\": \"Debe fallar por numeroDia duplicado\",\n  \"destino\": \"Quindio\",\n  \"duracionDias\": 3,\n  \"precio\": 900000.00,\n  \"cupo\": 10,\n  \"fechaInicio\": \"2026-07-10\",\n  \"itinerario\": [\n    { \"numeroDia\": 1, \"titulo\": \"Llegada\" },\n    { \"numeroDia\": 1, \"titulo\": \"Tour repetido\" }\n  ]\n}" }, "url": "{{baseUrl}}/api/paquetes" }
+        },
+        {
+          "name": "Validacion itinerario supera duracion",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 409', function () { pm.response.to.have.status(409); });", "pm.expect(pm.response.json().mensaje).to.include('duracion del paquete');"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"titulo\": \"Paquete con itinerario fuera de rango {{$timestamp}}\",\n  \"descripcion\": \"Debe fallar porque el dia 4 supera duracionDias 3\",\n  \"destino\": \"Quindio\",\n  \"duracionDias\": 3,\n  \"precio\": 900000.00,\n  \"cupo\": 10,\n  \"fechaInicio\": \"2026-07-10\",\n  \"itinerario\": [\n    { \"numeroDia\": 4, \"titulo\": \"Dia inexistente\" }\n  ]\n}" }, "url": "{{baseUrl}}/api/paquetes" }
+        },
+        {
+          "name": "Validacion transporte invalido",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 409', function () { pm.response.to.have.status(409); });", "pm.expect(pm.response.json().mensaje).to.include('Bus de turismo o Avion');"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"titulo\": \"Paquete con transporte invalido {{$timestamp}}\",\n  \"descripcion\": \"Debe fallar por transporte no permitido\",\n  \"destino\": \"Quindio\",\n  \"duracionDias\": 3,\n  \"precio\": 900000.00,\n  \"cupo\": 10,\n  \"fechaInicio\": \"2026-07-10\",\n  \"tipoTransporte\": \"Barco\",\n  \"itinerario\": [\n    { \"numeroDia\": 1, \"titulo\": \"Llegada\" }\n  ]\n}" }, "url": "{{baseUrl}}/api/paquetes" }
+        },
+        {
+          "name": "Validacion comentario puntaje fuera de rango",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 400', function () { pm.response.to.have.status(400); });"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"comentario\": \"Comentario con puntaje invalido\",\n  \"puntaje\": 6\n}" }, "url": "{{baseUrl}}/api/paquetes/1/comentarios" }
+        }
+      ]
+    },
+    {
+      "name": "Gateway 8080 con Bearer token",
+      "description": "Estas pruebas usan las mismas rutas por gateway. Debes ejecutar Auth primero para que la variable token este cargada.",
+      "auth": {
         "type": "bearer",
         "bearer": [
-            {
-                "key": "token",
-                "value": "{{token}}",
-                "type": "string"
-            }
+          { "key": "token", "value": "{{token}}", "type": "string" }
         ]
-    },
-    "variable": [
+      },
+      "item": [
         {
-            "key": "baseUrl",
-            "value": "http://localhost:8080"
-        },
-        {
-            "key": "gatewayUrl",
-            "value": "http://localhost:8080"
-        },
-        {
-            "key": "paqueteId",
-            "value": ""
-        },
-        {
-            "key": "proveedorId",
-            "value": ""
-        },
-        {
-            "key": "token",
-            "value": ""
-        },
-        {
-            "key": "authEmail",
-            "value": "catalog.qa.postman@test.com"
-        },
-        {
-            "key": "authPassword",
-            "value": "Password123"
-        },
-        {
-            "key": "documentNumber",
-            "value": "999000111"
+          "name": "Buscar paquetes por gateway",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });", "pm.expect(pm.response.json().content).to.be.an('array');"] } }],
+          "request": { "method": "GET", "header": [], "url": "{{gatewayUrl}}/api/paquetes?activo=true&pagina=0&tamano=5" }
         }
-    ],
-    "item": [
-        {
-            "name": "Auth por Gateway",
-            "auth": {
-                "type": "noauth"
-            },
-            "item": [
-                {
-                    "name": "Registrar usuario QA",
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "pm.test(\u0027status 201 o usuario ya existe\u0027, function () {",
-                                    "  pm.expect([201, 409]).to.include(pm.response.code);",
-                                    "});"
-                                ],
-                                "type": "text/javascript"
-                            }
-                        }
-                    ],
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"firstName\": \"Catalog\",\n  \"lastName\": \"QA\",\n  \"email\": \"{{authEmail}}\",\n  \"password\": \"{{authPassword}}\",\n  \"documentType\": \"Cedula Ciudadania\",\n  \"documentNumber\": \"{{documentNumber}}\",\n  \"phone\": \"3001234567\",\n  \"birthDate\": \"1995-01-01\",\n  \"state\": \"Quindio\",\n  \"city\": \"Armenia\",\n  \"address\": \"Centro\"\n}"
-                        },
-                        "url": "{{baseUrl}}/api/auth/register"
-                    }
-                },
-                {
-                    "name": "Login y guardar token",
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "pm.test(\u0027status 200\u0027, function () { pm.response.to.have.status(200); });",
-                                    "const json = pm.response.json();",
-                                    "pm.expect(json.accessToken).to.exist;",
-                                    "pm.collectionVariables.set(\u0027token\u0027, json.accessToken);"
-                                ],
-                                "type": "text/javascript"
-                            }
-                        }
-                    ],
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"email\": \"{{authEmail}}\",\n  \"password\": \"{{authPassword}}\"\n}"
-                        },
-                        "url": "{{baseUrl}}/api/auth/login"
-                    }
-                }
-            ]
-        },
-        {
-            "name": "Catalogo por Gateway 8080",
-            "item": [
-                {
-                    "name": "Health",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "url": "{{baseUrl}}/actuator/health"
-                    },
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "pm.test(\u0027status 200\u0027, function () { pm.response.to.have.status(200); });",
-                                    "pm.test(\u0027UP\u0027, function () { pm.expect(pm.response.json().status).to.eql(\u0027UP\u0027); });"
-                                ],
-                                "type": "text/javascript"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "Crear paquete",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"titulo\": \"Eje Cafetero {{$timestamp}}\",\n  \"descripcion\": \"Paquete creado desde Postman con el flujo completo del mockup\",\n  \"destino\": \"Quindio\",\n  \"duracionDias\": 3,\n  \"precio\": 1250000.00,\n  \"cupo\": 20,\n  \"fechaInicio\": \"2026-07-10\",\n  \"lugarSalida\": \"Terminal de Transportes de Medellin\",\n  \"horaSalida\": \"06:30:00\",\n  \"alojamiento\": \"Hotel 3 estrellas o similar\",\n  \"tipoHabitacion\": \"Habitacion multiple (compartida)\",\n  \"tipoTransporte\": \"Bus de turismo\",\n  \"fotoVerticalUrl\": \"https://cdn.vhl.test/paquetes/eje-cafetero-vertical.jpg\",\n  \"fotoHorizontalUrl\": \"https://cdn.vhl.test/paquetes/eje-cafetero-horizontal.jpg\",\n  \"incluye\": [\n    \"Transporte terrestre ida y regreso\",\n    \"Hospedaje en hotel 3 estrellas\",\n    \"Alimentacion (desayuno y cena)\",\n    \"Tours turisticos guiados\",\n    \"Seguro de viaje\"\n  ],\n  \"noIncluye\": [\n    \"Gastos personales\",\n    \"Bebidas alcoholicas\",\n    \"Souvenirs o compras personales\"\n  ],\n  \"politicasCancelacion\": [\n    \"Cancelacion gratuita hasta 5 dias antes del viaje\",\n    \"50% de reembolso hasta 48 horas antes\",\n    \"No hay devolucion el mismo dia del viaje\"\n  ],\n  \"itinerario\": [\n    {\n      \"numeroDia\": 1,\n      \"titulo\": \"Llegada\"\n    },\n    {\n      \"numeroDia\": 2,\n      \"titulo\": \"Tour cafetero\"\n    },\n    {\n      \"numeroDia\": 3,\n      \"titulo\": \"Regreso\"\n    }\n  ]\n}"
-                        },
-                        "url": "{{baseUrl}}/api/paquetes"
-                    },
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "pm.test(\u0027status 201\u0027, function () { pm.response.to.have.status(201); });",
-                                    "const json = pm.response.json();",
-                                    "pm.expect(json.id).to.exist;",
-                                    "pm.collectionVariables.set(\u0027paqueteId\u0027, json.id);",
-                                    "pm.expect(json.titulo).to.include(\u0027Eje Cafetero\u0027);",
-                                    "pm.expect(json.destino).to.eql(\u0027Quindio\u0027);",
-                                    "pm.expect(json.duracionDias).to.eql(3);",
-                                    "pm.expect(json.tipoTransporte).to.eql(\u0027Bus de turismo\u0027);",
-                                    "pm.expect(json.fotoVerticalUrl).to.eql(\u0027https://cdn.vhl.test/paquetes/eje-cafetero-vertical.jpg\u0027);",
-                                    "pm.expect(json.fotoHorizontalUrl).to.eql(\u0027https://cdn.vhl.test/paquetes/eje-cafetero-horizontal.jpg\u0027);",
-                                    "pm.expect(json.incluye).to.include(\u0027Seguro de viaje\u0027);",
-                                    "pm.expect(json.noIncluye).to.include(\u0027Gastos personales\u0027);",
-                                    "pm.expect(json.politicasCancelacion).to.have.length(3);",
-                                    "pm.expect(json.itinerario).to.have.length(3);",
-                                    "pm.expect(json.itinerario.map(i =\u003e i.numeroDia)).to.eql([1, 2, 3]);",
-                                    "pm.expect(json.itinerario.every(i =\u003e !Object.prototype.hasOwnProperty.call(i, \u0027descripcion\u0027))).to.eql(true);"
-                                ],
-                                "type": "text/javascript"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "Buscar paquetes con filtros",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "url": "{{baseUrl}}/api/paquetes?destino=Quindio\u0026activo=true\u0026pagina=0\u0026tamano=5\u0026ordenarPor=titulo\u0026direccion=asc"
-                    },
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "pm.test(\u0027status 200\u0027, function () { pm.response.to.have.status(200); });",
-                                    "const json = pm.response.json();",
-                                    "pm.expect(json.content).to.be.an(\u0027array\u0027);",
-                                    "pm.expect(json.content.some(p =\u003e p.id === Number(pm.collectionVariables.get(\u0027paqueteId\u0027)))).to.eql(true);"
-                                ],
-                                "type": "text/javascript"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "Buscar paquete por id",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "url": "{{baseUrl}}/api/paquetes/{{paqueteId}}"
-                    },
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "pm.test(\u0027status 200\u0027, function () { pm.response.to.have.status(200); });",
-                                    "const json = pm.response.json();",
-                                    "pm.expect(json.id).to.eql(Number(pm.collectionVariables.get(\u0027paqueteId\u0027)));",
-                                    "pm.expect(json.fotoVerticalUrl).to.eql(\u0027https://cdn.vhl.test/paquetes/eje-cafetero-vertical.jpg\u0027);",
-                                    "pm.expect(json.fotoHorizontalUrl).to.eql(\u0027https://cdn.vhl.test/paquetes/eje-cafetero-horizontal.jpg\u0027);",
-                                    "pm.expect(json.itinerario.map(i =\u003e i.numeroDia)).to.eql([1, 2, 3]);",
-                                    "pm.expect(json.itinerario.every(i =\u003e !Object.prototype.hasOwnProperty.call(i, \u0027descripcion\u0027))).to.eql(true);"
-                                ],
-                                "type": "text/javascript"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "Agregar comentario a paquete",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"comentario\": \"Excelente paquete para familias {{$timestamp}}\",\n  \"puntaje\": 5\n}"
-                        },
-                        "url": "{{baseUrl}}/api/paquetes/{{paqueteId}}/comentarios"
-                    },
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "pm.test(\u0027status 201\u0027, function () { pm.response.to.have.status(201); });",
-                                    "const json = pm.response.json();",
-                                    "pm.expect(json.id).to.exist;",
-                                    "pm.expect(json.idPaquete).to.eql(Number(pm.collectionVariables.get(\u0027paqueteId\u0027)));",
-                                    "pm.expect(json.puntaje).to.eql(5);",
-                                    "pm.expect(json.autor).to.eql(pm.collectionVariables.get(\u0027authEmail\u0027));"
-                                ],
-                                "type": "text/javascript"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "Listar comentarios de paquete",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "url": "{{baseUrl}}/api/paquetes/{{paqueteId}}/comentarios"
-                    },
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "pm.test(\u0027status 200\u0027, function () { pm.response.to.have.status(200); });",
-                                    "const json = pm.response.json();",
-                                    "pm.expect(json).to.be.an(\u0027array\u0027);",
-                                    "pm.expect(json.some(c =\u003e c.puntaje === 5)).to.eql(true);"
-                                ],
-                                "type": "text/javascript"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "Actualizar paquete",
-                    "request": {
-                        "method": "PUT",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"titulo\": \"Eje Cafetero Actualizado {{$timestamp}}\",\n  \"descripcion\": \"Paquete actualizado desde Postman con fotos e itinerario completo\",\n  \"destino\": \"Quindio\",\n  \"duracionDias\": 4,\n  \"precio\": 1450000.00,\n  \"cupo\": 15,\n  \"fechaInicio\": \"2026-07-10\",\n  \"lugarSalida\": \"Terminal del Norte\",\n  \"horaSalida\": \"07:00:00\",\n  \"alojamiento\": \"Hotel campestre 4 estrellas\",\n  \"tipoHabitacion\": \"Habitacion doble\",\n  \"tipoTransporte\": \"Avion\",\n  \"fotoVerticalUrl\": \"https://cdn.vhl.test/paquetes/eje-cafetero-vertical-v2.jpg\",\n  \"fotoHorizontalUrl\": \"https://cdn.vhl.test/paquetes/eje-cafetero-horizontal-v2.jpg\",\n  \"incluye\": [\n    \"Tiquetes aereos ida y regreso\",\n    \"Hospedaje en hotel campestre\",\n    \"Desayunos\",\n    \"Guia turistico\",\n    \"Seguro de viaje\"\n  ],\n  \"noIncluye\": [\n    \"Almuerzos no descritos\",\n    \"Gastos personales\"\n  ],\n  \"politicasCancelacion\": [\n    \"Cancelacion gratuita hasta 5 dias antes del viaje\",\n    \"50% de reembolso hasta 48 horas antes\",\n    \"No hay reembolso el mismo dia\"\n  ],\n  \"itinerario\": [\n    {\n      \"numeroDia\": 1,\n      \"titulo\": \"Llegada\"\n    },\n    {\n      \"numeroDia\": 2,\n      \"titulo\": \"Tour cafetero premium\"\n    },\n    {\n      \"numeroDia\": 3,\n      \"titulo\": \"Salento y Valle del Cocora\"\n    },\n    {\n      \"numeroDia\": 4,\n      \"titulo\": \"Regreso\"\n    }\n  ]\n}"
-                        },
-                        "url": "{{baseUrl}}/api/paquetes/{{paqueteId}}"
-                    },
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "pm.test(\u0027status 200\u0027, function () { pm.response.to.have.status(200); });",
-                                    "const json = pm.response.json();",
-                                    "pm.expect(json.id).to.eql(Number(pm.collectionVariables.get(\u0027paqueteId\u0027)));",
-                                    "pm.expect(json.duracionDias).to.eql(4);",
-                                    "pm.expect(json.tipoTransporte).to.eql(\u0027Avion\u0027);",
-                                    "pm.expect(json.fotoVerticalUrl).to.eql(\u0027https://cdn.vhl.test/paquetes/eje-cafetero-vertical-v2.jpg\u0027);",
-                                    "pm.expect(json.fotoHorizontalUrl).to.eql(\u0027https://cdn.vhl.test/paquetes/eje-cafetero-horizontal-v2.jpg\u0027);",
-                                    "pm.expect(json.itinerario).to.have.length(4);",
-                                    "pm.expect(json.itinerario.map(i =\u003e i.numeroDia)).to.eql([1, 2, 3, 4]);",
-                                    "pm.expect(json.itinerario.every(i =\u003e !Object.prototype.hasOwnProperty.call(i, \u0027descripcion\u0027))).to.eql(true);"
-                                ],
-                                "type": "text/javascript"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "Eliminar paquete",
-                    "request": {
-                        "method": "DELETE",
-                        "header": [],
-                        "url": "{{baseUrl}}/api/paquetes/{{paqueteId}}"
-                    },
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "pm.test(\u0027status 204\u0027, function () { pm.response.to.have.status(204); });"
-                                ],
-                                "type": "text/javascript"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "Crear proveedor",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"nombre\": \"Proveedor {{$timestamp}}\",\n  \"tipoProveedor\": \"TRANSPORTE\",\n  \"correo\": \"proveedor.{{$timestamp}}@test.com\",\n  \"telefono\": \"3001234567\"\n}"
-                        },
-                        "url": "{{baseUrl}}/api/proveedores"
-                    },
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "pm.test(\u0027status 201\u0027, function () { pm.response.to.have.status(201); });",
-                                    "const json = pm.response.json();",
-                                    "pm.expect(json.id).to.exist;",
-                                    "pm.collectionVariables.set(\u0027proveedorId\u0027, json.id);"
-                                ],
-                                "type": "text/javascript"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "Listar proveedores",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "url": "{{baseUrl}}/api/proveedores"
-                    },
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "pm.test(\u0027status 200\u0027, function () { pm.response.to.have.status(200); });",
-                                    "pm.expect(pm.response.json()).to.be.an(\u0027array\u0027);"
-                                ],
-                                "type": "text/javascript"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "Actualizar proveedor",
-                    "request": {
-                        "method": "PUT",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"nombre\": \"Proveedor Actualizado {{$timestamp}}\",\n  \"tipoProveedor\": \"ALOJAMIENTO\",\n  \"correo\": \"proveedor.actualizado.{{$timestamp}}@test.com\",\n  \"telefono\": \"3007654321\"\n}"
-                        },
-                        "url": "{{baseUrl}}/api/proveedores/{{proveedorId}}"
-                    },
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "pm.test(\u0027status 200\u0027, function () { pm.response.to.have.status(200); });",
-                                    "const json = pm.response.json();",
-                                    "pm.expect(json.id).to.eql(Number(pm.collectionVariables.get(\u0027proveedorId\u0027)));",
-                                    "pm.expect(json.tipoProveedor).to.eql(\u0027ALOJAMIENTO\u0027);",
-                                    "pm.expect(json.activo).to.eql(true);"
-                                ],
-                                "type": "text/javascript"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "Eliminar proveedor",
-                    "request": {
-                        "method": "DELETE",
-                        "header": [],
-                        "url": "{{baseUrl}}/api/proveedores/{{proveedorId}}"
-                    },
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "pm.test(\u0027status 204\u0027, function () { pm.response.to.have.status(204); });"
-                                ],
-                                "type": "text/javascript"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "Validacion paquete invalido",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"titulo\": \"\",\n  \"destino\": \"\",\n  \"duracionDias\": 0,\n  \"precio\": 0,\n  \"cupo\": 0,\n  \"fechaInicio\": \"2026-07-10\"\n}"
-                        },
-                        "url": "{{baseUrl}}/api/paquetes"
-                    },
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "pm.test(\u0027status 400\u0027, function () { pm.response.to.have.status(400); });",
-                                    "pm.expect(pm.response.json().campos).to.be.an(\u0027object\u0027);"
-                                ],
-                                "type": "text/javascript"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "Validacion itinerario con dia repetido",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"titulo\": \"Paquete con itinerario repetido {{$timestamp}}\",\n  \"descripcion\": \"Debe fallar por numeroDia duplicado\",\n  \"destino\": \"Quindio\",\n  \"duracionDias\": 3,\n  \"precio\": 900000.00,\n  \"cupo\": 10,\n  \"fechaInicio\": \"2026-07-10\",\n  \"itinerario\": [\n    {\n      \"numeroDia\": 1,\n      \"titulo\": \"Llegada\"\n    },\n    {\n      \"numeroDia\": 1,\n      \"titulo\": \"Tour repetido\"\n    }\n  ]\n}"
-                        },
-                        "url": "{{baseUrl}}/api/paquetes"
-                    },
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "pm.test(\u0027status 409\u0027, function () { pm.response.to.have.status(409); });",
-                                    "pm.expect(pm.response.json().mensaje).to.include(\u0027dias repetidos\u0027);"
-                                ],
-                                "type": "text/javascript"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "Validacion itinerario supera duracion",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"titulo\": \"Paquete con itinerario fuera de rango {{$timestamp}}\",\n  \"descripcion\": \"Debe fallar porque el dia 4 supera duracionDias 3\",\n  \"destino\": \"Quindio\",\n  \"duracionDias\": 3,\n  \"precio\": 900000.00,\n  \"cupo\": 10,\n  \"fechaInicio\": \"2026-07-10\",\n  \"itinerario\": [\n    {\n      \"numeroDia\": 4,\n      \"titulo\": \"Dia inexistente\"\n    }\n  ]\n}"
-                        },
-                        "url": "{{baseUrl}}/api/paquetes"
-                    },
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "pm.test(\u0027status 409\u0027, function () { pm.response.to.have.status(409); });",
-                                    "pm.expect(pm.response.json().mensaje).to.include(\u0027duracion del paquete\u0027);"
-                                ],
-                                "type": "text/javascript"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "Validacion transporte invalido",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"titulo\": \"Paquete con transporte invalido {{$timestamp}}\",\n  \"descripcion\": \"Debe fallar por transporte no permitido\",\n  \"destino\": \"Quindio\",\n  \"duracionDias\": 3,\n  \"precio\": 900000.00,\n  \"cupo\": 10,\n  \"fechaInicio\": \"2026-07-10\",\n  \"tipoTransporte\": \"Barco\",\n  \"itinerario\": [\n    {\n      \"numeroDia\": 1,\n      \"titulo\": \"Llegada\"\n    }\n  ]\n}"
-                        },
-                        "url": "{{baseUrl}}/api/paquetes"
-                    },
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "pm.test(\u0027status 409\u0027, function () { pm.response.to.have.status(409); });",
-                                    "pm.expect(pm.response.json().mensaje).to.include(\u0027Bus de turismo o Avion\u0027);"
-                                ],
-                                "type": "text/javascript"
-                            }
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "Gateway 8080 con Bearer token",
-            "description": "Estas pruebas usan las mismas rutas por gateway. Debes poner un JWT valido en la variable token.",
-            "auth": {
-                "type": "bearer",
-                "bearer": [
-                    {
-                        "key": "token",
-                        "value": "{{token}}",
-                        "type": "string"
-                    }
-                ]
-            },
-            "item": [
-                {
-                    "name": "Buscar paquetes por gateway",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "url": "{{gatewayUrl}}/api/paquetes?activo=true\u0026pagina=0\u0026tamano=5"
-                    }
-                }
-            ]
-        }
-    ]
+      ]
+    }
+  ]
 }
-

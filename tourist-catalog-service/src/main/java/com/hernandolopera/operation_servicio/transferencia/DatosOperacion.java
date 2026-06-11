@@ -3,9 +3,7 @@ package com.hernandolopera.operation_servicio.transferencia;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 
@@ -18,8 +16,8 @@ public final class DatosOperacion {
     public record SolicitudPaqueteTuristico(@NotBlank String titulo, String descripcion, String destino,
         List<@NotBlank String> destinos,
         @NotNull @Min(1) Integer duracionDias, @NotNull @DecimalMin("0.01") BigDecimal precio,
-        @NotNull @Min(1) Integer cupo, @NotNull LocalDate fechaInicio,
-        String lugarSalida, LocalTime horaSalida, String alojamiento, String tipoHabitacion, String tipoTransporte,
+        @NotNull @Min(1) Integer cupo,
+        String lugarSalida, String tipoTransporte,
         List<@NotBlank String> tiposTransporte,
         String fotoVerticalUrl, String fotoHorizontalUrl, List<@NotBlank String> incluye,
         List<@NotBlank String> noIncluye, List<@NotBlank String> politicasCancelacion,
@@ -27,8 +25,9 @@ public final class DatosOperacion {
         @Valid List<SolicitudActividadItinerario> itinerario) {}
     public record RespuestaPaqueteTuristico(Integer id, String titulo, String descripcion, String destino,
         List<String> destinos,
-        Integer duracionDias, BigDecimal precio, Integer cupo, LocalDate fechaInicio,
-        String lugarSalida, LocalTime horaSalida, String alojamiento, String tipoHabitacion, String tipoTransporte,
+
+        Integer duracionDias, BigDecimal precio, Integer cupo,
+        String lugarSalida, String tipoTransporte,
         List<String> tiposTransporte,
         String fotoVerticalUrl, String fotoHorizontalUrl, List<String> incluye, List<String> noIncluye,
         List<String> politicasCancelacion, List<String> requisitos, Boolean activo, List<RespuestaActividadItinerario> itinerario) {}
@@ -39,9 +38,13 @@ public final class DatosOperacion {
         String autor, LocalDateTime fechaCreacion) {}
 
     public record SolicitudProveedor(@NotBlank String nombre, @NotBlank String tipoProveedor,
-        @Email String correo, String telefono) {}
+        @Email String correo, String telefono,
+        String tipoVehiculo, String placa, String conductor, String telefonoConductor, Integer capacidad,
+        String direccion, String especialidad, String idioma, String tipoComida, String notas) {}
     public record RespuestaProveedor(Integer id, String nombre, String tipoProveedor,
-        String correo, String telefono, Boolean activo) {}
+        String correo, String telefono, Boolean activo,
+        String tipoVehiculo, String placa, String conductor, String telefonoConductor, Integer capacidad,
+        String direccion, String especialidad, String idioma, String tipoComida, String notas) {}
 
     public record RespuestaErrorApi(LocalDateTime fecha, int estado, String error, String mensaje,
         String ruta, Map<String, String> campos) {}
