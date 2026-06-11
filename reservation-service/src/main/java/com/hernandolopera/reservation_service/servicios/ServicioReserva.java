@@ -61,6 +61,16 @@ public class ServicioReserva {
 	}
 
 	/**
+	 * Obtiene todas las reservas de un paquete
+	 */
+	public List<ReservaDTO> obtenerReservasPorPaquete(Long idPaquete) {
+		log.info("Obteniendo reservas del paquete: {}", idPaquete);
+		actualizarReservasPasadas();
+		return repositorioReserva.findByIdPaquete(idPaquete).stream().map(this::convertirADTO)
+				.collect(Collectors.toList());
+	}
+
+	/**
 	 * Obtiene todas las reservas por estado
 	 */
 	public List<ReservaDTO> obtenerReservasPorEstado(EstadoReserva estado) {
