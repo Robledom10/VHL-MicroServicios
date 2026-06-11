@@ -4,9 +4,10 @@ import com.hernandolopera.operation_servicio.excepcion.*;
 import com.hernandolopera.operation_servicio.entidades.*;
 import com.hernandolopera.operation_servicio.repositorio.*;
 import com.hernandolopera.operation_servicio.transferencia.DatosOperacion.*;
-import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,8 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ServicioPaqueteTuristico {
-    private static final String ALOJAMIENTO_DEFECTO = "Hotel 3 estrellas o similar";
-    private static final String HABITACION_DEFECTO = "Habitacion multiple (compartida)";
     private static final String TRANSPORTE_DEFECTO = "Bus de turismo";
     private static final List<String> TRANSPORTES_PERMITIDOS = List.of("Bus de turismo", "Avion");
     private static final List<String> INCLUYE_DEFECTO = List.of(
@@ -38,15 +37,17 @@ public class ServicioPaqueteTuristico {
         "50% de reembolso hasta 48 horas antes",
         "No hay reembolso el mismo dia"
     );
+    private static final List<String> REQUISITOS_DEFECTO = List.of(
+        "Cedula de ciudadania obligatoria",
+        "Edad minima: 5 anos",
+        "Pago completo antes del viaje"
+    );
 
     private final RepositorioPaqueteTuristico repositorioPaquete;
-    private final RepositorioCategoria repositorioCategoria;
     private final MapeadorOperaciones mapeador;
 
-    public ServicioPaqueteTuristico(RepositorioPaqueteTuristico repositorioPaquete,
-        RepositorioCategoria repositorioCategoria, MapeadorOperaciones mapeador) {
+    public ServicioPaqueteTuristico(RepositorioPaqueteTuristico repositorioPaquete, MapeadorOperaciones mapeador) {
         this.repositorioPaquete = repositorioPaquete;
-        this.repositorioCategoria = repositorioCategoria;
         this.mapeador = mapeador;
     }
 
@@ -70,12 +71,12 @@ public class ServicioPaqueteTuristico {
     }
 
     @Transactional(readOnly = true)
-    public Page<RespuestaPaqueteTuristico> buscar(String categoria, String destino, String busqueda,
-        BigDecimal precioMinimo, BigDecimal precioMaximo, Boolean activo, Pageable paginacion) {
-        if (precioMinimo != null && precioMaximo != null && precioMinimo.compareTo(precioMaximo) > 0) {
-            throw new ExcepcionReglaNegocio("El precio minimo no puede ser mayor al precio maximo");
+    public Page<RespuestaPaqueteTuristico> buscar(String destino, String busqueda, Integer duracionDias,
+        Boolean activo, Pageable paginacion) {
+        if (duracionDias != null && duracionDias < 1) {
+            throw new ExcepcionReglaNegocio("La duracion debe ser de al menos 1 dia");
         }
-        return repositorioPaquete.buscar(categoria, destino, busqueda, precioMinimo, precioMaximo, activo, paginacion)
+        return repositorioPaquete.buscar(destino, busqueda, duracionDias, activo, paginacion)
             .map(mapeador::aRespuestaPaquete);
     }
 
@@ -84,6 +85,13 @@ public class ServicioPaqueteTuristico {
         PaqueteTuristico paquete = buscarActivo(id);
         paquete.activo = false;
         repositorioPaquete.save(paquete);
+    }
+
+    @Transactional
+    public void eliminarPermanente(Integer id) {
+        PaqueteTuristico paquete = repositorioPaquete.findById(id)
+            .orElseThrow(() -> new RecursoNoEncontradoExcepcion("No existe el paquete turistico con id " + id));
+        repositorioPaquete.delete(paquete);
     }
 
     PaqueteTuristico buscarActivo(Integer id) {
@@ -97,25 +105,16 @@ public class ServicioPaqueteTuristico {
 
     private void aplicarSolicitud(PaqueteTuristico paquete, SolicitudPaqueteTuristico solicitud, boolean nuevo) {
         validarItinerario(solicitud.itinerario(), solicitud.duracionDias());
-        validarFechas(solicitud);
-        validarTransporte(solicitud.tipoTransporte());
-        Categoria categoria = repositorioCategoria.findById(solicitud.idCategoria())
-            .filter(c -> Boolean.TRUE.equals(c.activo))
-            .orElseThrow(() -> new RecursoNoEncontradoExcepcion("No existe la categoria con id " + solicitud.idCategoria()));
+        List<String> destinos = normalizarDestinos(solicitud.destinos(), solicitud.destino());
+        List<String> tiposTransporte = normalizarTransportes(solicitud.tiposTransporte(), solicitud.tipoTransporte());
         paquete.titulo = solicitud.titulo().trim();
-        paquete.categoria = categoria;
-        paquete.destino = solicitud.destino().trim();
+        paquete.reemplazarDestinos(destinos);
         paquete.descripcion = solicitud.descripcion() == null ? null : solicitud.descripcion().trim();
         paquete.duracionDias = solicitud.duracionDias();
         paquete.precio = solicitud.precio();
         paquete.cupo = solicitud.cupo();
-        paquete.fechaInicio = solicitud.fechaInicio();
-        paquete.fechaFin = solicitud.fechaFin();
         paquete.lugarSalida = textoOpcional(solicitud.lugarSalida());
-        paquete.horaSalida = solicitud.horaSalida();
-        paquete.alojamiento = textoConDefecto(solicitud.alojamiento(), ALOJAMIENTO_DEFECTO);
-        paquete.tipoHabitacion = textoConDefecto(solicitud.tipoHabitacion(), HABITACION_DEFECTO);
-        paquete.tipoTransporte = textoConDefecto(solicitud.tipoTransporte(), TRANSPORTE_DEFECTO);
+        paquete.reemplazarTiposTransporte(tiposTransporte);
         paquete.fotoVerticalUrl = textoOpcional(solicitud.fotoVerticalUrl());
         paquete.fotoHorizontalUrl = textoOpcional(solicitud.fotoHorizontalUrl());
         List<ActividadItinerario> actividades = solicitud.itinerario() == null ? List.of()
@@ -126,7 +125,8 @@ public class ServicioPaqueteTuristico {
         paquete.reemplazarListasDelDetalle(
             normalizarLista(solicitud.incluye(), INCLUYE_DEFECTO),
             normalizarLista(solicitud.noIncluye(), NO_INCLUYE_DEFECTO),
-            normalizarLista(solicitud.politicasCancelacion(), POLITICAS_CANCELACION_DEFECTO)
+            normalizarLista(solicitud.politicasCancelacion(), POLITICAS_CANCELACION_DEFECTO),
+            normalizarLista(solicitud.requisitos(), REQUISITOS_DEFECTO)
         );
     }
 
@@ -148,21 +148,42 @@ public class ServicioPaqueteTuristico {
         });
     }
 
-    private void validarFechas(SolicitudPaqueteTuristico solicitud) {
-        if (solicitud.fechaFin().isBefore(solicitud.fechaInicio())) {
-            throw new ExcepcionReglaNegocio("La fecha final no puede ser anterior a la fecha inicial");
+    private List<String> normalizarDestinos(List<String> destinos, String destino) {
+        List<String> destinosNormalizados = normalizarLista(destinos, List.of());
+        if (destinosNormalizados.isEmpty() && destino != null && !destino.isBlank()) {
+            destinosNormalizados = List.of(destino.trim());
         }
+        if (destinosNormalizados.isEmpty()) {
+            throw new ExcepcionReglaNegocio("Debe registrar al menos un destino");
+        }
+        return destinosNormalizados;
     }
 
-    private void validarTransporte(String tipoTransporte) {
-        if (tipoTransporte == null || tipoTransporte.isBlank()) {
-            return;
+    private List<String> normalizarTransportes(List<String> tiposTransporte, String tipoTransporte) {
+        List<String> transportesNormalizados = normalizarLista(tiposTransporte, List.of());
+        if (transportesNormalizados.isEmpty() && tipoTransporte != null && !tipoTransporte.isBlank()) {
+            transportesNormalizados = List.of(tipoTransporte.trim());
         }
-        boolean permitido = TRANSPORTES_PERMITIDOS.stream()
-            .anyMatch(transporte -> transporte.equalsIgnoreCase(tipoTransporte.trim()));
-        if (!permitido) {
-            throw new ExcepcionReglaNegocio("El tipo de transporte debe ser Bus de turismo o Avion");
+        if (transportesNormalizados.isEmpty()) {
+            transportesNormalizados = List.of(TRANSPORTE_DEFECTO);
         }
+        Set<String> vistos = new HashSet<>();
+        List<String> resultado = new ArrayList<>();
+        transportesNormalizados.forEach(transporte -> {
+            String transporteValido = transportePermitido(transporte);
+            String llave = transporteValido.toLowerCase(Locale.ROOT);
+            if (vistos.add(llave)) {
+                resultado.add(transporteValido);
+            }
+        });
+        return resultado;
+    }
+
+    private String transportePermitido(String tipoTransporte) {
+        return TRANSPORTES_PERMITIDOS.stream()
+            .filter(transporte -> transporte.equalsIgnoreCase(tipoTransporte.trim()))
+            .findFirst()
+            .orElseThrow(() -> new ExcepcionReglaNegocio("El tipo de transporte debe ser Bus de turismo, Avion o ambos"));
     }
 
     private List<String> normalizarLista(List<String> valores, List<String> valoresDefecto) {
