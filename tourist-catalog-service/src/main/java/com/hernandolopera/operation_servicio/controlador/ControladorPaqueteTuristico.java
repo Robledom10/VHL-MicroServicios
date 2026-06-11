@@ -4,7 +4,6 @@ import com.hernandolopera.operation_servicio.servicio.ServicioPaqueteTuristico;
 import com.hernandolopera.operation_servicio.servicio.ServicioImagenPaquete;
 import com.hernandolopera.operation_servicio.transferencia.DatosOperacion.*;
 
-import io.micrometer.common.lang.NonNull;
 import jakarta.validation.Valid;
 import java.net.URI;
 import org.springframework.data.domain.*;
@@ -38,10 +37,13 @@ public class ControladorPaqueteTuristico {
     @GetMapping
     public ResponseEntity<Page<RespuestaPaqueteTuristico>> buscar(@RequestParam(required = false) String destino,
         @RequestParam(required = false) String busqueda,
+        @RequestParam(required = false) Integer duracionDias,
         @RequestParam(required = false) Boolean activo, @RequestParam(defaultValue = "0") int pagina,
         @RequestParam(defaultValue = "10") int tamano, @RequestParam(defaultValue = "titulo") String ordenarPor,
         @RequestParam(defaultValue = "asc") String direccion) {
         Sort orden = "desc".equalsIgnoreCase(direccion) ? Sort.by(ordenarPor).descending() : Sort.by(ordenarPor).ascending();
+        return ResponseEntity.ok(servicio.buscar(destino, busqueda, duracionDias, activo,
+
             PageRequest.of(pagina, tamano, orden)));
     }
 

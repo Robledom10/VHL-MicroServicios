@@ -9,8 +9,6 @@ CREATE TABLE `package` (
     duration_days INT NOT NULL,
     price DECIMAL(15,2) NOT NULL,
     quota INT NOT NULL,
-    start_date DATE NOT NULL,
-    end_date DATE NOT NULL,
     departure_place VARCHAR(150),
     transport_type VARCHAR(80) DEFAULT 'Bus de turismo',
     vertical_photo_url VARCHAR(500),
