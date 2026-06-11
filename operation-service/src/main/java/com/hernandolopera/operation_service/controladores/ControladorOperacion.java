@@ -1,9 +1,8 @@
 package com.hernandolopera.operation_service.controladores;
 
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaAlojamiento;
-import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaGuia;
+
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaRestaurante;
-import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudGuia;
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudRestaurante;
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaCheckIn;
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaContactoEmergencia;
@@ -58,77 +57,65 @@ public class ControladorOperacion {
 
     @PostMapping("/viajes/{idViaje}/transporte")
     public ResponseEntity<RespuestaTransporte> asignarTransporte(
-        @PathVariable Long idViaje,
-        @Valid @RequestBody SolicitudTransporte solicitud
-    ) {
+            @PathVariable Long idViaje,
+            @Valid @RequestBody SolicitudTransporte solicitud) {
         log.info("POST /api/v1/operaciones/viajes/{}/transporte", idViaje);
         return ResponseEntity.status(HttpStatus.CREATED).body(servicioOperacion.asignarTransporte(idViaje, solicitud));
     }
 
     @PostMapping("/viajes/{idViaje}/checkins")
     public ResponseEntity<RespuestaCheckIn> registrarCheckIn(
-        @PathVariable Long idViaje,
-        @Valid @RequestBody SolicitudCheckIn solicitud
-    ) {
+            @PathVariable Long idViaje,
+            @Valid @RequestBody SolicitudCheckIn solicitud) {
         log.info("POST /api/v1/operaciones/viajes/{}/checkins", idViaje);
         return ResponseEntity.status(HttpStatus.CREATED).body(servicioOperacion.registrarCheckIn(idViaje, solicitud));
     }
 
     @PostMapping("/viajes/{idViaje}/alojamientos")
     public ResponseEntity<RespuestaAlojamiento> asignarAlojamiento(
-        @PathVariable Long idViaje,
-        @Valid @RequestBody SolicitudAlojamiento solicitud
-    ) {
+            @PathVariable Long idViaje,
+            @Valid @RequestBody SolicitudAlojamiento solicitud) {
         log.info("POST /api/v1/operaciones/viajes/{}/alojamientos", idViaje);
         return ResponseEntity.status(HttpStatus.CREATED).body(servicioOperacion.asignarAlojamiento(idViaje, solicitud));
     }
 
     @PostMapping("/viajeros/{idViajero}/informacion-medica")
     public ResponseEntity<RespuestaInformacionMedica> registrarInformacionMedica(
-        @PathVariable Long idViajero,
-        @Valid @RequestBody SolicitudInformacionMedica solicitud
-    ) {
+            @PathVariable Long idViajero,
+            @Valid @RequestBody SolicitudInformacionMedica solicitud) {
         log.info("POST /api/v1/operaciones/viajeros/{}/informacion-medica", idViajero);
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(servicioOperacion.registrarInformacionMedica(idViajero, solicitud));
+                .body(servicioOperacion.registrarInformacionMedica(idViajero, solicitud));
     }
 
     @PostMapping("/viajeros/{idViajero}/contactos-emergencia")
     public ResponseEntity<RespuestaContactoEmergencia> registrarContactoEmergencia(
-        @PathVariable Long idViajero,
-        @Valid @RequestBody SolicitudContactoEmergencia solicitud
-    ) {
+            @PathVariable Long idViajero,
+            @Valid @RequestBody SolicitudContactoEmergencia solicitud) {
         log.info("POST /api/v1/operaciones/viajeros/{}/contactos-emergencia", idViajero);
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(servicioOperacion.registrarContactoEmergencia(idViajero, solicitud));
+                .body(servicioOperacion.registrarContactoEmergencia(idViajero, solicitud));
     }
 
     @PostMapping("/viajes/{idViaje}/incidentes")
     public ResponseEntity<RespuestaIncidente> registrarIncidente(
-        @PathVariable Long idViaje,
-        @Valid @RequestBody SolicitudIncidente solicitud
-    ) {
+            @PathVariable Long idViaje,
+            @Valid @RequestBody SolicitudIncidente solicitud) {
         log.info("POST /api/v1/operaciones/viajes/{}/incidentes", idViaje);
         return ResponseEntity.status(HttpStatus.CREATED).body(servicioOperacion.registrarIncidente(idViaje, solicitud));
     }
 
-    @PostMapping("/viajes/{idViaje}/guias")
-    public ResponseEntity<RespuestaGuia> asignarGuia(@PathVariable Long idViaje, @Valid @RequestBody SolicitudGuia solicitud) {
-        log.info("POST /api/v1/operaciones/viajes/{}/guias", idViaje);
-        return ResponseEntity.status(HttpStatus.CREATED).body(servicioOperacion.asignarGuia(idViaje, solicitud));
-    }
-
     @PostMapping("/viajes/{idViaje}/restaurantes")
-    public ResponseEntity<RespuestaRestaurante> asignarRestaurante(@PathVariable Long idViaje, @Valid @RequestBody SolicitudRestaurante solicitud) {
+    public ResponseEntity<RespuestaRestaurante> asignarRestaurante(@PathVariable Long idViaje,
+            @Valid @RequestBody SolicitudRestaurante solicitud) {
         log.info("POST /api/v1/operaciones/viajes/{}/restaurantes", idViaje);
         return ResponseEntity.status(HttpStatus.CREATED).body(servicioOperacion.asignarRestaurante(idViaje, solicitud));
     }
 
     @PostMapping("/viajes/{idViaje}/notificaciones")
     public ResponseEntity<RespuestaNotificacion> enviarNotificacion(
-        @PathVariable Long idViaje,
-        @Valid @RequestBody SolicitudNotificacion solicitud
-    ) {
+            @PathVariable Long idViaje,
+            @Valid @RequestBody SolicitudNotificacion solicitud) {
         log.info("POST /api/v1/operaciones/viajes/{}/notificaciones", idViaje);
         return ResponseEntity.status(HttpStatus.CREATED).body(servicioOperacion.enviarNotificacion(idViaje, solicitud));
     }
@@ -159,12 +146,6 @@ public class ControladorOperacion {
     public ResponseEntity<List<RespuestaAlojamiento>> listarAlojamientos(@PathVariable Long idViaje) {
         log.info("GET /api/v1/operaciones/viajes/{}/alojamientos", idViaje);
         return ResponseEntity.ok(servicioOperacion.listarAlojamientos(idViaje));
-    }
-
-    @GetMapping("/viajes/{idViaje}/guias")
-    public ResponseEntity<List<RespuestaGuia>> listarGuias(@PathVariable Long idViaje) {
-        log.info("GET /api/v1/operaciones/viajes/{}/guias", idViaje);
-        return ResponseEntity.ok(servicioOperacion.listarGuias(idViaje));
     }
 
     @GetMapping("/viajes/{idViaje}/restaurantes")
@@ -199,8 +180,8 @@ public class ControladorOperacion {
 
     @PutMapping("/viajes/{idViaje}/notificaciones/{id}")
     public ResponseEntity<RespuestaNotificacion> actualizarNotificacion(
-        @PathVariable Long idViaje, @PathVariable Long id,
-        @Valid @RequestBody SolicitudNotificacion solicitud) {
+            @PathVariable Long idViaje, @PathVariable Long id,
+            @Valid @RequestBody SolicitudNotificacion solicitud) {
         log.info("PUT /api/v1/operaciones/viajes/{}/notificaciones/{}", idViaje, id);
         return ResponseEntity.ok(servicioOperacion.actualizarNotificacion(idViaje, id, solicitud));
     }
@@ -224,9 +205,8 @@ public class ControladorOperacion {
 
     @PutMapping("/viajes/{id}")
     public ResponseEntity<RespuestaViaje> actualizarViaje(
-        @PathVariable Long id,
-        @Valid @RequestBody SolicitudViaje solicitud
-    ) {
+            @PathVariable Long id,
+            @Valid @RequestBody SolicitudViaje solicitud) {
         log.info("PUT /api/v1/operaciones/viajes/{}", id);
         return ResponseEntity.ok(servicioOperacion.actualizarViaje(id, solicitud));
     }
@@ -240,69 +220,58 @@ public class ControladorOperacion {
 
     @PutMapping("/viajes/{idViaje}/alojamientos/{id}")
     public ResponseEntity<RespuestaAlojamiento> actualizarAlojamiento(
-        @PathVariable Long idViaje,
-        @PathVariable Long id,
-        @Valid @RequestBody SolicitudAlojamiento solicitud
-    ) {
+            @PathVariable Long idViaje,
+            @PathVariable Long id,
+            @Valid @RequestBody SolicitudAlojamiento solicitud) {
         log.info("PUT /api/v1/operaciones/viajes/{}/alojamientos/{}", idViaje, id);
         return ResponseEntity.ok(servicioOperacion.actualizarAlojamiento(idViaje, id, solicitud));
     }
 
     @PutMapping("/viajes/{idViaje}/transporte/{id}")
     public ResponseEntity<RespuestaTransporte> actualizarTransporte(
-        @PathVariable Long idViaje,
-        @PathVariable Long id,
-        @Valid @RequestBody SolicitudTransporte solicitud
-    ) {
+            @PathVariable Long idViaje,
+            @PathVariable Long id,
+            @Valid @RequestBody SolicitudTransporte solicitud) {
         log.info("PUT /api/v1/operaciones/viajes/{}/transporte/{}", idViaje, id);
         return ResponseEntity.ok(servicioOperacion.actualizarTransporte(idViaje, id, solicitud));
     }
 
-    @PutMapping("/viajes/{idViaje}/guias/{id}")
-    public ResponseEntity<RespuestaGuia> actualizarGuia(@PathVariable Long idViaje, @PathVariable Long id, @Valid @RequestBody SolicitudGuia solicitud) {
-        log.info("PUT /api/v1/operaciones/viajes/{}/guias/{}", idViaje, id);
-        return ResponseEntity.ok(servicioOperacion.actualizarGuia(idViaje, id, solicitud));
-    }
-
     @PutMapping("/viajes/{idViaje}/restaurantes/{id}")
-    public ResponseEntity<RespuestaRestaurante> actualizarRestaurante(@PathVariable Long idViaje, @PathVariable Long id, @Valid @RequestBody SolicitudRestaurante solicitud) {
+    public ResponseEntity<RespuestaRestaurante> actualizarRestaurante(@PathVariable Long idViaje, @PathVariable Long id,
+            @Valid @RequestBody SolicitudRestaurante solicitud) {
         log.info("PUT /api/v1/operaciones/viajes/{}/restaurantes/{}", idViaje, id);
         return ResponseEntity.ok(servicioOperacion.actualizarRestaurante(idViaje, id, solicitud));
     }
 
     @PutMapping("/incidentes/{id}")
     public ResponseEntity<RespuestaIncidente> actualizarIncidente(
-        @PathVariable Long id,
-        @Valid @RequestBody SolicitudIncidente solicitud
-    ) {
+            @PathVariable Long id,
+            @Valid @RequestBody SolicitudIncidente solicitud) {
         log.info("PUT /api/v1/operaciones/incidentes/{}", id);
         return ResponseEntity.ok(servicioOperacion.actualizarIncidente(id, solicitud));
     }
 
     @PatchMapping("/incidentes/{id}/estado")
     public ResponseEntity<RespuestaIncidente> actualizarEstadoIncidente(
-        @PathVariable Long id,
-        @Valid @RequestBody SolicitudActualizarEstadoIncidente solicitud
-    ) {
+            @PathVariable Long id,
+            @Valid @RequestBody SolicitudActualizarEstadoIncidente solicitud) {
         log.info("PATCH /api/v1/operaciones/incidentes/{}/estado", id);
         return ResponseEntity.ok(servicioOperacion.actualizarEstadoIncidente(id, solicitud));
     }
 
     @PutMapping("/viajeros/{idViajero}/informacion-medica/{id}")
     public ResponseEntity<RespuestaInformacionMedica> actualizarInformacionMedica(
-        @PathVariable Long idViajero,
-        @PathVariable Long id,
-        @Valid @RequestBody SolicitudInformacionMedica solicitud
-    ) {
+            @PathVariable Long idViajero,
+            @PathVariable Long id,
+            @Valid @RequestBody SolicitudInformacionMedica solicitud) {
         log.info("PUT /api/v1/operaciones/viajeros/{}/informacion-medica/{}", idViajero, id);
         return ResponseEntity.ok(servicioOperacion.actualizarInformacionMedica(idViajero, id, solicitud));
     }
 
     @DeleteMapping("/viajeros/{idViajero}/informacion-medica/{id}")
     public ResponseEntity<Void> eliminarInformacionMedica(
-        @PathVariable Long idViajero,
-        @PathVariable Long id
-    ) {
+            @PathVariable Long idViajero,
+            @PathVariable Long id) {
         log.info("DELETE /api/v1/operaciones/viajeros/{}/informacion-medica/{}", idViajero, id);
         servicioOperacion.eliminarInformacionMedica(idViajero, id);
         return ResponseEntity.noContent().build();
@@ -310,19 +279,11 @@ public class ControladorOperacion {
 
     @PutMapping("/viajeros/{idViajero}/contactos-emergencia/{id}")
     public ResponseEntity<RespuestaContactoEmergencia> actualizarContacto(
-        @PathVariable Long idViajero,
-        @PathVariable Long id,
-        @Valid @RequestBody SolicitudContactoEmergencia solicitud
-    ) {
+            @PathVariable Long idViajero,
+            @PathVariable Long id,
+            @Valid @RequestBody SolicitudContactoEmergencia solicitud) {
         log.info("PUT /api/v1/operaciones/viajeros/{}/contactos-emergencia/{}", idViajero, id);
         return ResponseEntity.ok(servicioOperacion.actualizarContacto(idViajero, id, solicitud));
-    }
-
-    @DeleteMapping("/viajes/{idViaje}/guias/{id}")
-    public ResponseEntity<Void> eliminarGuia(@PathVariable Long idViaje, @PathVariable Long id) {
-        log.info("DELETE /api/v1/operaciones/viajes/{}/guias/{}", idViaje, id);
-        servicioOperacion.eliminarGuia(idViaje, id);
-        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/viajes/{idViaje}/restaurantes/{id}")
