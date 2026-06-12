@@ -152,9 +152,9 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${DOCUMENTS_DB_NAME}
+      MYSQL_DATABASE: ${DOCUMENT_DB_NAME}
     ports:
-      - "${DOCUMENTS_DB_PORT}:3306"
+      - "${DOCUMENT_DB_PORT}:3306"
     volumes:
       - documents_data:/var/lib/mysql
       - ./Docker/gestion_documental_db.sql:/docker-entrypoint-initdb.d/gestion_documental_db.sql
@@ -326,11 +326,11 @@ services:
       - .env
     environment:
       SERVER_PORT: 8087
-      SPRING_DATASOURCE_URL: jdbc:mysql://db-documents:3306/${DOCUMENTS_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_URL: jdbc:mysql://db-documents:3306/${DOCUMENT_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     ports:
-      - "${DOCUMENTS_SERVICE_PORT}:8087"
+      - "${DOCUMENT_SERVICE_PORT}:8087"
     volumes:
       - documents_uploads:/app/uploads
     networks:
