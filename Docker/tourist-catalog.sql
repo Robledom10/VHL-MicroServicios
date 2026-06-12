@@ -83,6 +83,7 @@ CREATE TABLE package_comment (
     comment VARCHAR(500) NOT NULL,
     score INT NOT NULL,
     author VARCHAR(100),
+    author_email VARCHAR(150),
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CHECK (score BETWEEN 1 AND 5),
     FOREIGN KEY (fk_id_package) REFERENCES `package`(id_package)

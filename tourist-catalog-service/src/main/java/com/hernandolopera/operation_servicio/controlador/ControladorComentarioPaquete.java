@@ -32,4 +32,13 @@ public class ControladorComentarioPaquete {
     public ResponseEntity<List<RespuestaComentarioPaquete>> buscarPorPaquete(@PathVariable Integer idPaquete) {
         return ResponseEntity.ok(servicio.buscarPorPaquete(idPaquete));
     }
+
+    @PutMapping("/{idComentario}")
+    public ResponseEntity<RespuestaComentarioPaquete> editar(@PathVariable Integer idPaquete,
+        @PathVariable Integer idComentario,
+        @RequestHeader("X-User-Email") String correoUsuario,
+        @RequestHeader(value = "X-User-Name", required = false) String nombreUsuario,
+        @Valid @RequestBody SolicitudComentarioPaquete solicitud) {
+        return ResponseEntity.ok(servicio.editar(idPaquete, idComentario, nombreUsuario, correoUsuario, solicitud));
+    }
 }

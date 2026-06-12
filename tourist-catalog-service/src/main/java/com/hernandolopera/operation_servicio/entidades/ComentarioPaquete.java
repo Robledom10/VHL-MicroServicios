@@ -23,6 +23,9 @@ public class ComentarioPaquete {
     @Column(name = "author", length = 100)
     public String autor;
 
+    @Column(name = "author_email", length = 150)
+    public String correoAutor;
+
     @Column(name = "created_at", nullable = false)
     public LocalDateTime fechaCreacion = LocalDateTime.now();
 }
