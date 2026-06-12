@@ -2,8 +2,6 @@ package com.hernandolopera.operation_servicio.entidades;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,21 +34,9 @@ public class PaqueteTuristico {
 
     @Column(name = "quota", nullable = false)
     public Integer cupo;
-
-    @Column(name = "start_date", nullable = false)
-    public LocalDate fechaInicio;
-
+    
     @Column(name = "departure_place", length = 150)
     public String lugarSalida;
-
-    @Column(name = "departure_time")
-    public LocalTime horaSalida;
-
-    @Column(name = "lodging", length = 150)
-    public String alojamiento;
-
-    @Column(name = "room_type", length = 120)
-    public String tipoHabitacion;
 
     @Column(name = "transport_type", length = 80)
     public String tipoTransporte;

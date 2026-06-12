@@ -1,7 +1,6 @@
 package com.hernandolopera.operation_service.servicios;
 
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaAlojamiento;
-import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaGuia;
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaRestaurante;
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaCheckIn;
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaContactoEmergencia;
@@ -13,7 +12,6 @@ import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaTranspor
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaViaje;
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudActualizarEstadoIncidente;
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudAlojamiento;
-import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudGuia;
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudRestaurante;
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudCheckIn;
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudContactoEmergencia;
@@ -23,7 +21,6 @@ import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudNotifica
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudTransporte;
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudViaje;
 import com.hernandolopera.operation_service.entidades.AlojamientoAsignado;
-import com.hernandolopera.operation_service.entidades.GuiaAsignado;
 import com.hernandolopera.operation_service.entidades.RestauranteViaje;
 import com.hernandolopera.operation_service.entidades.CheckInViajero;
 import com.hernandolopera.operation_service.entidades.ContactoEmergencia;
@@ -35,7 +32,6 @@ import com.hernandolopera.operation_service.entidades.TransporteAsignado;
 import com.hernandolopera.operation_service.excepciones.ExcepcionReglaNegocio;
 import com.hernandolopera.operation_service.excepciones.RecursoNoEncontradoExcepcion;
 import com.hernandolopera.operation_service.repositorios.RepositorioAlojamientoAsignado;
-import com.hernandolopera.operation_service.repositorios.RepositorioGuiaAsignado;
 import com.hernandolopera.operation_service.repositorios.RepositorioRestauranteViaje;
 import com.hernandolopera.operation_service.repositorios.RepositorioCheckInViajero;
 import com.hernandolopera.operation_service.repositorios.RepositorioContactoEmergencia;
@@ -70,7 +66,6 @@ public class ServicioOperacion {
     private final RepositorioContactoEmergencia repositorioContactoEmergencia;
     private final RepositorioIncidenteViaje repositorioIncidente;
     private final RepositorioNotificacionViaje repositorioNotificacion;
-    private final RepositorioGuiaAsignado repositorioGuia;
     private final RepositorioRestauranteViaje repositorioRestaurante;
     private final ServicioEmail servicioEmail;
     private final ServicioWhatsApp servicioWhatsApp;
@@ -177,47 +172,6 @@ public class ServicioOperacion {
 
         AlojamientoAsignado guardado = repositorioAlojamiento.save(alojamiento);
         return mapearAlojamiento(guardado, "Alojamiento asignado correctamente");
-    }
-
-    public RespuestaGuia asignarGuia(Long idViaje, SolicitudGuia solicitud) {
-        validarIdPositivo(idViaje, "idViaje");
-        validarViajeExistente(idViaje);
-        GuiaAsignado guia = GuiaAsignado.builder()
-            .idViaje(idViaje)
-            .nombreGuia(solicitud.nombreGuia())
-            .telefono(solicitud.telefono())
-            .correo(solicitud.correo())
-            .especialidad(solicitud.especialidad())
-            .idioma(solicitud.idioma())
-            .fechaRegistro(LocalDateTime.now())
-            .build();
-        return mapearGuia(repositorioGuia.save(guia), "Guía asignado correctamente");
-    }
-
-    public RespuestaGuia actualizarGuia(Long idViaje, Long idGuia, SolicitudGuia solicitud) {
-        validarIdPositivo(idViaje, "idViaje");
-        GuiaAsignado guia = repositorioGuia.findById(idGuia)
-            .orElseThrow(() -> new RecursoNoEncontradoExcepcion("Guía no encontrado"));
-        guia.setNombreGuia(solicitud.nombreGuia());
-        guia.setTelefono(solicitud.telefono());
-        guia.setCorreo(solicitud.correo());
-        guia.setEspecialidad(solicitud.especialidad());
-        guia.setIdioma(solicitud.idioma());
-        return mapearGuia(repositorioGuia.save(guia), "Guía actualizado correctamente");
-    }
-
-    @Transactional(readOnly = true)
-    public List<RespuestaGuia> listarGuias(Long idViaje) {
-        validarIdPositivo(idViaje, "idViaje");
-        return repositorioGuia.findAllByIdViaje(idViaje).stream()
-            .map(g -> mapearGuia(g, null)).toList();
-    }
-
-    public void eliminarGuia(Long idViaje, Long idGuia) {
-        validarIdPositivo(idViaje, "idViaje");
-        if (!repositorioGuia.existsById(idGuia))
-            throw new RecursoNoEncontradoExcepcion("Guía no encontrado");
-        repositorioGuia.deleteById(idGuia);
     }
 
     public RespuestaRestaurante asignarRestaurante(Long idViaje, SolicitudRestaurante solicitud) {
@@ -738,12 +692,6 @@ public class ServicioOperacion {
             alojamiento.getFechaRegistro(),
             mensaje
         );
-    }
-
-    private RespuestaGuia mapearGuia(GuiaAsignado g, String mensaje) {
-        return new RespuestaGuia(g.getId(), g.getIdViaje(), g.getNombreGuia(),
-            g.getTelefono(), g.getCorreo(), g.getEspecialidad(), g.getIdioma(),
-            g.getFechaRegistro(), mensaje);
     }
 
     private RespuestaRestaurante mapearRestaurante(RestauranteViaje r, String mensaje) {

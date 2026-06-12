@@ -19,7 +19,10 @@ public class PaymentController {
     @PostMapping("/create-link")
     public Mono<ResponseEntity<String>> create(
             @RequestBody CreatePaymentRequest request,
-            @RequestHeader("idempotency-Key") String key) {
+            @RequestHeader("idempotency-key") String key) {
+
+        System.out.println("ENTRO AL CONTROLLER");
+
         return paymentService.createPaymentLink(request, key)
                 .map(ResponseEntity::ok);
     }
