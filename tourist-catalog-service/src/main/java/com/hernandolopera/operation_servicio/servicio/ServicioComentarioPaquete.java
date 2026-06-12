@@ -26,8 +26,10 @@ public class ServicioComentarioPaquete {
     }
 
     @Transactional
-    public RespuestaComentarioPaquete crear(Integer idPaquete, String autor, SolicitudComentarioPaquete solicitud) {
-        if (autor == null || autor.isBlank()) {
+    public RespuestaComentarioPaquete crear(Integer idPaquete, String nombreUsuario, String correoUsuario,
+        SolicitudComentarioPaquete solicitud) {
+        String autor = obtenerAutorVisible(nombreUsuario, correoUsuario);
+        if (autor == null) {
             throw new ExcepcionReglaNegocio("No se pudo identificar el usuario que realiza el comentario");
         }
         PaqueteTuristico paquete = repositorioPaquete.findById(idPaquete)
@@ -38,9 +40,19 @@ public class ServicioComentarioPaquete {
         comentario.paqueteTuristico = paquete;
         comentario.comentario = solicitud.comentario().trim();
         comentario.puntaje = solicitud.puntaje();
-        comentario.autor = autor.trim();
+        comentario.autor = autor;
 
         return mapeador.aRespuestaComentario(repositorioComentario.save(comentario));
+    }
+
+    private String obtenerAutorVisible(String nombreUsuario, String correoUsuario) {
+        if (nombreUsuario != null && !nombreUsuario.isBlank()) {
+            return nombreUsuario.trim();
+        }
+        if (correoUsuario != null && !correoUsuario.isBlank()) {
+            return correoUsuario.trim();
+        }
+        return null;
     }
 
     @Transactional(readOnly = true)

@@ -158,27 +158,6 @@ services:
     volumes:
       - documents_data:/var/lib/mysql
       - ./Docker/gestion_documental_db.sql:/docker-entrypoint-initdb.d/gestion_documental_db.sql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-      start_period: 20s
-    networks:
-      - microservices-net
-
-  db-documents:
-    image: mysql:8
-    container_name: db-documents
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${DOCUMENTS_DB_NAME}
-    ports:
-      - "${DOCUMENTS_DB_PORT}:3306"
-    volumes:
-      - documents_data:/var/lib/mysql
-      - ./Docker/gestion_documental_db.sql:/docker-entrypoint-initdb.d/gestion_documental_db.sql
 
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
@@ -398,3 +377,5 @@ volumes:
   gallery_data:
   operation_data:
   financial_data:
+  documents_data:
+  documents_uploads:
