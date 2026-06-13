@@ -17,6 +17,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ReservaDTO {
 
+	// ─── Campos originales ───────────────────────────────────────────────────
 	private Long id;
 	private String numeroReserva;
 	private Long idPaquete;
@@ -33,4 +34,30 @@ public class ReservaDTO {
 	private List<ViajeroDTO> viajeros;
 	private String notas;
 
+	// ─── Campos del cliente (formulario) ─────────────────────────────────────
+	private String clienteNombre;
+	private String clienteImagen;
+	private String tipoDocumento;
+	private String documento;
+	private String clienteEmail;
+	private String clienteTelefono;
+	private String ciudadResidencia;
+
+	// ─── Campos del viaje (formulario) ───────────────────────────────────────
+	private String paqueteNombre;
+	private String destino;
+	private String tipoHabitacion;
+	private String solicitudEspecial;
+
+	// ─── Campos de pago (formulario) ─────────────────────────────────────────
+	private String metodoPago;
+	private String estadoPago;
+
+	// ─── Campos formateados para el frontend ─────────────────────────────────
+	private Integer personas;           // = cantidadPasajeros
+	private BigDecimal total;           // = precioTotal
+	private String fechaViaje;          // formato "DD - MM - YYYY"
+	private String fechaReserva;        // formato "YYYY-MM-DD"
+	private String estadoDescripcion;   // "Confirmada", "Pendiente", "Cancelada"
+	private List<AcompananteDTO> acompanantes;
 }

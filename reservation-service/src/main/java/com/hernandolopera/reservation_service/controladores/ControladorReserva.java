@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,9 +16,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hernandolopera.reservation_service.dto.ReservaDTO;
+import com.hernandolopera.reservation_service.dto.SolicitudCrearReserva;
 import com.hernandolopera.reservation_service.entidades.EstadoReserva;
 import com.hernandolopera.reservation_service.entidades.Reserva;
 import com.hernandolopera.reservation_service.servicios.ServicioReserva;
+
+import jakarta.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +33,15 @@ import lombok.extern.slf4j.Slf4j;
 public class ControladorReserva {
 
 	private final ServicioReserva servicioReserva;
+
+	/**
+	 * Obtiene todas las reservas (panel admin)
+	 */
+	@GetMapping
+	public ResponseEntity<List<ReservaDTO>> obtenerTodasLasReservas() {
+		log.info("GET /api/v1/reservas - Obteniendo todas las reservas");
+		return ResponseEntity.ok(servicioReserva.obtenerTodasLasReservas());
+	}
 
 	/**
 	 * SCRUM-704: Crear servicio para obtener reservas
@@ -45,6 +58,15 @@ public class ControladorReserva {
 			log.warn("Reserva no encontrada con ID: {}", idReserva);
 			return ResponseEntity.notFound().build();
 		}
+	}
+
+	/**
+	 * Obtiene todas las reservas de un paquete turístico
+	 */
+	@GetMapping("/paquete/{idPaquete}")
+	public ResponseEntity<List<ReservaDTO>> obtenerReservasPorPaquete(@PathVariable("idPaquete") Long idPaquete) {
+		log.info("GET /api/v1/reservas/paquete/{} - Obteniendo reservas por paquete", idPaquete);
+		return ResponseEntity.ok(servicioReserva.obtenerReservasPorPaquete(idPaquete));
 	}
 
 	/**
@@ -105,13 +127,41 @@ public class ControladorReserva {
 	}
 
 	/**
-	 * Crea una nueva reserva
+	 * Crea una nueva reserva desde el formulario del frontend
 	 */
 	@PostMapping
-	public ResponseEntity<ReservaDTO> crearReserva(@RequestBody Reserva reserva) {
-		log.info("POST /api/v1/reservas - Creando nueva reserva");
-		ReservaDTO reservaCreada = servicioReserva.crearReserva(reserva);
+	public ResponseEntity<ReservaDTO> crearReserva(@Valid @RequestBody SolicitudCrearReserva solicitud) {
+		log.info("POST /api/v1/reservas - Creando nueva reserva para: {}", solicitud.getClienteNombre());
+		ReservaDTO reservaCreada = servicioReserva.crearReserva(solicitud);
 		return ResponseEntity.status(HttpStatus.CREATED).body(reservaCreada);
+	}
+
+	/**
+	 * Confirma una reserva directamente (panel admin)
+	 */
+	@PutMapping("/{idReserva}/confirmar")
+	public ResponseEntity<ReservaDTO> confirmarReserva(@PathVariable("idReserva") Long idReserva) {
+		log.info("PUT /api/v1/reservas/{}/confirmar - Confirmando reserva", idReserva);
+		try {
+			return ResponseEntity.ok(servicioReserva.confirmarReserva(idReserva));
+		} catch (RuntimeException e) {
+			log.error("Error al confirmar la reserva: {}", e.getMessage());
+			return ResponseEntity.notFound().build();
+		}
+	}
+
+	/**
+	 * Reactiva una reserva cancelada (vuelve a PENDIENTE)
+	 */
+	@PutMapping("/{idReserva}/reactivar")
+	public ResponseEntity<ReservaDTO> reactivarReserva(@PathVariable("idReserva") Long idReserva) {
+		log.info("PUT /api/v1/reservas/{}/reactivar - Reactivando reserva", idReserva);
+		try {
+			return ResponseEntity.ok(servicioReserva.reactivarReserva(idReserva));
+		} catch (RuntimeException e) {
+			log.error("Error al reactivar la reserva: {}", e.getMessage());
+			return ResponseEntity.notFound().build();
+		}
 	}
 
 	/**

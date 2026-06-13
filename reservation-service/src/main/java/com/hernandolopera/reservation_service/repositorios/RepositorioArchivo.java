@@ -12,7 +12,7 @@ public interface RepositorioArchivo extends JpaRepository<Archivo, Long> {
 
 	List<Archivo> findByReservaId(Long reservaId);
 
-	List<Archivo> findByViajerooId(Long viajerooId);
+	List<Archivo> findByViajeroId(Long viajeroId);
 
 	List<Archivo> findByReservaIdAndTipoDocumento(Long reservaId, String tipoDocumento);
 
