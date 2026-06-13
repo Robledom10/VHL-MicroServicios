@@ -117,16 +117,6 @@ public class ControladorReserva {
 	}
 
 	/**
-	 * Obtiene todas las reservas de un paquete
-	 */
-	@GetMapping("/paquete/{idPaquete}")
-	public ResponseEntity<List<ReservaDTO>> obtenerReservasPorPaquete(@PathVariable("idPaquete") Long idPaquete) {
-		log.info("GET /api/v1/reservas/paquete/{} - Obteniendo reservas del paquete", idPaquete);
-		List<ReservaDTO> reservas = servicioReserva.obtenerReservasPorPaquete(idPaquete);
-		return ResponseEntity.ok(reservas);
-	}
-
-	/**
 	 * Obtiene reservas por estado
 	 */
 	@GetMapping("/estado/{estado}")
