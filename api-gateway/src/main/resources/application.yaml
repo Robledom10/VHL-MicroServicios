@@ -59,6 +59,14 @@ spring:
           predicates:
             - Path=/api/v1/operaciones/**
 
+        # =========================================================
+        # DOCUMENT SERVICE
+        # =========================================================
+        - id: document-service
+          uri: http://document-service:8087
+          predicates:
+          - Path=/api/documents/**,/api/validation/**,/api/ia/**,/api/history/**,/api/contracts/**,/api/reservation/**
+
       # =========================================================
       # CORS
       # =========================================================

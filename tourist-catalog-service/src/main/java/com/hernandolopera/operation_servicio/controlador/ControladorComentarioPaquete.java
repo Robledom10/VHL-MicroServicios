@@ -20,8 +20,10 @@ public class ControladorComentarioPaquete {
 
     @PostMapping
     public ResponseEntity<RespuestaComentarioPaquete> crear(@PathVariable Integer idPaquete,
-        @RequestHeader("X-User-Email") String autor, @Valid @RequestBody SolicitudComentarioPaquete solicitud) {
-        RespuestaComentarioPaquete respuesta = servicio.crear(idPaquete, autor, solicitud);
+        @RequestHeader("X-User-Email") String correoUsuario,
+        @RequestHeader(value = "X-User-Name", required = false) String nombreUsuario,
+        @Valid @RequestBody SolicitudComentarioPaquete solicitud) {
+        RespuestaComentarioPaquete respuesta = servicio.crear(idPaquete, nombreUsuario, correoUsuario, solicitud);
         return ResponseEntity.created(URI.create("/api/paquetes/" + idPaquete + "/comentarios/" + respuesta.id()))
             .body(respuesta);
     }
@@ -29,5 +31,14 @@ public class ControladorComentarioPaquete {
     @GetMapping
     public ResponseEntity<List<RespuestaComentarioPaquete>> buscarPorPaquete(@PathVariable Integer idPaquete) {
         return ResponseEntity.ok(servicio.buscarPorPaquete(idPaquete));
+    }
+
+    @PutMapping("/{idComentario}")
+    public ResponseEntity<RespuestaComentarioPaquete> editar(@PathVariable Integer idPaquete,
+        @PathVariable Integer idComentario,
+        @RequestHeader("X-User-Email") String correoUsuario,
+        @RequestHeader(value = "X-User-Name", required = false) String nombreUsuario,
+        @Valid @RequestBody SolicitudComentarioPaquete solicitud) {
+        return ResponseEntity.ok(servicio.editar(idPaquete, idComentario, nombreUsuario, correoUsuario, solicitud));
     }
 }

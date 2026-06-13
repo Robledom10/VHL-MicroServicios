@@ -159,28 +159,6 @@ public final class DatosOperacion {
     ) {
     }
 
-    public record SolicitudGuia(
-        @NotBlank String nombreGuia,
-        @Pattern(regexp = "^\\+?[0-9\\s-]{7,20}$", message = "Teléfono inválido") String telefono,
-        @Email String correo,
-        String especialidad,
-        String idioma
-    ) {
-    }
-
-    public record RespuestaGuia(
-        Long id,
-        Long idViaje,
-        String nombreGuia,
-        String telefono,
-        String correo,
-        String especialidad,
-        String idioma,
-        LocalDateTime fechaRegistro,
-        String mensaje
-    ) {
-    }
-
     public record SolicitudRestaurante(
         @NotBlank String nombreRestaurante,
         String direccion,

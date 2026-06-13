@@ -1,7 +1,7 @@
 package com.documents.service;
-import java.io.IOException;
 import java.util.List;
 
+import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.documents.entity.TravelerDocument;
@@ -13,7 +13,9 @@ public interface TravelerDocumentService {
             Integer userId,
             String documentType,
             MultipartFile file
-    ) throws IOException;
+    );
+
+    List<TravelerDocument> getAllDocuments();
 
     List<TravelerDocument> getUserDocuments(
             Integer userId
@@ -26,4 +28,12 @@ public interface TravelerDocumentService {
     TravelerDocument getDocument(
         Integer documentId
         );
+
+    Resource downloadDocument(
+            Integer documentId
+    );
+
+    void deleteDocument(
+            Integer documentId
+    );
 }

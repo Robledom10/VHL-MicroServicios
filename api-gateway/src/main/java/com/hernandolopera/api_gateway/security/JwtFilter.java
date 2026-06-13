@@ -103,6 +103,7 @@ public class JwtFilter implements GlobalFilter, Ordered {
                     ServerWebExchange exchangeConUsuario = exchange.mutate()
                             .request(exchange.getRequest().mutate()
                                     .header("X-User-Email", jwtTokenProvider.getEmailFromToken(token))
+                                    .header("X-User-Name", jwtTokenProvider.getUserNameFromToken(token))
                                     .build())
                             .build();
                     return chain.filter(exchangeConUsuario);

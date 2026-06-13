@@ -77,19 +77,17 @@ public class ServicioReserva {
 				.collect(Collectors.toList());
 	}
 
-	// ─── Obtener por paquete ──────────────────────────────────────────────────
-
 	@Transactional(readOnly = true)
 	public List<ReservaDTO> obtenerReservasPorPaquete(Long idPaquete) {
 		log.info("Obteniendo reservas del paquete: {}", idPaquete);
+		actualizarReservasPasadas();
 		return repositorioReserva.findByIdPaquete(idPaquete).stream()
 				.map(this::convertirADTO)
 				.collect(Collectors.toList());
 	}
 
-	// ─── Obtener por estado ───────────────────────────────────────────────────
-
 	@Transactional(readOnly = true)
+
 	public List<ReservaDTO> obtenerReservasPorEstado(EstadoReserva estado) {
 		log.info("Obteniendo reservas con estado: {}", estado);
 		actualizarReservasPasadas();
