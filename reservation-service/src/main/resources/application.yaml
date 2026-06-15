@@ -3,7 +3,6 @@ spring:
     name: reservation-service
 
   datasource:
-    # Se conecta al contenedor 'db-reservation' en el puerto interno 3306 usando la variable del .env
     url: ${SPRING_DATASOURCE_URL:jdbc:mysql://db-reservation:3306/${RESERVATION_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC}
     username: ${SPRING_DATASOURCE_USERNAME:root}
     password: ${SPRING_DATASOURCE_PASSWORD:root}
@@ -15,7 +14,7 @@ spring:
     show-sql: false
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
+        dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
 
 server:

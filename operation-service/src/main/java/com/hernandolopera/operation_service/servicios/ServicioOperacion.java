@@ -32,6 +32,7 @@ import com.hernandolopera.operation_service.entidades.TransporteAsignado;
 import com.hernandolopera.operation_service.excepciones.ExcepcionReglaNegocio;
 import com.hernandolopera.operation_service.excepciones.RecursoNoEncontradoExcepcion;
 import com.hernandolopera.operation_service.repositorios.RepositorioAlojamientoAsignado;
+import com.hernandolopera.operation_service.repositorios.RepositorioGuiaAsignado;
 import com.hernandolopera.operation_service.repositorios.RepositorioRestauranteViaje;
 import com.hernandolopera.operation_service.repositorios.RepositorioCheckInViajero;
 import com.hernandolopera.operation_service.repositorios.RepositorioContactoEmergencia;
@@ -59,6 +60,7 @@ public class ServicioOperacion {
     private static final String ESTADO_ENVIADA = "ENVIADA";
 
     private final RepositorioSalidaViaje repositorioSalidaViaje;
+    private final RepositorioGuiaAsignado repositorioGuia;
     private final RepositorioTransporteAsignado repositorioTransporte;
     private final RepositorioCheckInViajero repositorioCheckIn;
     private final RepositorioAlojamientoAsignado repositorioAlojamiento;
@@ -472,6 +474,45 @@ public class ServicioOperacion {
         repositorioNotificacion.deleteAllByIdViaje(id);
         repositorioSalidaViaje.deleteById(id);
         log.info("Viaje {} eliminado con todos sus datos asociados", id);
+    }
+
+    public void eliminarTransporte(Long idViaje, Long id) {
+        validarIdPositivo(idViaje, "idViaje");
+        validarIdPositivo(id, "id");
+        if (!repositorioTransporte.existsById(id)) {
+            throw new RecursoNoEncontradoExcepcion("Transporte no encontrado con id: " + id);
+        }
+        repositorioTransporte.deleteById(id);
+        log.info("Transporte {} eliminado del viaje {}", id, idViaje);
+    }
+
+    public void eliminarAlojamiento(Long idViaje, Long id) {
+        validarIdPositivo(idViaje, "idViaje");
+        validarIdPositivo(id, "id");
+        if (!repositorioAlojamiento.existsById(id)) {
+            throw new RecursoNoEncontradoExcepcion("Alojamiento no encontrado con id: " + id);
+        }
+        repositorioAlojamiento.deleteById(id);
+        log.info("Alojamiento {} eliminado del viaje {}", id, idViaje);
+    }
+
+    public void eliminarGuia(Long idViaje, Long id) {
+        validarIdPositivo(idViaje, "idViaje");
+        validarIdPositivo(id, "id");
+        if (!repositorioGuia.existsById(id)) {
+            throw new RecursoNoEncontradoExcepcion("Guia no encontrado con id: " + id);
+        }
+        repositorioGuia.deleteById(id);
+        log.info("Guia {} eliminado del viaje {}", id, idViaje);
+    }
+
+    public void eliminarIncidente(Long id) {
+        validarIdPositivo(id, "id");
+        if (!repositorioIncidente.existsById(id)) {
+            throw new RecursoNoEncontradoExcepcion("Incidente no encontrado con id: " + id);
+        }
+        repositorioIncidente.deleteById(id);
+        log.info("Incidente {} eliminado", id);
     }
 
     public void eliminarInformacionMedica(Long idViajero, Long id) {

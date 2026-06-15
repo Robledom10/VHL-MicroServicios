@@ -49,7 +49,7 @@ public class Archivo implements Serializable {
 	private String tipoDocumento;
 
 	@Column(name = "viajero_id")
-	private Long viajerooId;
+	private Long viajeroId;
 
 	@Column(name = "fecha_carga", nullable = false, updatable = false)
 	private LocalDateTime fechaCarga;

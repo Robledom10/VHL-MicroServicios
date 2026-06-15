@@ -286,6 +286,34 @@ public class ControladorOperacion {
         return ResponseEntity.ok(servicioOperacion.actualizarContacto(idViajero, id, solicitud));
     }
 
+    @DeleteMapping("/viajes/{idViaje}/transporte/{id}")
+    public ResponseEntity<Void> eliminarTransporte(@PathVariable Long idViaje, @PathVariable Long id) {
+        log.info("DELETE /api/v1/operaciones/viajes/{}/transporte/{}", idViaje, id);
+        servicioOperacion.eliminarTransporte(idViaje, id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/viajes/{idViaje}/alojamientos/{id}")
+    public ResponseEntity<Void> eliminarAlojamiento(@PathVariable Long idViaje, @PathVariable Long id) {
+        log.info("DELETE /api/v1/operaciones/viajes/{}/alojamientos/{}", idViaje, id);
+        servicioOperacion.eliminarAlojamiento(idViaje, id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/incidentes/{id}")
+    public ResponseEntity<Void> eliminarIncidente(@PathVariable Long id) {
+        log.info("DELETE /api/v1/operaciones/incidentes/{}", id);
+        servicioOperacion.eliminarIncidente(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/viajes/{idViaje}/guias/{id}")
+    public ResponseEntity<Void> eliminarGuia(@PathVariable Long idViaje, @PathVariable Long id) {
+        log.info("DELETE /api/v1/operaciones/viajes/{}/guias/{}", idViaje, id);
+        servicioOperacion.eliminarGuia(idViaje, id);
+        return ResponseEntity.noContent().build();
+    }
+
     @DeleteMapping("/viajes/{idViaje}/restaurantes/{id}")
     public ResponseEntity<Void> eliminarRestaurante(@PathVariable Long idViaje, @PathVariable Long id) {
         log.info("DELETE /api/v1/operaciones/viajes/{}/restaurantes/{}", idViaje, id);
