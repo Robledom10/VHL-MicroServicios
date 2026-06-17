@@ -3,7 +3,7 @@ spring:
     name: reservation-service
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://mysql:3306/reservation_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC}
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://db-reservation:3306/${RESERVATION_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC}
     username: ${SPRING_DATASOURCE_USERNAME:root}
     password: ${SPRING_DATASOURCE_PASSWORD:root}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -14,11 +14,11 @@ spring:
     show-sql: false
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
+        dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
 
 server:
-  port: 8082
+  port: ${RESERVATION_SERVICE_PORT:8082}
   servlet:
     context-path: /
 
@@ -28,3 +28,46 @@ logging:
     com.hernandolopera.reservation_service: DEBUG
     org.springframework.web: INFO
     org.hibernate: INFO
+
+# =========================================================================
+# PROPIEDADES PERSONALIZADAS (Mapeo del archivo .env para inyectar con @Value)
+# =========================================================================
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration: ${JWT_EXPIRATION:900000}
+
+# Puertos asignados a cada microservicio
+ports:
+  gateway: ${API_GATEWAY_PORT:8080}
+  auth: ${AUTH_SERVICE_PORT:8081}
+  reservation: ${RESERVATION_SERVICE_PORT:8082}
+  catalog: ${TOURIST_CATALOG_SERVICE_PORT:8083}
+  gallery: ${GALLERY_SERVICE_PORT:8084}
+  financial: ${FINANCIAL_SERVICE_PORT:8085}
+  operation: ${OPERATION_SERVICE_PORT:8086}
+  document: ${DOCUMENT_SERVICE_PORT:8087}
+  analytics: ${ANALYTICS_SERVICE_PORT:8088}
+
+# URLs de comunicación interna dentro de la red de Docker
+services:
+  auth:
+    url: ${AUTH_SERVICE_URL:http://auth-service:8081}
+    db-name: ${AUTH_DB_NAME:auth_db}
+  reservation:
+    url: ${RESERVATION_SERVICE_URL:http://reservation-service:8082}
+    db-name: ${RESERVATION_DB_NAME:reservation_db}
+  catalog:
+    url: ${TOURIST_CATALOG_SERVICE_URL:http://tourist-catalog-service:8083}
+    db-name: ${CATALOG_DB_NAME:catalogo_turistico_db}
+  gallery:
+    url: ${GALLERY_SERVICE_URL:http://gallery-service:8084}
+  financial:
+    url: ${FINANCIAL_SERVICE_URL:http://financial-service:8085}
+    db-name: ${FINANCIAL_DB_NAME:pago_db}
+  operation:
+    url: ${OPERATION_SERVICE_URL:http://operation-service:8086}
+    db-name: ${OPERATION_DB_NAME:trip_operations_db}
+  document:
+    url: ${DOCUMENT_SERVICE_URL:http://document-service:8087}
+    db-name: ${DOCUMENT_DB_NAME:gestion_documental_db}

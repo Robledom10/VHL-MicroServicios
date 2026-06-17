@@ -3,9 +3,7 @@ package com.hernandolopera.operation_servicio.transferencia;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 
@@ -18,8 +16,8 @@ public final class DatosOperacion {
     public record SolicitudPaqueteTuristico(@NotBlank String titulo, String descripcion, String destino,
         List<@NotBlank String> destinos,
         @NotNull @Min(1) Integer duracionDias, @NotNull @DecimalMin("0.01") BigDecimal precio,
-        @NotNull @Min(1) Integer cupo, @NotNull LocalDate fechaInicio,
-        String lugarSalida, LocalTime horaSalida, String alojamiento, String tipoHabitacion, String tipoTransporte,
+        @NotNull @Min(1) Integer cupo,
+        String lugarSalida, String tipoTransporte,
         List<@NotBlank String> tiposTransporte,
         String fotoVerticalUrl, String fotoHorizontalUrl, List<@NotBlank String> incluye,
         List<@NotBlank String> noIncluye, List<@NotBlank String> politicasCancelacion,
@@ -27,8 +25,9 @@ public final class DatosOperacion {
         @Valid List<SolicitudActividadItinerario> itinerario) {}
     public record RespuestaPaqueteTuristico(Integer id, String titulo, String descripcion, String destino,
         List<String> destinos,
-        Integer duracionDias, BigDecimal precio, Integer cupo, LocalDate fechaInicio,
-        String lugarSalida, LocalTime horaSalida, String alojamiento, String tipoHabitacion, String tipoTransporte,
+
+        Integer duracionDias, BigDecimal precio, Integer cupo,
+        String lugarSalida, String tipoTransporte,
         List<String> tiposTransporte,
         String fotoVerticalUrl, String fotoHorizontalUrl, List<String> incluye, List<String> noIncluye,
         List<String> politicasCancelacion, List<String> requisitos, Boolean activo, List<RespuestaActividadItinerario> itinerario) {}
