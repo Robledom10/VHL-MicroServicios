@@ -13,6 +13,9 @@ class AuthClient:
                 f"{settings.AUTH_SERVICE_URL}/api/statistics/users"
             )
 
+            print("STATUS:", response.status_code)
+            print("BODY:", response.text)
+
             response.raise_for_status()
 
             return response.json()
