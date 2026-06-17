@@ -2,10 +2,11 @@ package com.hernandolopera.reservation_service.dto;
 
 import java.math.BigDecimal;
 import java.util.List;
-import jakarta.validation.constraints.Email;
+
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,30 +18,18 @@ import lombok.NoArgsConstructor;
 @Builder
 public class SolicitudCrearReserva {
 
-	@NotBlank
-	private String clienteNombre;
+	@NotNull
+	private Long idUsuario;
 
-	@NotBlank
-	private String tipoDocumento;
-
-	@NotBlank
-	private String documento;
-
-	@NotBlank
-	@Email
-	private String clienteEmail;
-
-	@NotBlank
-	private String clienteTelefono;
-
-	@NotBlank
-	private String ciudadResidencia;
+	private Long idPaquete;
 
 	@NotNull
 	@Min(1)
 	private Integer personas;
 
 	private List<AcompananteDTO> acompanantes;
+
+	private List<@Valid ContactoEmergenciaDTO> contactosEmergencia;
 
 	@NotBlank
 	private String paqueteNombre;
@@ -60,12 +49,6 @@ public class SolicitudCrearReserva {
 	private String solicitudEspecial;
 
 	private String notas;
-
-	@NotBlank
-	private String metodoPago;
-
-	@NotBlank
-	private String estadoPago;
 
 	@NotNull
 	private BigDecimal total;

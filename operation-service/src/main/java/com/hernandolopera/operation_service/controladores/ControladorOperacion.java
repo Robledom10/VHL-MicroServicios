@@ -6,6 +6,7 @@ import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaRestaura
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudRestaurante;
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaCheckIn;
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaContactoEmergencia;
+import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudContactoDesdeReserva;
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaDashboard;
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaIncidente;
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaInformacionMedica;
@@ -95,6 +96,15 @@ public class ControladorOperacion {
         log.info("POST /api/v1/operaciones/viajeros/{}/contactos-emergencia", idViajero);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(servicioOperacion.registrarContactoEmergencia(idViajero, solicitud));
+    }
+
+    @PostMapping("/viajes/{idViaje}/contactos-emergencia")
+    public ResponseEntity<RespuestaContactoEmergencia> registrarContactoDesdeReserva(
+            @PathVariable Long idViaje,
+            @Valid @RequestBody SolicitudContactoDesdeReserva solicitud) {
+        log.info("POST /api/v1/operaciones/viajes/{}/contactos-emergencia", idViaje);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(servicioOperacion.registrarContactoDesdeReserva(idViaje, solicitud));
     }
 
     @PostMapping("/viajes/{idViaje}/incidentes")

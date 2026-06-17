@@ -145,6 +145,16 @@ public final class DatosOperacion {
     ) {
     }
 
+    public record SolicitudContactoDesdeReserva(
+        @NotBlank String nombre,
+        @NotBlank String parentesco,
+        @Pattern(regexp = "^\\+?[0-9\\s-]{7,20}$", message = "El telefono no tiene un formato valido")
+        @NotBlank String telefono,
+        @Email String correo,
+        String nombreViajero
+    ) {
+    }
+
     public record RespuestaContactoEmergencia(
         Long id,
         Long idViaje,
