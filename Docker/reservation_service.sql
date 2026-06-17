@@ -1,4 +1,4 @@
-﻿DROP DATABASE IF EXISTS reservation_db;
+DROP DATABASE IF EXISTS reservation_db;
 
 CREATE DATABASE reservation_db;
 
@@ -7,7 +7,7 @@ USE reservation_db;
 CREATE TABLE reservation (
     id_reservation INT AUTO_INCREMENT PRIMARY KEY,
     id_user INT NOT NULL,
-    package_id INT NOT NULL,
+    package_id INT NULL,
     reservation_code VARCHAR(50) NOT NULL UNIQUE,
     passenger_count INT NULL,
     total_amount DECIMAL(10, 2) NOT NULL,
@@ -18,14 +18,20 @@ CREATE TABLE reservation (
         'pendiente',
         'confirmada',
         'cancelada',
-        'completada'
+        'completada',
+        'pasada'
     ) NOT NULL DEFAULT 'pendiente',
     payment_verified BOOLEAN NOT NULL DEFAULT FALSE,
     reservation_date DATE NOT NULL,
     expires_at DATETIME NULL,
     updated_at DATETIME NULL,
     confirmation_date DATETIME NULL,
-    notes VARCHAR(500) NULL
+    notes VARCHAR(500) NULL,
+    viaje_id BIGINT NULL,
+    paquete_nombre VARCHAR(150) NULL,
+    destino VARCHAR(150) NULL,
+    tipo_habitacion VARCHAR(50) NULL,
+    solicitud_especial VARCHAR(200) NULL
 );
 
 CREATE TABLE traveler (
@@ -44,6 +50,26 @@ CREATE TABLE traveler (
     documents_verified BOOLEAN NOT NULL DEFAULT FALSE,
     created_at DATETIME NOT NULL,
     updated_at DATETIME NULL,
+    FOREIGN KEY (fk_id_reservation) REFERENCES reservation (id_reservation)
+);
+
+CREATE TABLE acompanante (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    fk_id_reservation INT NOT NULL,
+    nombre VARCHAR(150) NOT NULL,
+    tipo_documento VARCHAR(50) NULL,
+    documento VARCHAR(50) NULL,
+    fecha_nacimiento DATE NULL,
+    FOREIGN KEY (fk_id_reservation) REFERENCES reservation (id_reservation)
+);
+
+CREATE TABLE reservation_emergency_contact (
+    id_contact INT AUTO_INCREMENT PRIMARY KEY,
+    fk_id_reservation INT NOT NULL,
+    full_name VARCHAR(120) NOT NULL,
+    relationship VARCHAR(80) NOT NULL,
+    phone VARCHAR(30) NOT NULL,
+    email VARCHAR(150) NULL,
     FOREIGN KEY (fk_id_reservation) REFERENCES reservation (id_reservation)
 );
 
