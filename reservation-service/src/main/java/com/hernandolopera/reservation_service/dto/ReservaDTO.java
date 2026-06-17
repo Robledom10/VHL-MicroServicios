@@ -17,7 +17,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ReservaDTO {
 
-	// ─── Campos originales ───────────────────────────────────────────────────
 	private Long id;
 	private String numeroReserva;
 	private Long idPaquete;
@@ -34,30 +33,25 @@ public class ReservaDTO {
 	private List<ViajeroDTO> viajeros;
 	private String notas;
 
-	// ─── Campos del cliente (formulario) ─────────────────────────────────────
-	private String clienteNombre;
-	private String clienteImagen;
-	private String tipoDocumento;
-	private String documento;
-	private String clienteEmail;
-	private String clienteTelefono;
-	private String ciudadResidencia;
+	// ─── Datos del usuario traídos desde auth-service ────────────────────────
+	private UsuarioDTO datosUsuario;
 
-	// ─── Campos del viaje (formulario) ───────────────────────────────────────
+	// ─── Campos del viaje ────────────────────────────────────────────────────
 	private String paqueteNombre;
 	private String destino;
 	private String tipoHabitacion;
 	private String solicitudEspecial;
 
-	// ─── Campos de pago (formulario) ─────────────────────────────────────────
-	private String metodoPago;
-	private String estadoPago;
+	// ─── Contactos de emergencia ──────────────────────────────────────────────
+	private List<ContactoEmergenciaDTO> contactosEmergencia;
+
+	// ─── Campos de acompañantes ───────────────────────────────────────────────
+	private List<AcompananteDTO> acompanantes;
 
 	// ─── Campos formateados para el frontend ─────────────────────────────────
-	private Integer personas;           // = cantidadPasajeros
-	private BigDecimal total;           // = precioTotal
-	private String fechaViaje;          // formato "DD - MM - YYYY"
-	private String fechaReserva;        // formato "YYYY-MM-DD"
-	private String estadoDescripcion;   // "Confirmada", "Pendiente", "Cancelada"
-	private List<AcompananteDTO> acompanantes;
+	private Integer personas;
+	private BigDecimal total;
+	private String fechaViaje;
+	private String fechaReserva;
+	private String estadoDescripcion;
 }

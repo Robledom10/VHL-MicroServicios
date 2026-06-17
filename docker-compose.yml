@@ -296,6 +296,8 @@ services:
   operation-service:
     build: ./operation-service
     container_name: operation-service
+
+
     restart: always
     depends_on:
       db-operation:
@@ -354,6 +356,79 @@ services:
 
     networks:
       - microservices-net
+    
+  # ─────────────────────────────────────────────────────
+  #  API del chatbot (FastAPI + pdfplumber + ollama SDK)
+  #  Conecta al Ollama que ya corre en el HOST (:11434)
+  # ─────────────────────────────────────────────────────
+  # chatbot-service:
+  #   build: ./chatbot-service
+  #   container_name: chatbot-service
+  #   restart: unless-stopped
+  #   environment:
+  #     # host.docker.internal → resuelve al host en Windows/Mac
+  #     # En Linux cambiar por la IP del host (p.ej. 172.17.0.1)
+  #     CHATBOT_OLLAMA_HOST: ${CHATBOT_OLLAMA_HOST:-http://host.docker.internal:11434}
+  #     CHATBOT_CHAT_MODEL: ${CHATBOT_CHAT_MODEL:-qwen3:8b}
+  #     CHATBOT_SAFEGUARD_MODEL: ${CHATBOT_SAFEGUARD_MODEL:-llama-guard3:8b}
+  #     CHATBOT_OCR_MODEL: ${CHATBOT_OCR_MODEL:-llava:7b}
+  #   ports:
+  #     - "${CHATBOT_SERVICE_PORT:-8090}:8000"
+ 
+
+
+  # =========================================================
+  # OLLAMA — LLM local con GPU (GTX 1650 / nvidia)
+  # =========================================================
+  ollama:
+    image: ollama/ollama
+    container_name: ollama
+    restart: always
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    networks:
+      - microservices-net
+
+  # =========================================================
+  # CHATBOT SERVICE — Sharky (FastAPI + Ollama)
+  # =========================================================
+  chatbot-service:
+    build: ./chatbot_backend
+    container_name: chatbot-service
+    restart: always
+    environment:
+      # Ollama corre local en el host (no en Docker), accedemos vía host.docker.internal
+      OLLAMA_URL: http://host.docker.internal:11434
+      OLLAMA_MODEL: qwen3:1.7b
+      # Catálogo público de paquetes (sin auth) para que Sharky responda con datos reales
+      CATALOG_SERVICE_URL: http://tourist-catalog-service:8083/api/paquetes
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "8090:8000"
+    volumes:
+      # Feedback (👍/👎) de los usuarios, queda en el host para revisarlo fácil
+      - ./chatbot_backend/feedback:/app/feedback
+    networks:
+      - microservices-net
 
   # =========================================================
   # API GATEWAY
@@ -397,3 +472,4 @@ volumes:
   financial_data:
   documents_data:
   documents_uploads:
+  ollama_data:

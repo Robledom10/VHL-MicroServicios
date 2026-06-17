@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.hernandolopera.reservation_service.dto.ContactoEmergenciaDTO;
 import com.hernandolopera.reservation_service.dto.ReservaDTO;
 import com.hernandolopera.reservation_service.dto.SolicitudCrearReserva;
 import com.hernandolopera.reservation_service.entidades.EstadoReserva;
@@ -33,6 +34,12 @@ import lombok.extern.slf4j.Slf4j;
 public class ControladorReserva {
 
 	private final ServicioReserva servicioReserva;
+
+	@GetMapping("/viaje/{idViaje}/contactos-emergencia")
+	public ResponseEntity<List<ContactoEmergenciaDTO>> obtenerContactosPorViaje(@PathVariable Long idViaje) {
+		log.info("GET /api/v1/reservas/viaje/{}/contactos-emergencia", idViaje);
+		return ResponseEntity.ok(servicioReserva.obtenerContactosPorViaje(idViaje));
+	}
 
 	/**
 	 * Obtiene todas las reservas (panel admin)
@@ -131,7 +138,7 @@ public class ControladorReserva {
 	 */
 	@PostMapping
 	public ResponseEntity<ReservaDTO> crearReserva(@Valid @RequestBody SolicitudCrearReserva solicitud) {
-		log.info("POST /api/v1/reservas - Creando nueva reserva para: {}", solicitud.getClienteNombre());
+		log.info("POST /api/v1/reservas - Creando nueva reserva para usuario ID: {}", solicitud.getIdUsuario());
 		ReservaDTO reservaCreada = servicioReserva.crearReserva(solicitud);
 		return ResponseEntity.status(HttpStatus.CREATED).body(reservaCreada);
 	}

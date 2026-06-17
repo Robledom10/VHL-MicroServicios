@@ -73,17 +73,18 @@ spring:
         - id: document-service
           uri: http://document-service:8087
           predicates:
-          - Path=/api/documents/**,/api/validation/**,/api/ia/**,/api/history/**,/api/contracts/**,/api/reservation/**
+            - Path=/api/documents/**,/api/validation/**,/api/ia/**,/api/history/**,/api/contracts/**,/api/reservation/**
 
 
       # =========================================================
-      # CORS
+      # CORS CORREGIDO (Alineado perfectamente con 'routes')
       # =========================================================
       globalcors:
-        corsConfigurations:
-          "[/**]":
+        cors-configurations:
+          '[/**]':
             allowedOrigins:
               - "http://localhost:4200"
+              - "https://hernando-lopera-jade.vercel.app"
             allowedMethods:
               - GET
               - POST
@@ -95,13 +96,10 @@ spring:
             allowCredentials: true
 
       # =========================================================
-      # DEFAULT FILTERS
+      # DEFAULT FILTERS CORREGIDO
       # =========================================================
       default-filters:
-        - name: DedupeResponseHeader
-          args:
-            name: Access-Control-Allow-Origin Access-Control-Allow-Credentials
-            strategy: RETAIN_UNIQUE
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
 
 # =========================================================
 # JWT
