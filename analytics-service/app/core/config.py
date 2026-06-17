@@ -1,11 +1,4 @@
 import os
-from pathlib import Path
-from dotenv import load_dotenv
-
-# Buscar el .env en la raíz del proyecto VHL-MicroServicios
-env_path = Path(__file__).resolve().parents[3] / ".env"
-
-load_dotenv(env_path)
 
 
 class Settings:
