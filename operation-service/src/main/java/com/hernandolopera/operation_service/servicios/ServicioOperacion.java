@@ -14,6 +14,7 @@ import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudActualiz
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudAlojamiento;
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudRestaurante;
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudCheckIn;
+import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudContactoDesdeReserva;
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudContactoEmergencia;
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudIncidente;
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudInformacionMedica;
@@ -263,6 +264,28 @@ public class ServicioOperacion {
 
         ContactoEmergencia guardado = repositorioContactoEmergencia.save(contacto);
         return mapearContacto(guardado, "Contacto de emergencia registrado correctamente");
+    }
+
+    public RespuestaContactoEmergencia registrarContactoDesdeReserva(
+        Long idViaje,
+        SolicitudContactoDesdeReserva solicitud
+    ) {
+        validarIdPositivo(idViaje, "idViaje");
+        validarViajeExistente(idViaje);
+
+        ContactoEmergencia contacto = ContactoEmergencia.builder()
+            .idViaje(idViaje)
+            .idViajero(null)
+            .nombre(solicitud.nombre())
+            .parentesco(solicitud.parentesco())
+            .telefono(solicitud.telefono())
+            .correo(solicitud.correo())
+            .nombreViajero(solicitud.nombreViajero())
+            .fechaRegistro(LocalDateTime.now())
+            .build();
+
+        ContactoEmergencia guardado = repositorioContactoEmergencia.save(contacto);
+        return mapearContacto(guardado, "Contacto de emergencia sincronizado desde reserva");
     }
 
     public RespuestaIncidente registrarIncidente(Long idViaje, SolicitudIncidente solicitud) {

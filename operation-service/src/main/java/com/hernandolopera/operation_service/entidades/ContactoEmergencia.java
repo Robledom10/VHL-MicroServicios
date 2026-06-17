@@ -29,7 +29,7 @@ public class ContactoEmergencia {
     @Column(name = "fk_id_trip", nullable = false)
     private Long idViaje;
 
-    @Column(name = "id_traveler", nullable = false)
+    @Column(name = "id_traveler")
     private Long idViajero;
 
     @Column(name = "full_name", nullable = false, length = 120)

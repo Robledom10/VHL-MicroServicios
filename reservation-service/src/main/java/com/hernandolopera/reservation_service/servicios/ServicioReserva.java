@@ -1,7 +1,5 @@
 package com.hernandolopera.reservation_service.servicios;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -12,15 +10,21 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.hernandolopera.reservation_service.clientes.ClienteAuth;
+import com.hernandolopera.reservation_service.clientes.ClienteOperaciones;
 import com.hernandolopera.reservation_service.dto.AcompananteDTO;
+import com.hernandolopera.reservation_service.dto.ContactoEmergenciaDTO;
 import com.hernandolopera.reservation_service.dto.ReservaDTO;
 import com.hernandolopera.reservation_service.dto.SolicitudCrearReserva;
+import com.hernandolopera.reservation_service.dto.UsuarioDTO;
 import com.hernandolopera.reservation_service.dto.ViajeroDTO;
 import com.hernandolopera.reservation_service.entidades.Acompanante;
+import com.hernandolopera.reservation_service.entidades.ContactoEmergenciaReserva;
 import com.hernandolopera.reservation_service.entidades.EstadoReserva;
 import com.hernandolopera.reservation_service.entidades.Reserva;
 import com.hernandolopera.reservation_service.entidades.Viajero;
 import com.hernandolopera.reservation_service.repositorios.RepositorioAcompanante;
+import com.hernandolopera.reservation_service.repositorios.RepositorioContactoEmergenciaReserva;
 import com.hernandolopera.reservation_service.repositorios.RepositorioReserva;
 import com.hernandolopera.reservation_service.repositorios.RepositorioViajero;
 
@@ -36,6 +40,9 @@ public class ServicioReserva {
 	private final RepositorioReserva repositorioReserva;
 	private final RepositorioViajero repositorioViajero;
 	private final RepositorioAcompanante repositorioAcompanante;
+	private final RepositorioContactoEmergenciaReserva repositorioContactoEmergencia;
+	private final ClienteAuth clienteAuth;
+	private final ClienteOperaciones clienteOperaciones;
 
 	// ─── Obtener todas las reservas (panel admin) ─────────────────────────────
 
@@ -87,7 +94,6 @@ public class ServicioReserva {
 	}
 
 	@Transactional(readOnly = true)
-
 	public List<ReservaDTO> obtenerReservasPorEstado(EstadoReserva estado) {
 		log.info("Obteniendo reservas con estado: {}", estado);
 		actualizarReservasPasadas();
@@ -118,38 +124,27 @@ public class ServicioReserva {
 				.collect(Collectors.toList());
 	}
 
-	// ─── Crear reserva desde formulario ──────────────────────────────────────
+	// ─── Crear reserva ────────────────────────────────────────────────────────
 
 	public ReservaDTO crearReserva(SolicitudCrearReserva solicitud) {
-		log.info("Creando reserva para cliente: {}", solicitud.getClienteNombre());
-
-		String imagen = "https://ui-avatars.com/api/?name="
-				+ URLEncoder.encode(solicitud.getClienteNombre(), StandardCharsets.UTF_8)
-				+ "&background=3fa2db&color=fff";
+		log.info("Creando reserva para usuario ID: {}", solicitud.getIdUsuario());
 
 		Reserva reserva = Reserva.builder()
 				.numeroReserva(generarNumeroReserva())
 				.estado(EstadoReserva.PENDIENTE)
 				.fechaCreacion(LocalDate.now())
 				.pagoVerificado(false)
+				.idUsuario(solicitud.getIdUsuario())
+				.idPaquete(solicitud.getIdPaquete())
 				.cantidadPasajeros(solicitud.getPersonas())
 				.precioTotal(solicitud.getTotal())
 				.fechaInicioViaje(LocalDate.parse(solicitud.getFechaSalida()).atStartOfDay())
 				.fechaFinViaje(LocalDate.parse(solicitud.getFechaRegreso()).atStartOfDay())
 				.notas(solicitud.getNotas())
-				.clienteNombre(solicitud.getClienteNombre())
-				.clienteImagen(imagen)
-				.tipoDocumento(solicitud.getTipoDocumento())
-				.documento(solicitud.getDocumento())
-				.clienteEmail(solicitud.getClienteEmail())
-				.clienteTelefono(solicitud.getClienteTelefono())
-				.ciudadResidencia(solicitud.getCiudadResidencia())
 				.paqueteNombre(solicitud.getPaqueteNombre())
 				.destino(solicitud.getDestino())
 				.tipoHabitacion(solicitud.getTipoHabitacion())
 				.solicitudEspecial(solicitud.getSolicitudEspecial())
-				.metodoPago(solicitud.getMetodoPago())
-				.estadoPago(solicitud.getEstadoPago())
 				.idViaje(solicitud.getIdViaje())
 				.build();
 
@@ -167,6 +162,23 @@ public class ServicioReserva {
 						.build();
 				repositorioAcompanante.save(acompanante);
 			});
+		}
+
+		if (solicitud.getContactosEmergencia() != null) {
+			solicitud.getContactosEmergencia().forEach(cDTO -> {
+				ContactoEmergenciaReserva contacto = ContactoEmergenciaReserva.builder()
+						.idReserva(guardada.getId())
+						.nombre(cDTO.getNombre())
+						.parentesco(cDTO.getParentesco())
+						.telefono(cDTO.getTelefono())
+						.correo(cDTO.getCorreo())
+						.build();
+				repositorioContactoEmergencia.save(contacto);
+			});
+
+			if (solicitud.getIdViaje() != null && !solicitud.getContactosEmergencia().isEmpty()) {
+				clienteOperaciones.enviarContactosEmergencia(solicitud.getIdViaje(), solicitud.getContactosEmergencia());
+			}
 		}
 
 		log.info("Reserva {} creada exitosamente", guardada.getNumeroReserva());
@@ -229,7 +241,23 @@ public class ServicioReserva {
 		return convertirADTO(repositorioReserva.save(reserva));
 	}
 
-	// ─── Helpers privados ────────────────────────────────────────────────────
+	// ─── Contactos de emergencia por viaje (para panel de operaciones) ───────
+
+	@Transactional(readOnly = true)
+	public List<ContactoEmergenciaDTO> obtenerContactosPorViaje(Long idViaje) {
+		log.info("Obteniendo contactos de emergencia para viaje ID: {}", idViaje);
+		return repositorioContactoEmergencia.findByIdViaje(idViaje).stream()
+				.map(c -> ContactoEmergenciaDTO.builder()
+						.id(c.getId())
+						.nombre(c.getNombre())
+						.parentesco(c.getParentesco())
+						.telefono(c.getTelefono())
+						.correo(c.getCorreo())
+						.build())
+				.collect(Collectors.toList());
+	}
+
+	// ─── Helpers privados ─────────────────────────────────────────────────────
 
 	private String generarNumeroReserva() {
 		return "RES-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
@@ -265,6 +293,21 @@ public class ServicioReserva {
 						.build())
 				.collect(Collectors.toList());
 
+		List<ContactoEmergenciaDTO> contactosEmergencia = repositorioContactoEmergencia
+				.findByIdReserva(reserva.getId()).stream()
+				.map(c -> ContactoEmergenciaDTO.builder()
+						.id(c.getId())
+						.nombre(c.getNombre())
+						.parentesco(c.getParentesco())
+						.telefono(c.getTelefono())
+						.correo(c.getCorreo())
+						.build())
+				.collect(Collectors.toList());
+
+		UsuarioDTO datosUsuario = reserva.getIdUsuario() != null
+				? clienteAuth.obtenerUsuarioPorId(reserva.getIdUsuario()).orElse(null)
+				: null;
+
 		String fechaViaje = "";
 		if (reserva.getFechaInicioViaje() != null) {
 			LocalDate f = reserva.getFechaInicioViaje().toLocalDate();
@@ -290,25 +333,18 @@ public class ServicioReserva {
 				.fechaConfirmacion(reserva.getFechaConfirmacion())
 				.notas(reserva.getNotas())
 				.viajeros(viajeros)
-				.clienteNombre(reserva.getClienteNombre())
-				.clienteImagen(reserva.getClienteImagen())
-				.tipoDocumento(reserva.getTipoDocumento())
-				.documento(reserva.getDocumento())
-				.clienteEmail(reserva.getClienteEmail())
-				.clienteTelefono(reserva.getClienteTelefono())
-				.ciudadResidencia(reserva.getCiudadResidencia())
+				.datosUsuario(datosUsuario)
 				.paqueteNombre(reserva.getPaqueteNombre())
 				.destino(reserva.getDestino())
 				.tipoHabitacion(reserva.getTipoHabitacion())
 				.solicitudEspecial(reserva.getSolicitudEspecial())
-				.metodoPago(reserva.getMetodoPago())
-				.estadoPago(reserva.getEstadoPago())
+				.contactosEmergencia(contactosEmergencia)
+				.acompanantes(acompanantes)
 				.personas(reserva.getCantidadPasajeros())
 				.total(reserva.getPrecioTotal())
 				.fechaViaje(fechaViaje)
 				.fechaReserva(fechaReserva)
 				.estadoDescripcion(estadoDesc)
-				.acompanantes(acompanantes)
 				.build();
 	}
 

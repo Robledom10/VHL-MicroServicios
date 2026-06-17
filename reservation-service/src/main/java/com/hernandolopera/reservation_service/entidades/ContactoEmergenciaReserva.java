@@ -1,7 +1,5 @@
 package com.hernandolopera.reservation_service.entidades;
 
-import java.io.Serializable;
-import java.time.LocalDate;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -14,32 +12,30 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "acompanante")
+@Table(name = "reservation_emergency_contact")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Acompanante implements Serializable {
-
-	private static final long serialVersionUID = 1L;
+public class ContactoEmergenciaReserva {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
+	@Column(name = "id_contact")
 	private Long id;
 
 	@Column(name = "fk_id_reservation", nullable = false)
 	private Long idReserva;
 
-	@Column(name = "nombre", nullable = false, length = 150)
+	@Column(name = "full_name", nullable = false, length = 120)
 	private String nombre;
 
-	@Column(name = "fecha_nacimiento")
-	private LocalDate fechaNacimiento;
+	@Column(name = "relationship", nullable = false, length = 80)
+	private String parentesco;
 
-	@Column(name = "tipo_documento", nullable = false, length = 10)
-	private String tipoDocumento;
+	@Column(name = "phone", nullable = false, length = 30)
+	private String telefono;
 
-	@Column(name = "documento", nullable = false, length = 50)
-	private String documento;
+	@Column(name = "email", length = 150)
+	private String correo;
 }
