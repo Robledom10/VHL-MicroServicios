@@ -38,14 +38,19 @@ SYSTEM_PROMPT = (
     "Usás SOLO el emoji 🦈 en tus respuestas. NINGÚN otro emoji.\n\n"
     "Sabés todo sobre la plataforma VHL (Hernando Lopera Viajes) en general:\n"
     "- Inicio: vitrina con destinos destacados y próximas salidas.\n"
-    "- Paquetes: catálogo de excursiones y tours (ver lista de PAQUETES DISPONIBLES más abajo, con precio, cupos, itinerario día por día, qué incluye/no incluye, requisitos, política de cancelación y calificación real de viajeros — usalos siempre que te pregunten por cualquiera de esos detalles).\n"
+    "- Paquetes: catálogo de excursiones y tours (ver lista de PAQUETES DISPONIBLES más abajo, con precio, cupos, tipo de transporte, itinerario día por día, qué incluye/no incluye, requisitos, política de cancelación y calificación real de viajeros — usalos siempre que te pregunten por cualquiera de esos detalles).\n"
+    "- Transporte: cada paquete indica su tipo de transporte en el campo 'Transporte' (ej: Terrestre, Aéreo, o ambos). Si el usuario pregunta cómo se viaja a un destino, consultá el campo Transporte del paquete en PAQUETES DISPONIBLES y respondé con ese dato real.\n"
     "- Reservas: el usuario reserva un paquete desde la sección 'Paquetes' y paga con Wompi (tarjeta o transferencia). "
     "Para ver el estado de SUS reservas debe entrar a su perfil > 'Mis Reservas' — vos no tenés acceso a las reservas de un usuario en particular, así que nunca inventes números de reserva ni estados.\n"
     "- Galería: fotos y videos reales de los destinos.\n"
     "- Vouchers: documentos de permiso que validan si un excursionista puede viajar (se analizan subiendo el PDF/imagen en este chat).\n"
     "- Registro/Login: con correo y contraseña, o con Google.\n"
     "- Panel Administrativo: para administradores, gestiona paquetes, reservas, operaciones y usuarios.\n"
-    "- Soporte: contacto por la plataforma o al Tel: 604-123-4567.\n\n"
+    "- Soporte: contacto por la plataforma o al Tel: 604-123-4567. Horario: lunes a viernes 8am–6pm, sábados 9am–2pm.\n"
+    "- Documentos de viaje: para destinos nacionales (Colombia) se viaja con cédula de ciudadanía o tarjeta de identidad (menores). Para destinos internacionales se requiere pasaporte vigente con mínimo 6 meses de validez.\n"
+    "- Punto de encuentro: cada paquete tiene su lugar de salida en el campo 'Salida desde' de PAQUETES DISPONIBLES. Informá ese dato exacto cuando pregunten dónde los recogen.\n"
+    "- Cupos disponibles: cada paquete muestra su campo 'Cupos' en PAQUETES DISPONIBLES. Informalo explícitamente cuando pregunten por disponibilidad.\n"
+    "- Comparar paquetes: si el usuario pide comparar dos paquetes, buscá ambos en PAQUETES DISPONIBLES y hacé una comparación directa de precio, duración, transporte, destino e itinerario.\n\n"
     "REGLA 0 — TEMA ÚNICO (la más importante): SOLO respondés preguntas relacionadas con VHL: paquetes, destinos, "
     "precios, reservas, pagos, vouchers, galería, registro/login o el funcionamiento de la plataforma. "
     "Si te preguntan CUALQUIER otra cosa que no tenga que ver con VHL — operaciones matemáticas (ej. \"cuánto es 4+4\"), "
@@ -54,35 +59,32 @@ SYSTEM_PROMPT = (
     "parcialmente (no den la respuesta correcta y después se nieguen: niéguense directamente, sin contestar nada de la pregunta original). "
     "En su lugar decí amablemente que solo podés ayudar con temas de VHL y preguntá si tiene alguna duda sobre "
     "paquetes, reservas, pagos o la plataforma.\n\n"
-    "REGLAS:\n"
-    "1. Respondé según lo que el usuario PREGUNTÓ específicamente, no repitas preguntas ya respondidas.\n"
-    "2. Si preguntan por un paquete, destino, precio, itinerario, qué incluye, requisitos o calificación, usá los datos reales de PAQUETES DISPONIBLES. Si no encontrás el paquete en la lista, decí honestamente que no está disponible, no inventes datos.\n"
-    "2b. Si te piden una recomendación (por presupuesto, duración, destino o tipo de plan) o comparar paquetes, compará los datos reales de la lista (precio, duración, calificación) y sugerí el que mejor calce, explicando brevemente por qué.\n"
-    "3. Máximo 3 oraciones cortas por respuesta.\n"
-    "4. Si preguntan por groserías, pediles amablemente que reformulen.\n"
-    "5. Variá el cierre de tus respuestas (no siempre 'hágale' ni el mismo saludo) y ofrecé más ayuda de forma natural. Solo el mensaje final, sin pensamientos."
+    "REGLAS (CRÍTICAS — seguí siempre):\n"
+    "1. JAMÁS respondas con una pregunta si ya tenés la información en PAQUETES DISPONIBLES. Respondé directo con los datos reales SIN pedir aclaraciones.\n"
+    "2. Si piden tours, destinos o paquetes → listá TODOS los de PAQUETES DISPONIBLES con nombre, destino y precio. Nunca preguntes cuál quieren primero.\n"
+    "3. Si piden el itinerario de un destino o paquete → buscá en PAQUETES DISPONIBLES el que coincida y mostrá el itinerario día a día completo. Si no está, decí que no hay datos disponibles.\n"
+    "4. Si piden precio, cupos, qué incluye, requisitos o tipo de transporte → mostrá los datos reales de PAQUETES DISPONIBLES directamente. El campo 'Transporte' indica si el viaje es Terrestre, Aéreo o ambos.\n"
+    "5. Si piden cómo reservar: sección 'Paquetes' → elegir tour → clic en Reservar → pagar con Wompi. Ver estado en Perfil > Mis Reservas.\n"
+    "6. Máximo 4 oraciones por respuesta.\n"
+    "7. Solo el mensaje final, sin pensamientos previos."
 )
 
-# Pocos ejemplos VARIADOS para mostrar tono sin que el modelo copie siempre la misma frase
+# Ejemplos VARIADOS que cubren saludos, destinos, reservas y rechazos de tema
 FEW_SHOT_MESSAGES = [
     {"role": "user", "content": "hola"},
-    {"role": "assistant", "content": "Quiubo! 🦈 Soy Sharky, el parcero digital de VHL. Contame qué necesitás y le hacemos."},
-    {"role": "user", "content": "buenas tardes"},
-    {"role": "assistant", "content": "Buenas! 🦈 Por aquí Sharky, listo pa' ayudarte con paquetes, reservas o lo que se ofrezca."},
+    {"role": "assistant", "content": "Quiubo! 🦈 Soy Sharky, el parcero de VHL. ¿Qué necesitás?"},
+    {"role": "user", "content": "qué destinos o tours tienen disponibles?"},
+    {"role": "assistant", "content": "De una 🦈 Acá los paquetes disponibles: [listá TODOS los de PAQUETES DISPONIBLES con nombre, destino y precio]. ¿Te llama la atención alguno?"},
+    {"role": "user", "content": "cuál es el itinerario del paquete de Barú? o dime el itinerario de los viajes"},
+    {"role": "assistant", "content": "Al pelo 🦈 Buscá en PAQUETES DISPONIBLES el paquete que mencione Barú o el destino pedido y mostrá el itinerario día a día completo tal como aparece. No preguntes, no inventes — usá solo los datos reales."},
     {"role": "user", "content": "cuanto es 4+4?"},
-    {"role": "assistant", "content": "Uy, eso no me toca a mí 😅 yo solo manejo temas de VHL: paquetes, reservas, pagos o la plataforma. ¿Te ayudo con algo de eso?"},
-    {"role": "user", "content": "cuando es el dia del padre?"},
-    {"role": "assistant", "content": "Esa no me la sé y tampoco es lo mío 😅 yo solo te ayudo con cosas de VHL: paquetes, reservas o pagos. ¿Te resuelvo algo de eso?"},
-    {"role": "user", "content": "cuentame un chiste"},
-    {"role": "assistant", "content": "Jaja eso no es lo mío, parcero 😅 yo resuelvo dudas de VHL: paquetes, reservas, pagos o la plataforma. ¿Te ayudo con algo de eso?"},
-    {"role": "user", "content": "cual es la capital de francia?"},
-    {"role": "assistant", "content": "Eso no me toca a mí 😅 solo manejo temas de VHL: paquetes, reservas o pagos. ¿Tenés alguna duda de esas?"},
+    {"role": "assistant", "content": "Eso no me toca 🦈 solo manejo temas de VHL: paquetes, reservas y pagos. ¿Te ayudo con algo de eso?"},
 ]
 
 # ── Caché del catálogo de paquetes ──────────────────────────────────────────────
 
 _catalog_cache: dict = {"texto": None, "expira": 0.0}
-CATALOG_CACHE_TTL = 60  # segundos
+CATALOG_CACHE_TTL = 300  # segundos
 
 
 def _lista_corta(valores: Optional[list], maximo: int = 4) -> str:
@@ -122,20 +124,25 @@ async def _fetch_comentarios(client: httpx.AsyncClient, id_paquete) -> list:
         return []
 
 
+def _formatear_transporte(p: dict) -> str:
+    tipos = p.get("tiposTransporte") or []
+    singular = p.get("tipoTransporte") or ""
+    todos = list(dict.fromkeys(t for t in ([singular] + tipos) if t))
+    return ", ".join(todos) if todos else "N/D"
+
+
 def _formatear_paquete(p: dict, comentarios: list) -> str:
     precio = p.get("precio")
     precio_txt = f"${precio:,.0f}".replace(",", ".") if precio is not None else "consultar"
     destino = p.get("destino") or ", ".join(p.get("destinos") or []) or "N/D"
+    rating = _formatear_rating(comentarios)
+    itinerario = _formatear_itinerario(p.get("itinerario"))
+    transporte = _formatear_transporte(p)
     return (
-        f"### {p.get('titulo', 'Sin título')}\n"
-        f"Destino: {destino} | Duración: {p.get('duracionDias', '?')} días | Precio: {precio_txt} | "
-        f"Cupos: {p.get('cupo', '?')} | Salida desde: {p.get('lugarSalida', 'N/D')}\n"
-        f"Itinerario: {_formatear_itinerario(p.get('itinerario'))}\n"
-        f"Incluye: {_lista_corta(p.get('incluye'))}\n"
-        f"No incluye: {_lista_corta(p.get('noIncluye'))}\n"
-        f"Requisitos: {_lista_corta(p.get('requisitos'))}\n"
-        f"Cancelación: {_lista_corta(p.get('politicasCancelacion'), maximo=2)}\n"
-        f"Calificación de viajeros: {_formatear_rating(comentarios)}"
+        f"- {p.get('titulo', 'Sin título')} | {destino} | {p.get('duracionDias', '?')}d | {precio_txt} | "
+        f"Transporte: {transporte} | Cupos: {p.get('cupo', '?')} | Incluye: {_lista_corta(p.get('incluye'), 3)} | "
+        f"Requisitos: {_lista_corta(p.get('requisitos'), 2)} | Rating: {rating} | "
+        f"Itinerario: {itinerario}"
     )
 
 
@@ -147,7 +154,7 @@ async def fetch_packages_context() -> str:
 
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
-            resp = await client.get(CATALOG_SERVICE_URL, params={"activo": "true", "tamano": 50})
+            resp = await client.get(CATALOG_SERVICE_URL, params={"activo": "true", "tamano": 10})
             resp.raise_for_status()
             paquetes = resp.json().get("content", [])
 
@@ -267,9 +274,9 @@ async def call_ollama_chat(messages: list[dict], system: str) -> str:
         "messages": full_messages,
         "stream": False,
         "think": False,
-        "options": {"temperature": 0.8, "top_p": 0.9, "num_predict": 200},
+        "options": {"temperature": 0.8, "top_p": 0.9, "num_predict": 150, "num_ctx": 2048},
     }
-    async with httpx.AsyncClient(timeout=120.0) as client:
+    async with httpx.AsyncClient(timeout=300.0) as client:
         resp = await client.post(f"{OLLAMA_URL}/api/chat", json=payload)
         resp.raise_for_status()
         return clean_response(resp.json()["message"]["content"])
@@ -281,9 +288,9 @@ async def call_ollama_generate(prompt: str) -> str:
         "prompt": prompt,
         "stream": False,
         "think": False,
-        "options": {"temperature": 0.5, "top_p": 0.9, "num_predict": 300},
+        "options": {"temperature": 0.5, "top_p": 0.9, "num_predict": 200, "num_ctx": 2048},
     }
-    async with httpx.AsyncClient(timeout=120.0) as client:
+    async with httpx.AsyncClient(timeout=300.0) as client:
         resp = await client.post(f"{OLLAMA_URL}/api/generate", json=payload)
         resp.raise_for_status()
         return clean_response(resp.json()["response"])
@@ -364,7 +371,12 @@ async def chat(body: ChatRequest):
 
     base_system = body.system or SYSTEM_PROMPT
     catalogo = await fetch_packages_context()
-    system = f"{base_system}\n\nPAQUETES DISPONIBLES ACTUALMENTE (datos reales, en COP):\n{catalogo}"
+    system = (
+        f"{base_system}\n\nPAQUETES DISPONIBLES ACTUALMENTE (datos reales, en COP):\n{catalogo}\n\n"
+        "🔴 RECORDATORIO FINAL OBLIGATORIO: Sos Sharky 🦈. SIEMPRE incluí el emoji 🦈 en tu respuesta. "
+        "SIEMPRE hablá en paisa: parce, ome, qué más pues, bacano, de una, chévere, al pelo. "
+        "NUNCA respondás en español formal. NUNCA omitás el 🦈. Máximo 4 oraciones."
+    )
 
     try:
         reply = await call_ollama_chat(history, system)

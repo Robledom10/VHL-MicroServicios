@@ -359,15 +359,12 @@ services:
 
 
   # =========================================================
-  # OLLAMA — LLM local usando CPU (compatible con cualquier máquina)
+  # OLLAMA — LLM local en CPU (sin GPU, compatible con cualquier máquina)
   # =========================================================
   ollama:
     image: ollama/ollama
     container_name: ollama
     restart: always
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
     ports:
       - "11434:11434"
     volumes:
@@ -376,7 +373,7 @@ services:
       test: ["CMD", "ollama", "list"]
       interval: 10s
       timeout: 10s
-      retries: 10
+      retries: 15
       start_period: 60s
     networks:
       - microservices-net
@@ -392,13 +389,12 @@ services:
       ollama:
         condition: service_healthy
     environment:
-      OLLAMA_URL: ${OLLAMA_URL}
-      OLLAMA_MODEL: ${OLLAMA_MODEL}
-      CATALOG_SERVICE_URL: ${CATALOG_SERVICE_URL}
+      OLLAMA_URL: http://ollama:11434
+      OLLAMA_MODEL: qwen3:1.7b
+      CATALOG_SERVICE_URL: http://tourist-catalog-service:8083/api/paquetes
     ports:
-      - "${CHATBOT_SERVICE_PORT}:8000"
+      - "8090:8000"
     volumes:
-      # Feedback (👍/👎) de los usuarios, queda en el host para revisarlo fácil
       - ./chatbot_backend/feedback:/app/feedback
     networks:
       - microservices-net
