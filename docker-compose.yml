@@ -339,32 +339,22 @@ services:
       - microservices-net
 
   # =========================================================
-  # OLLAMA — LLM local con GPU (GTX 1650 / nvidia)
+  # OLLAMA — LLM local en CPU (sin GPU, compatible con cualquier máquina)
   # =========================================================
   ollama:
     image: ollama/ollama
     container_name: ollama
     restart: always
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
     ports:
       - "11434:11434"
     volumes:
       - ollama_data:/root/.ollama
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      test: ["CMD", "ollama", "list"]
       interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
+      timeout: 10s
+      retries: 15
+      start_period: 60s
     networks:
       - microservices-net
 
@@ -375,18 +365,16 @@ services:
     build: ./chatbot_backend
     container_name: chatbot-service
     restart: always
+    depends_on:
+      ollama:
+        condition: service_healthy
     environment:
-      # Ollama corre local en el host (no en Docker), accedemos vía host.docker.internal
-      OLLAMA_URL: http://host.docker.internal:11434
+      OLLAMA_URL: http://ollama:11434
       OLLAMA_MODEL: qwen3:1.7b
-      # Catálogo público de paquetes (sin auth) para que Sharky responda con datos reales
       CATALOG_SERVICE_URL: http://tourist-catalog-service:8083/api/paquetes
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     ports:
       - "8090:8000"
     volumes:
-      # Feedback (👍/👎) de los usuarios, queda en el host para revisarlo fácil
       - ./chatbot_backend/feedback:/app/feedback
     networks:
       - microservices-net
