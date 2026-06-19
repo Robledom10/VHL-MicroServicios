@@ -33,4 +33,25 @@ public class ReservaDTO {
 	private List<ViajeroDTO> viajeros;
 	private String notas;
 
+	// ─── Datos del usuario traídos desde auth-service ────────────────────────
+	private UsuarioDTO datosUsuario;
+
+	// ─── Campos del viaje ────────────────────────────────────────────────────
+	private String paqueteNombre;
+	private String destino;
+	private String tipoHabitacion;
+	private String solicitudEspecial;
+
+	// ─── Contactos de emergencia ──────────────────────────────────────────────
+	private List<ContactoEmergenciaDTO> contactosEmergencia;
+
+	// ─── Campos de acompañantes ───────────────────────────────────────────────
+	private List<AcompananteDTO> acompanantes;
+
+	// ─── Campos formateados para el frontend ─────────────────────────────────
+	private Integer personas;
+	private BigDecimal total;
+	private String fechaViaje;
+	private String fechaReserva;
+	private String estadoDescripcion;
 }

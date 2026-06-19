@@ -1,7 +1,6 @@
 package com.hernandolopera.operation_service.servicios;
 
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaAlojamiento;
-import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaGuia;
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaRestaurante;
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaCheckIn;
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaContactoEmergencia;
@@ -13,9 +12,9 @@ import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaTranspor
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaViaje;
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudActualizarEstadoIncidente;
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudAlojamiento;
-import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudGuia;
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudRestaurante;
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudCheckIn;
+import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudContactoDesdeReserva;
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudContactoEmergencia;
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudIncidente;
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudInformacionMedica;
@@ -23,7 +22,6 @@ import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudNotifica
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudTransporte;
 import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudViaje;
 import com.hernandolopera.operation_service.entidades.AlojamientoAsignado;
-import com.hernandolopera.operation_service.entidades.GuiaAsignado;
 import com.hernandolopera.operation_service.entidades.RestauranteViaje;
 import com.hernandolopera.operation_service.entidades.CheckInViajero;
 import com.hernandolopera.operation_service.entidades.ContactoEmergencia;
@@ -63,6 +61,7 @@ public class ServicioOperacion {
     private static final String ESTADO_ENVIADA = "ENVIADA";
 
     private final RepositorioSalidaViaje repositorioSalidaViaje;
+    private final RepositorioGuiaAsignado repositorioGuia;
     private final RepositorioTransporteAsignado repositorioTransporte;
     private final RepositorioCheckInViajero repositorioCheckIn;
     private final RepositorioAlojamientoAsignado repositorioAlojamiento;
@@ -70,7 +69,6 @@ public class ServicioOperacion {
     private final RepositorioContactoEmergencia repositorioContactoEmergencia;
     private final RepositorioIncidenteViaje repositorioIncidente;
     private final RepositorioNotificacionViaje repositorioNotificacion;
-    private final RepositorioGuiaAsignado repositorioGuia;
     private final RepositorioRestauranteViaje repositorioRestaurante;
     private final ServicioEmail servicioEmail;
     private final ServicioWhatsApp servicioWhatsApp;
@@ -179,47 +177,6 @@ public class ServicioOperacion {
         return mapearAlojamiento(guardado, "Alojamiento asignado correctamente");
     }
 
-    public RespuestaGuia asignarGuia(Long idViaje, SolicitudGuia solicitud) {
-        validarIdPositivo(idViaje, "idViaje");
-        validarViajeExistente(idViaje);
-        GuiaAsignado guia = GuiaAsignado.builder()
-            .idViaje(idViaje)
-            .nombreGuia(solicitud.nombreGuia())
-            .telefono(solicitud.telefono())
-            .correo(solicitud.correo())
-            .especialidad(solicitud.especialidad())
-            .idioma(solicitud.idioma())
-            .fechaRegistro(LocalDateTime.now())
-            .build();
-        return mapearGuia(repositorioGuia.save(guia), "Guía asignado correctamente");
-    }
-
-    public RespuestaGuia actualizarGuia(Long idViaje, Long idGuia, SolicitudGuia solicitud) {
-        validarIdPositivo(idViaje, "idViaje");
-        GuiaAsignado guia = repositorioGuia.findById(idGuia)
-            .orElseThrow(() -> new RecursoNoEncontradoExcepcion("Guía no encontrado"));
-        guia.setNombreGuia(solicitud.nombreGuia());
-        guia.setTelefono(solicitud.telefono());
-        guia.setCorreo(solicitud.correo());
-        guia.setEspecialidad(solicitud.especialidad());
-        guia.setIdioma(solicitud.idioma());
-        return mapearGuia(repositorioGuia.save(guia), "Guía actualizado correctamente");
-    }
-
-    @Transactional(readOnly = true)
-    public List<RespuestaGuia> listarGuias(Long idViaje) {
-        validarIdPositivo(idViaje, "idViaje");
-        return repositorioGuia.findAllByIdViaje(idViaje).stream()
-            .map(g -> mapearGuia(g, null)).toList();
-    }
-
-    public void eliminarGuia(Long idViaje, Long idGuia) {
-        validarIdPositivo(idViaje, "idViaje");
-        if (!repositorioGuia.existsById(idGuia))
-            throw new RecursoNoEncontradoExcepcion("Guía no encontrado");
-        repositorioGuia.deleteById(idGuia);
-    }
-
     public RespuestaRestaurante asignarRestaurante(Long idViaje, SolicitudRestaurante solicitud) {
         validarIdPositivo(idViaje, "idViaje");
         validarViajeExistente(idViaje);
@@ -307,6 +264,28 @@ public class ServicioOperacion {
 
         ContactoEmergencia guardado = repositorioContactoEmergencia.save(contacto);
         return mapearContacto(guardado, "Contacto de emergencia registrado correctamente");
+    }
+
+    public RespuestaContactoEmergencia registrarContactoDesdeReserva(
+        Long idViaje,
+        SolicitudContactoDesdeReserva solicitud
+    ) {
+        validarIdPositivo(idViaje, "idViaje");
+        validarViajeExistente(idViaje);
+
+        ContactoEmergencia contacto = ContactoEmergencia.builder()
+            .idViaje(idViaje)
+            .idViajero(null)
+            .nombre(solicitud.nombre())
+            .parentesco(solicitud.parentesco())
+            .telefono(solicitud.telefono())
+            .correo(solicitud.correo())
+            .nombreViajero(solicitud.nombreViajero())
+            .fechaRegistro(LocalDateTime.now())
+            .build();
+
+        ContactoEmergencia guardado = repositorioContactoEmergencia.save(contacto);
+        return mapearContacto(guardado, "Contacto de emergencia sincronizado desde reserva");
     }
 
     public RespuestaIncidente registrarIncidente(Long idViaje, SolicitudIncidente solicitud) {
@@ -518,6 +497,45 @@ public class ServicioOperacion {
         repositorioNotificacion.deleteAllByIdViaje(id);
         repositorioSalidaViaje.deleteById(id);
         log.info("Viaje {} eliminado con todos sus datos asociados", id);
+    }
+
+    public void eliminarTransporte(Long idViaje, Long id) {
+        validarIdPositivo(idViaje, "idViaje");
+        validarIdPositivo(id, "id");
+        if (!repositorioTransporte.existsById(id)) {
+            throw new RecursoNoEncontradoExcepcion("Transporte no encontrado con id: " + id);
+        }
+        repositorioTransporte.deleteById(id);
+        log.info("Transporte {} eliminado del viaje {}", id, idViaje);
+    }
+
+    public void eliminarAlojamiento(Long idViaje, Long id) {
+        validarIdPositivo(idViaje, "idViaje");
+        validarIdPositivo(id, "id");
+        if (!repositorioAlojamiento.existsById(id)) {
+            throw new RecursoNoEncontradoExcepcion("Alojamiento no encontrado con id: " + id);
+        }
+        repositorioAlojamiento.deleteById(id);
+        log.info("Alojamiento {} eliminado del viaje {}", id, idViaje);
+    }
+
+    public void eliminarGuia(Long idViaje, Long id) {
+        validarIdPositivo(idViaje, "idViaje");
+        validarIdPositivo(id, "id");
+        if (!repositorioGuia.existsById(id)) {
+            throw new RecursoNoEncontradoExcepcion("Guia no encontrado con id: " + id);
+        }
+        repositorioGuia.deleteById(id);
+        log.info("Guia {} eliminado del viaje {}", id, idViaje);
+    }
+
+    public void eliminarIncidente(Long id) {
+        validarIdPositivo(id, "id");
+        if (!repositorioIncidente.existsById(id)) {
+            throw new RecursoNoEncontradoExcepcion("Incidente no encontrado con id: " + id);
+        }
+        repositorioIncidente.deleteById(id);
+        log.info("Incidente {} eliminado", id);
     }
 
     public void eliminarInformacionMedica(Long idViajero, Long id) {
@@ -738,12 +756,6 @@ public class ServicioOperacion {
             alojamiento.getFechaRegistro(),
             mensaje
         );
-    }
-
-    private RespuestaGuia mapearGuia(GuiaAsignado g, String mensaje) {
-        return new RespuestaGuia(g.getId(), g.getIdViaje(), g.getNombreGuia(),
-            g.getTelefono(), g.getCorreo(), g.getEspecialidad(), g.getIdioma(),
-            g.getFechaRegistro(), mensaje);
     }
 
     private RespuestaRestaurante mapearRestaurante(RestauranteViaje r, String mensaje) {

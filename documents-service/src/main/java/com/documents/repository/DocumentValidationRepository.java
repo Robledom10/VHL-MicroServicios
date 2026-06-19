@@ -12,4 +12,8 @@ public interface DocumentValidationRepository
     findByTravelerDocumentIdDocument(
             Integer documentId
     );
+
+    void deleteByTravelerDocumentIdDocument(
+            Integer documentId
+    );
 }

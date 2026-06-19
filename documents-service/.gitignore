@@ -32,3 +32,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Generated Vaadin frontend ###
+src/main/frontend/generated/
+
+### Uploaded files (managed via Docker volume) ###
+uploads/

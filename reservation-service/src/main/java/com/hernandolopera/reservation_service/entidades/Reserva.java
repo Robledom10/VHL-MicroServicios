@@ -35,16 +35,19 @@ public class Reserva implements Serializable {
 	@Column(name = "reservation_code", unique = true, nullable = false, length = 50)
 	private String numeroReserva;
 
-	@Column(name = "package_id", nullable = false)
+	@Column(name = "package_id")
 	private Long idPaquete;
 
-	@Column(name = "id_user", nullable = false)
+	@Column(name = "viaje_id")
+	private Long idViaje;
+
+	@Column(name = "id_user")
 	private Long idUsuario;
 
 	@Column(name = "passenger_count")
 	private Integer cantidadPasajeros;
 
-	@Column(name = "total_amount", precision = 10, scale = 2, nullable = false)
+	@Column(name = "total_amount", precision = 15, scale = 2, nullable = false)
 	private BigDecimal precioTotal;
 
 	@Column(name = "travel_start_date")
@@ -74,4 +77,18 @@ public class Reserva implements Serializable {
 
 	@Column(name = "notes", length = 500)
 	private String notas;
+
+	// ─── Campos del viaje ────────────────────────────────────────────────────
+
+	@Column(name = "paquete_nombre", length = 150)
+	private String paqueteNombre;
+
+	@Column(name = "destino", length = 150)
+	private String destino;
+
+	@Column(name = "tipo_habitacion", length = 50)
+	private String tipoHabitacion;
+
+	@Column(name = "solicitud_especial", length = 200)
+	private String solicitudEspecial;
 }

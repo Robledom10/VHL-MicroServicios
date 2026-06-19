@@ -65,6 +65,22 @@ public class JwtTokenProvider {
                 .getSubject();
     }
 
+    public String getUserNameFromToken(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+
+        String firstName = claims.get("firstName", String.class);
+        String lastName = claims.get("lastName", String.class);
+        String fullName = String.join(" ",
+                firstName == null ? "" : firstName.trim(),
+                lastName == null ? "" : lastName.trim()).trim();
+
+        return fullName.isBlank() ? claims.getSubject() : fullName;
+    }
+
     public boolean validateToken(String token) {
         try {
             Jwts.parser()

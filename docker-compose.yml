@@ -95,32 +95,27 @@ services:
     networks:
       - microservices-net
 
-      # =========================================================
+  # =========================================================
   # FINANCIAL DATABASE
   # =========================================================
   db-financial:
     image: mysql:8
     container_name: db-financial
     restart: always
-
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${FINANCIAL_DB_NAME}
-
     ports:
       - "${FINANCIAL_DB_PORT}:3306"
-
     volumes:
       - financial_data:/var/lib/mysql
       - ./Docker/pago_db.sql:/docker-entrypoint-initdb.d/pago_db.sql
-
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 5s
       timeout: 3s
       retries: 5
       start_period: 20s
-
     networks:
       - microservices-net
 
@@ -149,6 +144,32 @@ services:
       - microservices-net
 
   # =========================================================
+  # DOCUMENTS DATABASE
+  # =========================================================
+  db-documents:
+    image: mysql:8
+    container_name: db-documents
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DOCUMENT_DB_NAME}
+    ports:
+      - "${DOCUMENT_DB_PORT}:3306"
+    volumes:
+      - documents_data:/var/lib/mysql
+      - ./Docker/gestion_documental_db.sql:/docker-entrypoint-initdb.d/gestion_documental_db.sql
+
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 20s
+
+    networks:
+      - microservices-net
+
+  # =========================================================
   # AUTH SERVICE
   # =========================================================
   auth-service:
@@ -167,7 +188,6 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       APP_JWT_SECRET: ${JWT_SECRET}
       APP_JWT_EXPIRATION: ${JWT_EXPIRATION}
-
       GOOGLE_ID_CLIENT: ${GOOGLE_ID_CLIENT}
       GOOGLE_SECRET_CLIENT: ${GOOGLE_SECRET_CLIENT}
     ports:
@@ -209,7 +229,8 @@ services:
     env_file:
       - .env
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db-catalog:3306/catalogo_turistico_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      # CORREGIDO: Se cambió 'catalogo_turistico_db' estático por la variable dinámica
+      SPRING_DATASOURCE_URL: jdbc:mysql://db-catalog:3306/${CATALOG_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     ports:
@@ -227,18 +248,19 @@ services:
     depends_on:
       db-gallery:
         condition: service_healthy
+    # CORREGIDO: Cambiada la estructura de lista (-) a diccionario estándar para evitar errores YAML
     environment:
-      - SERVER_PORT=8084
-      - SPRING_DATA_MONGODB_URI=mongodb://root:root@db-gallery:27017/gallery_db?authSource=admin
-      - SPRING_DATA_MONGODB_HOST=db-gallery
-      - SPRING_DATA_MONGODB_PORT=27017
-      - SPRING_DATA_MONGODB_DATABASE=gallery_db
-      - SPRING_DATA_MONGODB_USERNAME=root
-      - SPRING_DATA_MONGODB_PASSWORD=root
-      - SPRING_DATA_MONGODB_AUTHENTICATION_DATABASE=admin
-      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
-      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
-      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      SERVER_PORT: 8084
+      SPRING_DATA_MONGODB_URI: mongodb://${GALLERY_MONGO_USERNAME}:${GALLERY_MONGO_PASSWORD}@db-gallery:27017/gallery_db?authSource=admin
+      SPRING_DATA_MONGODB_HOST: db-gallery
+      SPRING_DATA_MONGODB_PORT: 27017
+      SPRING_DATA_MONGODB_DATABASE: gallery_db
+      SPRING_DATA_MONGODB_USERNAME: ${GALLERY_MONGO_USERNAME}
+      SPRING_DATA_MONGODB_PASSWORD: ${GALLERY_MONGO_PASSWORD}
+      SPRING_DATA_MONGODB_AUTHENTICATION_DATABASE: admin
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
     ports:
       - "${GALLERY_SERVICE_PORT}:8084"
     networks:
@@ -249,33 +271,22 @@ services:
   # =========================================================
   financial-service:
     build: ./financial-service
-
     container_name: financial-service
-
     restart: always
-
     depends_on:
       db-financial:
         condition: service_healthy
-
     env_file:
       - .env
-
     environment:
       SPRING_PROFILES_ACTIVE: dev
-
       SPRING_DATASOURCE_URL: jdbc:mysql://db-financial:3306/${FINANCIAL_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
-
       SPRING_DATASOURCE_USERNAME: root
-
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-
       WOMPI_PUBLIC_KEY: ${WOMPI_PUBLIC_KEY}
       WOMPI_PRIVATE_KEY: ${WOMPI_PRIVATE_KEY}
-
     ports:
       - "${FINANCIAL_SERVICE_PORT}:8085"
-
     networks:
       - microservices-net
 
@@ -285,6 +296,7 @@ services:
   operation-service:
     build: ./operation-service
     container_name: operation-service
+
     restart: always
     depends_on:
       db-operation:
@@ -300,25 +312,72 @@ services:
       - "${OPERATION_SERVICE_PORT}:8086"
     networks:
       - microservices-net
-    
-     # ─────────────────────────────────────────────────────
-  #  API del chatbot (FastAPI + pdfplumber + ollama SDK)
-  #  Conecta al Ollama que ya corre en el HOST (:11434)
-  # ─────────────────────────────────────────────────────
-  chatbot-service:
-    build: ./chatbot-service
-    container_name: chatbot-service
-    restart: unless-stopped
-    environment:
-      # host.docker.internal → resuelve al host en Windows/Mac
-      # En Linux cambiar por la IP del host (p.ej. 172.17.0.1)
-      CHATBOT_OLLAMA_HOST: ${CHATBOT_OLLAMA_HOST:-http://host.docker.internal:11434}
-      CHATBOT_CHAT_MODEL: ${CHATBOT_CHAT_MODEL:-qwen3:8b}
-      CHATBOT_SAFEGUARD_MODEL: ${CHATBOT_SAFEGUARD_MODEL:-llama-guard3:8b}
-      CHATBOT_OCR_MODEL: ${CHATBOT_OCR_MODEL:-llava:7b}
+
+  # =========================================================
+  # ANALYTICS SERVICE
+  # =========================================================
+  analytics-service:
+    build: ./analytics-service
+    container_name: analytics-service
+    restart: always
+
+    env_file:
+      - .env
+
+    depends_on:
+      - auth-service
+      - reservation-service
+      - tourist-catalog-service
+      - gallery-service
+      - financial-service
+      - operation-service
+
     ports:
-      - "${CHATBOT_SERVICE_PORT:-8090}:8000"
- 
+      - "${ANALYTICS_SERVICE_PORT}:8088"
+
+    networks:
+      - microservices-net
+
+  # =========================================================
+  # OLLAMA — LLM local en CPU (sin GPU, compatible con cualquier máquina)
+  # =========================================================
+  ollama:
+    image: ollama/ollama
+    container_name: ollama
+    restart: always
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 60s
+    networks:
+      - microservices-net
+
+  # =========================================================
+  # CHATBOT SERVICE — Sharky (FastAPI + Ollama)
+  # =========================================================
+  chatbot-service:
+    build: ./chatbot_backend
+    container_name: chatbot-service
+    restart: always
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_URL: http://ollama:11434
+      OLLAMA_MODEL: qwen3:1.7b
+      CATALOG_SERVICE_URL: http://tourist-catalog-service:8083/api/paquetes
+    ports:
+      - "8090:8000"
+    volumes:
+      - ./chatbot_backend/feedback:/app/feedback
+    networks:
+      - microservices-net
 
   # =========================================================
   # API GATEWAY
@@ -360,3 +419,6 @@ volumes:
   gallery_data:
   operation_data:
   financial_data:
+  documents_data:
+  documents_uploads:
+  ollama_data:
