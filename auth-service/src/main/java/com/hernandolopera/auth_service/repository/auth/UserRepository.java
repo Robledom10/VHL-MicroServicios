@@ -10,6 +10,20 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     Optional<User> findByEmail(String email);
 
-    // 🔥 AGREGA ESTA LÍNEA PARA SOLUCIONAR EL ERROR
     Optional<User> findByDocumentNumber(String documentNumber);
+
+    Long countByActiveTrue();
+
+    Long countByActiveFalse();
+
+    Long countByEmailVerifiedTrue();
+
+    Long countByPhoneVerifiedTrue();
+
+    Long countByProfileCompletedTrue();
+
+    Long countByAccountNonLockedFalse();
+
+    Long countByRole_Name(String roleName);
+
 }

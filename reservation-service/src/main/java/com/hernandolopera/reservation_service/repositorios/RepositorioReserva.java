@@ -27,4 +27,8 @@ public interface RepositorioReserva extends JpaRepository<Reserva, Long> {
 
 	List<Reserva> findByEstadoAndFechaFinViajeBefore(EstadoReserva estado, LocalDateTime fecha);
 
+	Long countByEstado(EstadoReserva estado);
+
+	Long countByPagoVerificado(Boolean pagoVerificado);
+
 }
