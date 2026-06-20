@@ -314,27 +314,26 @@ services:
       - microservices-net
 
   # =========================================================
-  # ANALYTICS SERVICE
+  # DOCUMENT SERVICE
   # =========================================================
-  analytics-service:
-    build: ./analytics-service
-    container_name: analytics-service
+  document-service:
+    build: ./documents-service
+    container_name: document-service
     restart: always
-
+    depends_on:
+      db-documents:
+        condition: service_healthy
     env_file:
       - .env
-
-    depends_on:
-      - auth-service
-      - reservation-service
-      - tourist-catalog-service
-      - gallery-service
-      - financial-service
-      - operation-service
-
+    environment:
+      SERVER_PORT: 8087
+      SPRING_DATASOURCE_URL: jdbc:mysql://db-documents:3306/${DOCUMENT_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     ports:
-      - "${ANALYTICS_SERVICE_PORT}:8088"
-
+      - "${DOCUMENT_SERVICE_PORT}:8087"
+    volumes:
+      - documents_uploads:/app/uploads
     networks:
       - microservices-net
 
@@ -393,6 +392,7 @@ services:
       - gallery-service
       - operation-service
       - financial-service
+      - document-service
     env_file:
       - .env
     environment:
