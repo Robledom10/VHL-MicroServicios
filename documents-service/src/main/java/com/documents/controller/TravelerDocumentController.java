@@ -5,12 +5,16 @@ import com.documents.entity.enums.DocumentStatus;
 import com.documents.service.TravelerDocumentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.List;
 
 @RestController
@@ -101,15 +105,43 @@ public class TravelerDocumentController {
             ) {
 
         Resource resource = service.downloadDocument(documentId);
-        String filename = resource.getFilename() == null
-                ? "documento"
-                : resource.getFilename();
+        String filename = getFilename(resource);
 
         return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .contentType(getMediaType(resource))
                 .header(
                         HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + filename + "\""
+                        ContentDisposition.attachment()
+                                .filename(
+                                        filename,
+                                        StandardCharsets.UTF_8
+                                )
+                                .build()
+                                .toString()
+                )
+                .body(resource);
+    }
+
+    @GetMapping("/view/{documentId}")
+    public ResponseEntity<Resource>
+            viewDocument(
+                    @PathVariable Integer documentId
+            ) {
+
+        Resource resource = service.downloadDocument(documentId);
+        String filename = getFilename(resource);
+
+        return ResponseEntity.ok()
+                .contentType(getMediaType(resource))
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        ContentDisposition.inline()
+                                .filename(
+                                        filename,
+                                        StandardCharsets.UTF_8
+                                )
+                                .build()
+                                .toString()
                 )
                 .body(resource);
     }
@@ -124,5 +156,32 @@ public class TravelerDocumentController {
 
         return ResponseEntity.noContent()
                 .build();
+    }
+
+    private String getFilename(
+            Resource resource
+    ) {
+
+        return resource.getFilename() == null
+                ? "documento"
+                : resource.getFilename();
+    }
+
+    private MediaType getMediaType(
+            Resource resource
+    ) {
+
+        try {
+            String contentType =
+                    Files.probeContentType(resource.getFile().toPath());
+
+            if (contentType != null) {
+                return MediaType.parseMediaType(contentType);
+            }
+        } catch (IOException ex) {
+            return MediaType.APPLICATION_OCTET_STREAM;
+        }
+
+        return MediaType.APPLICATION_OCTET_STREAM;
     }
 }
