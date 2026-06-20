@@ -12,6 +12,8 @@ import com.documents.service.AIResultService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class AIResultServiceImpl
@@ -56,6 +58,7 @@ public void processResult(
     DocumentValidation validation =
             DocumentValidation.builder()
                     .travelerDocument(document)
+                    .validationDate(LocalDateTime.now())
                     .source(ValidationSource.IA)
                     .result(
                             dto.getValid()

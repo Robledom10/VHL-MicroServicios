@@ -15,6 +15,8 @@ import com.documents.service.ValidationService;
 
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class ValidationServiceImpl
@@ -41,6 +43,7 @@ public class ValidationServiceImpl
         DocumentValidation validation =
                 DocumentValidation.builder()
                         .travelerDocument(document)
+                        .validationDate(LocalDateTime.now())
                         .source(ValidationSource.IA)
                         .result(
                                 response.getValid()

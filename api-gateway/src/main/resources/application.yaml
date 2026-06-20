@@ -12,6 +12,14 @@ spring:
     gateway:
       routes:
         # =========================================================
+        # DOCUMENT SERVICE - ADMIN
+        # =========================================================
+        - id: document-service-admin
+          uri: http://document-service:8087
+          predicates:
+            - Path=/api/admin/documents/**
+
+        # =========================================================
         # AUTH SERVICE
         # =========================================================
         - id: auth-service
