@@ -92,6 +92,8 @@ spring:
               - OPTIONS
             allowedHeaders:
               - "*"
+            exposedHeaders:
+              - Content-Disposition
             allowCredentials: true
 
       # =========================================================
