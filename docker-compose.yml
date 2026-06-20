@@ -337,6 +337,32 @@ services:
     networks:
       - microservices-net
 
+      # =========================================================
+  # ANALYTICS SERVICE (PYTHON + FASTAPI) - SIN BASE DE DATOS
+  # =========================================================
+  analytics-service:
+    build: ./analytics-service
+    container_name: analytics-service
+    restart: always
+    depends_on:
+      - auth-service
+      - operation-service
+    env_file:
+      - .env
+    environment:
+      - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
+      - OPERATION_SERVICE_URL=${OPERATION_SERVICE_URL}
+      - RESERVATION_SERVICE_URL=${RESERVATION_SERVICE_URL}
+      - TOURIST_CATALOG_SERVICE_URL=${TOURIST_CATALOG_SERVICE_URL}
+      - GALLERY_SERVICE_URL=${GALLERY_SERVICE_URL}
+      - FINANCIAL_SERVICE_URL=${FINANCIAL_SERVICE_URL}
+      - DOCUMENT_SERVICE_URL=${DOCUMENT_SERVICE_URL}
+      - PORT=8000
+    ports:
+      - "${ANALYTICS_SERVICE_PORT}:8000" # <--- Toma automáticamente el 8088 de tu .env
+    networks:
+      - microservices-net
+
   # =========================================================
   # OLLAMA — LLM local en CPU (sin GPU, compatible con cualquier máquina)
   # =========================================================
