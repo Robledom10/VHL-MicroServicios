@@ -297,7 +297,6 @@ services:
     build: ./operation-service
     container_name: operation-service
 
-
     restart: always
     depends_on:
       db-operation:
@@ -337,26 +336,32 @@ services:
       - documents_uploads:/app/uploads
     networks:
       - microservices-net
-    
-  # ─────────────────────────────────────────────────────
-  #  API del chatbot (FastAPI + pdfplumber + ollama SDK)
-  #  Conecta al Ollama que ya corre en el HOST (:11434)
-  # ─────────────────────────────────────────────────────
-  # chatbot-service:
-  #   build: ./chatbot-service
-  #   container_name: chatbot-service
-  #   restart: unless-stopped
-  #   environment:
-  #     # host.docker.internal → resuelve al host en Windows/Mac
-  #     # En Linux cambiar por la IP del host (p.ej. 172.17.0.1)
-  #     CHATBOT_OLLAMA_HOST: ${CHATBOT_OLLAMA_HOST:-http://host.docker.internal:11434}
-  #     CHATBOT_CHAT_MODEL: ${CHATBOT_CHAT_MODEL:-qwen3:8b}
-  #     CHATBOT_SAFEGUARD_MODEL: ${CHATBOT_SAFEGUARD_MODEL:-llama-guard3:8b}
-  #     CHATBOT_OCR_MODEL: ${CHATBOT_OCR_MODEL:-llava:7b}
-  #   ports:
-  #     - "${CHATBOT_SERVICE_PORT:-8090}:8000"
- 
 
+      # =========================================================
+  # ANALYTICS SERVICE (PYTHON + FASTAPI) - SIN BASE DE DATOS
+  # =========================================================
+  analytics-service:
+    build: ./analytics-service
+    container_name: analytics-service
+    restart: always
+    depends_on:
+      - auth-service
+      - operation-service
+    env_file:
+      - .env
+    environment:
+      - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
+      - OPERATION_SERVICE_URL=${OPERATION_SERVICE_URL}
+      - RESERVATION_SERVICE_URL=${RESERVATION_SERVICE_URL}
+      - TOURIST_CATALOG_SERVICE_URL=${TOURIST_CATALOG_SERVICE_URL}
+      - GALLERY_SERVICE_URL=${GALLERY_SERVICE_URL}
+      - FINANCIAL_SERVICE_URL=${FINANCIAL_SERVICE_URL}
+      - DOCUMENT_SERVICE_URL=${DOCUMENT_SERVICE_URL}
+      - PORT=8000
+    ports:
+      - "${ANALYTICS_SERVICE_PORT}:8000" # <--- Toma automáticamente el 8088 de tu .env
+    networks:
+      - microservices-net
 
   # =========================================================
   # OLLAMA — LLM local en CPU (sin GPU, compatible con cualquier máquina)

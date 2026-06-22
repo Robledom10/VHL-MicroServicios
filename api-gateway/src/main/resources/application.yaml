@@ -12,12 +12,20 @@ spring:
     gateway:
       routes:
         # =========================================================
+        # DOCUMENT SERVICE - ADMIN
+        # =========================================================
+        - id: document-service-admin
+          uri: http://document-service:8087
+          predicates:
+            - Path=/api/admin/documents/**
+
+        # =========================================================
         # AUTH SERVICE
         # =========================================================
         - id: auth-service
           uri: http://auth-service:8081
           predicates:
-            - Path=/api/auth/**,/api/admin/**,/api/roles/**
+            - Path=/api/auth/**,/api/admin/**,/api/roles/**, /api/statistics/**
 
         # =========================================================
         # RESERVATION SERVICE
@@ -60,12 +68,21 @@ spring:
             - Path=/api/v1/operaciones/**
 
         # =========================================================
+
+        # ANALYTICS SERVICE
+        # =========================================================
+        - id: analytics-service
+          uri: http://analytics-service:8088
+          predicates:
+            - Path=/api/analytics/**
+
         # DOCUMENT SERVICE
         # =========================================================
         - id: document-service
           uri: http://document-service:8087
           predicates:
             - Path=/api/documents/**,/api/validation/**,/api/ia/**,/api/history/**,/api/contracts/**,/api/reservation/**
+
 
       # =========================================================
       # CORS CORREGIDO (Alineado perfectamente con 'routes')
@@ -84,6 +101,8 @@ spring:
               - OPTIONS
             allowedHeaders:
               - "*"
+            exposedHeaders:
+              - Content-Disposition
             allowCredentials: true
 
       # =========================================================

@@ -34,7 +34,9 @@ public class SecurityConfig {
                                 "/api/auth/google-login",
                                 "/api/auth/tokens/**",
                                 "/api/auth/check-blacklist",
+                                "/api/statistics/**",
                                 "/api/internal/**")
+
                         .permitAll()
                         .requestMatchers("/api/auth/check-blacklist").permitAll()
                         // 👈 clave
