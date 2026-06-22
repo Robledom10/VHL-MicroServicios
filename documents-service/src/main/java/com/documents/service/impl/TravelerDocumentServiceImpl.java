@@ -1,5 +1,6 @@
 package com.documents.service.impl;
 
+import com.documents.dto.ReservationSummaryDTO;
 import com.documents.entity.TravelerDocument;
 import com.documents.entity.enums.DocumentStatus;
 import com.documents.entity.enums.DocumentType;
@@ -7,11 +8,15 @@ import com.documents.repository.DocumentValidationRepository;
 import com.documents.repository.TravelerDocumentRepository;
 import com.documents.service.TravelerDocumentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -35,9 +40,13 @@ public class TravelerDocumentServiceImpl
 
     private final String uploadDir = "uploads/";
 
+    @Value("${reservation.service.url:http://reservation-service:8082}")
+    private String reservationServiceUrl;
+
     @Override
     public TravelerDocument uploadDocument(
             Integer userId,
+            Integer reservationId,
             String documentType,
             MultipartFile file
     ) {
@@ -45,6 +54,12 @@ public class TravelerDocumentServiceImpl
         if (userId == null) {
             throw new IllegalArgumentException("El userId es obligatorio");
         }
+
+        Integer resolvedReservationId =
+                resolveReservationId(
+                        userId,
+                        reservationId
+                );
 
         DocumentType parsedDocumentType = parseDocumentType(documentType);
 
@@ -93,6 +108,7 @@ public class TravelerDocumentServiceImpl
 
         TravelerDocument document = TravelerDocument.builder()
                 .userId(userId)
+                .reservationId(resolvedReservationId)
                 .documentType(parsedDocumentType)
                 .fileUrl(filePath.toString())
                 .status(DocumentStatus.pendiente)
@@ -184,6 +200,60 @@ public class TravelerDocumentServiceImpl
         }
 
         repository.delete(document);
+    }
+
+    private Integer resolveReservationId(
+            Integer userId,
+            Integer reservationId
+    ) {
+
+        if (reservationId != null) {
+            return reservationId;
+        }
+
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<ReservationSummaryDTO[]> response =
+                    restTemplate.getForEntity(
+                            reservationServiceUrl
+                                    + "/api/v1/reservas/usuario/"
+                                    + userId,
+                            ReservationSummaryDTO[].class
+                    );
+
+            ReservationSummaryDTO[] reservations = response.getBody();
+
+            if (reservations == null || reservations.length == 0) {
+                throw new IllegalArgumentException(
+                        "No existe reserva para el usuario " + userId
+                );
+            }
+
+            return Arrays.stream(reservations)
+                    .filter(reservation -> reservation.getId() != null)
+                    .filter(reservation ->
+                            reservation.getEstado() == null
+                            || (
+                                    !reservation.getEstado()
+                                            .equalsIgnoreCase("CANCELADA")
+                                    && !reservation.getEstado()
+                                            .equalsIgnoreCase("PASADA")
+                            )
+                    )
+                    .map(ReservationSummaryDTO::getId)
+                    .max(Integer::compareTo)
+                    .orElseThrow(
+                            () -> new IllegalArgumentException(
+                                    "No existe reserva activa para el usuario "
+                                            + userId
+                            )
+                    );
+        } catch (RestClientException ex) {
+            throw new IllegalStateException(
+                    "No se pudo consultar la reserva del usuario",
+                    ex
+            );
+        }
     }
 
     private DocumentType parseDocumentType(String documentType) {

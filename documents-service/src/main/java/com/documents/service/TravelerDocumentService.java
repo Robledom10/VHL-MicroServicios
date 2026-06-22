@@ -11,6 +11,7 @@ public interface TravelerDocumentService {
 
     TravelerDocument uploadDocument(
             Integer userId,
+            Integer reservationId,
             String documentType,
             MultipartFile file
     );
