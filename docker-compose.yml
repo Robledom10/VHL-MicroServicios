@@ -397,6 +397,8 @@ services:
       OLLAMA_URL: http://ollama:11434
       OLLAMA_MODEL: qwen3:1.7b
       CATALOG_SERVICE_URL: http://tourist-catalog-service:8083/api/paquetes
+      OPERATION_SERVICE_URL: http://operation-service:8086/api/v1/operaciones/viajes
+      RESERVATION_SERVICE_URL: http://reservation-service:8082/api/v1/reservas
     ports:
       - "8090:8000"
     volumes:
