@@ -1,7 +1,10 @@
 package com.hernandolopera.reservation_service.servicios;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
+import com.hernandolopera.reservation_service.dto.PackageReservationsByYearDTO;
 import com.hernandolopera.reservation_service.dto.ReservationStatisticsDTO;
 import com.hernandolopera.reservation_service.entidades.EstadoReserva;
 import com.hernandolopera.reservation_service.repositorios.RepositorioReserva;
@@ -50,5 +53,9 @@ public class ReservationStatisticsService {
                         repositorioReserva.countByPagoVerificado(false))
 
                 .build();
+    }
+
+    public List<PackageReservationsByYearDTO> getPackagesWithMostReservationsByYear() {
+        return repositorioReserva.findPackagesWithMostReservationsByYear();
     }
 }

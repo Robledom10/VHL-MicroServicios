@@ -19,3 +19,15 @@ class ReservationClient:
             response.raise_for_status()
 
             return response.json()
+
+    async def get_packages_by_year(self):
+
+        async with httpx.AsyncClient() as client:
+
+            response = await client.get(
+                f"{settings.RESERVATION_SERVICE_URL}/api/statistics/packages-by-year"
+            )
+
+            response.raise_for_status()
+
+            return response.json()

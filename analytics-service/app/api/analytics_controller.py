@@ -29,3 +29,9 @@ async def reservation_statistics():
 async def catalog_statistics():
 
     return await catalog_client.get_catalog_statistics()
+
+
+@router.get("/packages-by-year")
+async def packages_by_year():
+
+    return await reservation_client.get_packages_by_year()
