@@ -1,7 +1,8 @@
 package com.hernandolopera.auth_service.service.managment;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.hernandolopera.auth_service.dto.response.UserResponse;
@@ -17,14 +18,16 @@ public class UserManagementService {
     private final UserRepository userRepository;
 
     /**
-     * Obtener todos los usuarios
+     * Obtener usuarios paginados
      */
-    public List<UserResponse> getAllUsers() {
+    public Page<UserResponse> getAllUsers(
+            int page,
+            int size) {
 
-        return userRepository.findAll()
-                .stream()
-                .map(this::mapToResponse)
-                .toList();
+        Pageable pageable = PageRequest.of(page, size);
+
+        return userRepository.findAll(pageable)
+                .map(this::mapToResponse);
     }
 
     /**
