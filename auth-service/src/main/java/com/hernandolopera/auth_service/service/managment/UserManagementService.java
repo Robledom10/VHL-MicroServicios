@@ -78,6 +78,8 @@ public class UserManagementService {
                 .lastName(user.getLastName())
                 .email(user.getEmail())
                 .phone(user.getPhone())
+                .documentType(user.getDocumentType() != null ? user.getDocumentType().name() : null)
+                .documentNumber(user.getDocumentNumber())
                 .role(user.getRole().getName())
                 .active(user.getActive())
                 .profileCompleted(user.getProfileCompleted())
