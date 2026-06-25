@@ -211,6 +211,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://db-reservation:3306/${RESERVATION_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      GMAIL_USERNAME: ${GMAIL_USERNAME}
+      GMAIL_APP_PASSWORD: ${GMAIL_APP_PASSWORD}
     ports:
       - "${RESERVATION_SERVICE_PORT}:8082"
     networks:
@@ -308,6 +310,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://db-operation:3306/${OPERATION_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      GMAIL_USERNAME: ${GMAIL_USERNAME}
+      GMAIL_APP_PASSWORD: ${GMAIL_APP_PASSWORD}
     ports:
       - "${OPERATION_SERVICE_PORT}:8086"
     networks:

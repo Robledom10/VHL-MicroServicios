@@ -1,23 +1,11 @@
 use auth_service;
 
-ALTER TABLE `user` MODIFY COLUMN `document_type` ENUM (
-    'Cedula Ciudadania',
-    'Tarjeta Identidad',
-    'Pasaporte',
-    'Cedula Extranjeria',
-    'Visa'
-) NOT NULL;
+-- Cambiar document_type de ENUM a VARCHAR para que JPA pueda guardar el nombre del enum Java
+ALTER TABLE `user` MODIFY COLUMN `document_type` VARCHAR(50) NULL;
 
-INSERT INTO
-    role (name, status)
-VALUES
-    ('USER', 1);
+-- Insertar roles requeridos por el código (CLIENT, ADMIN, GUIDE)
+INSERT IGNORE INTO role (name, status) VALUES ('CLIENT', 1);
+INSERT IGNORE INTO role (name, status) VALUES ('ADMIN', 1);
+INSERT IGNORE INTO role (name, status) VALUES ('GUIDE', 1);
 
-INSERT INTO
-    role (name, status)
-VALUES
-    ('ADMIN', 1)
-select
-    *
-from
-    `role`
+SELECT * FROM `role`;

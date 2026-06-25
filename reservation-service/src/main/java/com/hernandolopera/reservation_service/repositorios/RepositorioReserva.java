@@ -23,6 +23,8 @@ public interface RepositorioReserva extends JpaRepository<Reserva, Long> {
 
 	List<Reserva> findByIdPaquete(Long idPaquete);
 
+	List<Reserva> findByIdViaje(Long idViaje);
+
 	List<Reserva> findByEstadoAndIdUsuario(EstadoReserva estado, Long idUsuario);
 
 	List<Reserva> findByEstadoAndExpiresAtBefore(EstadoReserva estado, LocalDateTime fecha);

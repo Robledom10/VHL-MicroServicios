@@ -35,9 +35,6 @@ public class SolicitudCrearReserva {
 	private String paqueteNombre;
 
 	@NotBlank
-	private String destino;
-
-	@NotBlank
 	private String fechaSalida;
 
 	@NotBlank
