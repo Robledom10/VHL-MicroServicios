@@ -3,6 +3,7 @@ package com.hernandolopera.reservation_service.controladores;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -13,11 +14,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hernandolopera.reservation_service.dto.ContactoEmergenciaDTO;
 import com.hernandolopera.reservation_service.dto.ReservaDTO;
 import com.hernandolopera.reservation_service.dto.SolicitudCrearReserva;
+import com.hernandolopera.reservation_service.dto.SolicitudNotificarReserva;
 import com.hernandolopera.reservation_service.entidades.EstadoReserva;
 import com.hernandolopera.reservation_service.entidades.Reserva;
 import com.hernandolopera.reservation_service.servicios.ServicioReserva;
@@ -42,12 +45,14 @@ public class ControladorReserva {
 	}
 
 	/**
-	 * Obtiene todas las reservas (panel admin)
+	 * Obtiene todas las reservas (panel admin) — paginado
 	 */
 	@GetMapping
-	public ResponseEntity<List<ReservaDTO>> obtenerTodasLasReservas() {
-		log.info("GET /api/v1/reservas - Obteniendo todas las reservas");
-		return ResponseEntity.ok(servicioReserva.obtenerTodasLasReservas());
+	public ResponseEntity<Page<ReservaDTO>> obtenerTodasLasReservas(
+			@RequestParam(defaultValue = "0") int pagina,
+			@RequestParam(defaultValue = "10") int tamano) {
+		log.info("GET /api/v1/reservas?pagina={}&tamano={}", pagina, tamano);
+		return ResponseEntity.ok(servicioReserva.obtenerTodasLasReservas(pagina, tamano));
 	}
 
 	/**
@@ -74,6 +79,12 @@ public class ControladorReserva {
 	public ResponseEntity<List<ReservaDTO>> obtenerReservasPorPaquete(@PathVariable("idPaquete") Long idPaquete) {
 		log.info("GET /api/v1/reservas/paquete/{} - Obteniendo reservas por paquete", idPaquete);
 		return ResponseEntity.ok(servicioReserva.obtenerReservasPorPaquete(idPaquete));
+	}
+
+	@GetMapping("/viaje/{idViaje}")
+	public ResponseEntity<List<ReservaDTO>> obtenerReservasPorViaje(@PathVariable Long idViaje) {
+		log.info("GET /api/v1/reservas/viaje/{} - Obteniendo reservas por viaje", idViaje);
+		return ResponseEntity.ok(servicioReserva.obtenerReservasPorViaje(idViaje));
 	}
 
 	/**
@@ -183,6 +194,22 @@ public class ControladorReserva {
 			return ResponseEntity.ok(reservaActualizada);
 		} catch (RuntimeException e) {
 			log.error("Error al actualizar la reserva: {}", e.getMessage());
+			return ResponseEntity.notFound().build();
+		}
+	}
+
+	/**
+	 * Envía email de notificación al usuario de una reserva (panel admin)
+	 */
+	@PostMapping("/{idReserva}/notificar")
+	public ResponseEntity<Void> notificarReserva(@PathVariable("idReserva") Long idReserva,
+			@RequestBody SolicitudNotificarReserva solicitud) {
+		log.info("POST /api/v1/reservas/{}/notificar - Enviando notificación", idReserva);
+		try {
+			servicioReserva.notificarReserva(idReserva, solicitud.getAsunto(), solicitud.getMensaje());
+			return ResponseEntity.ok().build();
+		} catch (RuntimeException e) {
+			log.error("Error al notificar reserva {}: {}", idReserva, e.getMessage());
 			return ResponseEntity.notFound().build();
 		}
 	}

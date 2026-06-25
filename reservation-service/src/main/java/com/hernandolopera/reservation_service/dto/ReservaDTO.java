@@ -20,6 +20,7 @@ public class ReservaDTO {
 	private Long id;
 	private String numeroReserva;
 	private Long idPaquete;
+	private Long idViaje;
 	private Long idUsuario;
 	private Integer cantidadPasajeros;
 	private BigDecimal precioTotal;

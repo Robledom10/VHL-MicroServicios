@@ -1,5 +1,6 @@
 package com.hernandolopera.auth_service.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum DocumentType {
@@ -15,9 +16,19 @@ public enum DocumentType {
         this.value = value;
     }
 
-    @JsonValue // Para que Jackson use el String en el JSON
+    @JsonValue
     public String getValue() {
         return value;
+    }
+
+    @JsonCreator
+    public static DocumentType fromValue(String text) {
+        for (DocumentType dt : DocumentType.values()) {
+            if (dt.value.equalsIgnoreCase(text) || dt.name().equalsIgnoreCase(text)) {
+                return dt;
+            }
+        }
+        return null;
     }
 
     @Override

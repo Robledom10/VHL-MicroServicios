@@ -48,6 +48,14 @@ public class UserManagementController {
                                 userManagementService.getUserById(id));
         }
 
+        @GetMapping("/documento/{documentNumber}")
+        public ResponseEntity<UserResponse> getUserByDocumentNumber(
+                        @PathVariable String documentNumber) {
+
+                return ResponseEntity.ok(
+                                userManagementService.getUserByDocumentNumber(documentNumber));
+        }
+
         @PreAuthorize("hasRole('ADMIN')")
         @PutMapping("/{id}/disable")
         public ResponseEntity<Map<String, String>> disableUser(

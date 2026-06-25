@@ -42,6 +42,17 @@ public class UserManagementService {
     }
 
     /**
+     * Obtener usuario por número de documento
+     */
+    public UserResponse getUserByDocumentNumber(String documentNumber) {
+
+        User user = userRepository.findByDocumentNumber(documentNumber)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con documento: " + documentNumber));
+
+        return mapToResponse(user);
+    }
+
+    /**
      * Deshabilitar usuario
      */
     public void disableUser(Integer id) {
@@ -78,7 +89,7 @@ public class UserManagementService {
                 .lastName(user.getLastName())
                 .email(user.getEmail())
                 .phone(user.getPhone())
-                .documentType(user.getDocumentType() != null ? user.getDocumentType().name() : null)
+                .documentType(user.getDocumentType() != null ? user.getDocumentType().getValue() : null)
                 .documentNumber(user.getDocumentNumber())
                 .role(user.getRole().getName())
                 .active(user.getActive())

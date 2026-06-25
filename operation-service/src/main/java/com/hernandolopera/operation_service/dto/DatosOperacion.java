@@ -236,6 +236,17 @@ public final class DatosOperacion {
     ) {
     }
 
+    public record RespuestaEmailDTO(
+        Long id,
+        Long notificacionId,
+        String remitenteEmail,
+        String asunto,
+        String contenido,
+        LocalDateTime fechaRecibida,
+        boolean leida
+    ) {
+    }
+
     public record RespuestaDashboard(
         Long idViaje,
         Integer viajerosRegistrados,
