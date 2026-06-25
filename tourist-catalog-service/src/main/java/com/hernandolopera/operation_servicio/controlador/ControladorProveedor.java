@@ -5,6 +5,7 @@ import com.hernandolopera.operation_servicio.transferencia.DatosOperacion.*;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +28,15 @@ public class ControladorProveedor {
             return ResponseEntity.ok(servicio.buscarPorTipo(tipo));
         }
         return ResponseEntity.ok(servicio.buscarTodos());
+    }
+
+    @GetMapping("/paginado")
+    public ResponseEntity<Page<RespuestaProveedor>> buscarPaginado(
+            @RequestParam(required = false) String tipo,
+            @RequestParam(required = false) String busqueda,
+            @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(defaultValue = "10") int tamano) {
+        return ResponseEntity.ok(servicio.buscarPaginado(tipo, busqueda, pagina, tamano));
     }
 
     @PutMapping("/{id}")
