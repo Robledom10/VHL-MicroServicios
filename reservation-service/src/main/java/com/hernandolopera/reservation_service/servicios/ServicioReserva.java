@@ -155,8 +155,8 @@ public class ServicioReserva {
 				.idPaquete(solicitud.getIdPaquete())
 				.cantidadPasajeros(solicitud.getPersonas())
 				.precioTotal(solicitud.getTotal())
-				.fechaInicioViaje(LocalDate.parse(solicitud.getFechaSalida()).atStartOfDay())
-				.fechaFinViaje(LocalDate.parse(solicitud.getFechaRegreso()).atStartOfDay())
+				.fechaInicioViaje(parsearFecha(solicitud.getFechaSalida()))
+				.fechaFinViaje(parsearFecha(solicitud.getFechaRegreso()))
 				.notas(solicitud.getNotas())
 				.paqueteNombre(solicitud.getPaqueteNombre())
 				.destino(destino)
@@ -287,6 +287,12 @@ public class ServicioReserva {
 	}
 
 	// ─── Helpers privados ─────────────────────────────────────────────────────
+
+	private LocalDateTime parsearFecha(String fecha) {
+		if (fecha == null || fecha.isBlank()) return null;
+		String soloFecha = fecha.contains("T") ? fecha.split("T")[0] : fecha.split(" ")[0];
+		return LocalDate.parse(soloFecha).atStartOfDay();
+	}
 
 	private String generarNumeroReserva() {
 		return "RES-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();

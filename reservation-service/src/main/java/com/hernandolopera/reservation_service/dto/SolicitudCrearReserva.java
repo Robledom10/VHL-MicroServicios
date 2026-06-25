@@ -40,7 +40,6 @@ public class SolicitudCrearReserva {
 	@NotBlank
 	private String fechaRegreso;
 
-	@NotBlank
 	private String tipoHabitacion;
 
 	private String solicitudEspecial;
