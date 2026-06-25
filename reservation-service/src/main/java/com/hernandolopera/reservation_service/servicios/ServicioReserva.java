@@ -145,6 +145,10 @@ public class ServicioReserva {
 		log.info("Creando reserva para usuario ID: {}", solicitud.getIdUsuario());
 
 		String destino = clienteCatalogo.obtenerDestino(solicitud.getIdPaquete());
+		String paqueteNombre = clienteCatalogo.obtenerNombre(solicitud.getIdPaquete());
+		if (paqueteNombre == null || paqueteNombre.isBlank()) {
+			paqueteNombre = solicitud.getPaqueteNombre();
+		}
 
 		Reserva reserva = Reserva.builder()
 				.numeroReserva(generarNumeroReserva())
@@ -158,7 +162,7 @@ public class ServicioReserva {
 				.fechaInicioViaje(parsearFecha(solicitud.getFechaSalida()))
 				.fechaFinViaje(parsearFecha(solicitud.getFechaRegreso()))
 				.notas(solicitud.getNotas())
-				.paqueteNombre(solicitud.getPaqueteNombre())
+				.paqueteNombre(paqueteNombre)
 				.destino(destino)
 				.tipoHabitacion(solicitud.getTipoHabitacion())
 				.solicitudEspecial(solicitud.getSolicitudEspecial())
