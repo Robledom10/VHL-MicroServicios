@@ -211,6 +211,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://db-reservation:3306/${RESERVATION_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      GMAIL_USERNAME: ${GMAIL_USERNAME}
+      GMAIL_APP_PASSWORD: ${GMAIL_APP_PASSWORD}
     ports:
       - "${RESERVATION_SERVICE_PORT}:8082"
     networks:
@@ -308,33 +310,60 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://db-operation:3306/${OPERATION_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      GMAIL_USERNAME: ${GMAIL_USERNAME}
+      GMAIL_APP_PASSWORD: ${GMAIL_APP_PASSWORD}
     ports:
       - "${OPERATION_SERVICE_PORT}:8086"
     networks:
       - microservices-net
 
   # =========================================================
-  # ANALYTICS SERVICE
+  # DOCUMENT SERVICE
+  # =========================================================
+  document-service:
+    build: ./documents-service
+    container_name: document-service
+    restart: always
+    depends_on:
+      db-documents:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      SERVER_PORT: 8087
+      SPRING_DATASOURCE_URL: jdbc:mysql://db-documents:3306/${DOCUMENT_DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "${DOCUMENT_SERVICE_PORT}:8087"
+    volumes:
+      - documents_uploads:/app/uploads
+    networks:
+      - microservices-net
+
+      # =========================================================
+  # ANALYTICS SERVICE (PYTHON + FASTAPI) - SIN BASE DE DATOS
   # =========================================================
   analytics-service:
     build: ./analytics-service
     container_name: analytics-service
     restart: always
-
-    env_file:
-      - .env
-
     depends_on:
       - auth-service
-      - reservation-service
-      - tourist-catalog-service
-      - gallery-service
-      - financial-service
       - operation-service
-
+    env_file:
+      - .env
+    environment:
+      - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
+      - OPERATION_SERVICE_URL=${OPERATION_SERVICE_URL}
+      - RESERVATION_SERVICE_URL=${RESERVATION_SERVICE_URL}
+      - TOURIST_CATALOG_SERVICE_URL=${TOURIST_CATALOG_SERVICE_URL}
+      - GALLERY_SERVICE_URL=${GALLERY_SERVICE_URL}
+      - FINANCIAL_SERVICE_URL=${FINANCIAL_SERVICE_URL}
+      - DOCUMENT_SERVICE_URL=${DOCUMENT_SERVICE_URL}
+      - PORT=8000
     ports:
-      - "${ANALYTICS_SERVICE_PORT}:8088"
-
+      - "${ANALYTICS_SERVICE_PORT}:8000" # <--- Toma automáticamente el 8088 de tu .env
     networks:
       - microservices-net
 
@@ -372,6 +401,8 @@ services:
       OLLAMA_URL: http://ollama:11434
       OLLAMA_MODEL: qwen3:1.7b
       CATALOG_SERVICE_URL: http://tourist-catalog-service:8083/api/paquetes
+      OPERATION_SERVICE_URL: http://operation-service:8086/api/v1/operaciones/viajes
+      RESERVATION_SERVICE_URL: http://reservation-service:8082/api/v1/reservas
     ports:
       - "8090:8000"
     volumes:
@@ -393,6 +424,7 @@ services:
       - gallery-service
       - operation-service
       - financial-service
+      - document-service
     env_file:
       - .env
     environment:

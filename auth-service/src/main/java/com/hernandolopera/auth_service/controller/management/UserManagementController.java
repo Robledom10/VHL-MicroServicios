@@ -1,6 +1,5 @@
 package com.hernandolopera.auth_service.controller.management;
 
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
@@ -9,7 +8,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.Page;
 
 import com.hernandolopera.auth_service.dto.response.UserResponse;
 import com.hernandolopera.auth_service.service.managment.UserManagementService;
@@ -22,50 +23,60 @@ import lombok.RequiredArgsConstructor;
 @PreAuthorize("hasRole('ADMIN')")
 public class UserManagementController {
 
-    private final UserManagementService userManagementService;
+        private final UserManagementService userManagementService;
 
-    /**
-     * Obtener todos los usuarios
-     */
-    @GetMapping
-    public ResponseEntity<List<UserResponse>> getAllUsers() {
+        /**
+         * Obtener todos los usuarios
+         */
+        @GetMapping
+        public ResponseEntity<Page<UserResponse>> getAllUsers(
+                        @RequestParam(defaultValue = "0") int page,
+                        @RequestParam(defaultValue = "10") int size) {
 
-        return ResponseEntity.ok(
-                userManagementService.getAllUsers());
-    }
+                return ResponseEntity.ok(
+                                userManagementService.getAllUsers(page, size));
+        }
 
-    /**
-     * Obtener usuario por ID
-     */
-    @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> getUserById(
-            @PathVariable Integer id) {
+        /**
+         * Obtener usuario por ID
+         */
+        @GetMapping("/{id}")
+        public ResponseEntity<UserResponse> getUserById(
+                        @PathVariable Integer id) {
 
-        return ResponseEntity.ok(
-                userManagementService.getUserById(id));
-    }
+                return ResponseEntity.ok(
+                                userManagementService.getUserById(id));
+        }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{id}/disable")
-    public ResponseEntity<Map<String, String>> disableUser(
-            @PathVariable Integer id) {
+        @GetMapping("/documento/{documentNumber}")
+        public ResponseEntity<UserResponse> getUserByDocumentNumber(
+                        @PathVariable String documentNumber) {
 
-        userManagementService.disableUser(id);
+                return ResponseEntity.ok(
+                                userManagementService.getUserByDocumentNumber(documentNumber));
+        }
 
-        return ResponseEntity.ok(
-                Map.of(
-                        "message", "Usuario deshabilitado correctamente"));
-    }
+        @PreAuthorize("hasRole('ADMIN')")
+        @PutMapping("/{id}/disable")
+        public ResponseEntity<Map<String, String>> disableUser(
+                        @PathVariable Integer id) {
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{id}/enable")
-    public ResponseEntity<Map<String, String>> enableUser(
-            @PathVariable Integer id) {
+                userManagementService.disableUser(id);
 
-        userManagementService.enableUser(id);
+                return ResponseEntity.ok(
+                                Map.of(
+                                                "message", "Usuario deshabilitado correctamente"));
+        }
 
-        return ResponseEntity.ok(
-                Map.of(
-                        "message", "Usuario habilitado correctamente"));
-    }
+        @PreAuthorize("hasRole('ADMIN')")
+        @PutMapping("/{id}/enable")
+        public ResponseEntity<Map<String, String>> enableUser(
+                        @PathVariable Integer id) {
+
+                userManagementService.enableUser(id);
+
+                return ResponseEntity.ok(
+                                Map.of(
+                                                "message", "Usuario habilitado correctamente"));
+        }
 }

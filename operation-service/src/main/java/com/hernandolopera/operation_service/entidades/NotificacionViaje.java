@@ -51,4 +51,8 @@ public class NotificacionViaje {
 
     @Column(name = "status", nullable = false, length = 30)
     private String estado;
+
+    @Lob
+    @Column(name = "message_ids")
+    private String messageIds;
 }

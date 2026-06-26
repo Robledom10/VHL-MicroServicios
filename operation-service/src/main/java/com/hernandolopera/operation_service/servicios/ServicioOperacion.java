@@ -5,6 +5,7 @@ import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaRestaura
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaCheckIn;
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaContactoEmergencia;
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaDashboard;
+import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaEmailDTO;
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaIncidente;
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaInformacionMedica;
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaNotificacion;
@@ -28,6 +29,7 @@ import com.hernandolopera.operation_service.entidades.ContactoEmergencia;
 import com.hernandolopera.operation_service.entidades.IncidenteViaje;
 import com.hernandolopera.operation_service.entidades.InformacionMedica;
 import com.hernandolopera.operation_service.entidades.NotificacionViaje;
+import com.hernandolopera.operation_service.entidades.RespuestaEmail;
 import com.hernandolopera.operation_service.entidades.SalidaViaje;
 import com.hernandolopera.operation_service.entidades.TransporteAsignado;
 import com.hernandolopera.operation_service.excepciones.ExcepcionReglaNegocio;
@@ -40,14 +42,19 @@ import com.hernandolopera.operation_service.repositorios.RepositorioContactoEmer
 import com.hernandolopera.operation_service.repositorios.RepositorioIncidenteViaje;
 import com.hernandolopera.operation_service.repositorios.RepositorioInformacionMedica;
 import com.hernandolopera.operation_service.repositorios.RepositorioNotificacionViaje;
+import com.hernandolopera.operation_service.repositorios.RepositorioRespuestaEmail;
 import com.hernandolopera.operation_service.repositorios.RepositorioSalidaViaje;
 import com.hernandolopera.operation_service.repositorios.RepositorioTransporteAsignado;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.StringJoiner;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,6 +76,7 @@ public class ServicioOperacion {
     private final RepositorioContactoEmergencia repositorioContactoEmergencia;
     private final RepositorioIncidenteViaje repositorioIncidente;
     private final RepositorioNotificacionViaje repositorioNotificacion;
+    private final RepositorioRespuestaEmail repositorioRespuesta;
     private final RepositorioRestauranteViaje repositorioRestaurante;
     private final ServicioEmail servicioEmail;
     private final ServicioWhatsApp servicioWhatsApp;
@@ -339,7 +347,12 @@ public class ServicioOperacion {
 
         if (!contactos.isEmpty()) {
             if ("EMAIL".equals(canalUpper)) {
-                servicioEmail.enviarMasivo(contactos, solicitud.asunto(), solicitud.mensaje());
+                List<String> msgIds = servicioEmail.enviarMasivo(contactos, solicitud.asunto(), solicitud.mensaje());
+                List<String> validos = msgIds.stream().filter(Objects::nonNull).filter(s -> !s.isBlank()).toList();
+                if (!validos.isEmpty()) {
+                    guardada.setMessageIds(String.join(",", validos));
+                    repositorioNotificacion.save(guardada);
+                }
             } else if ("WHATSAPP".equals(canalUpper)) {
                 servicioWhatsApp.enviarMasivo(contactos, solicitud.mensaje());
             }
@@ -353,11 +366,10 @@ public class ServicioOperacion {
     // =========================================================
 
     @Transactional(readOnly = true)
-    public List<RespuestaViaje> listarViajes() {
-        return repositorioSalidaViaje.findAll()
-            .stream()
-            .map(v -> mapearViaje(v, null))
-            .toList();
+    public Page<RespuestaViaje> listarViajes(int pagina, int tamano) {
+        return repositorioSalidaViaje
+            .findAll(PageRequest.of(pagina, tamano, Sort.by(Sort.Direction.DESC, "id")))
+            .map(v -> mapearViaje(v, null));
     }
 
     @Transactional(readOnly = true)
@@ -420,6 +432,17 @@ public class ServicioOperacion {
         return repositorioNotificacion.findAllByIdViaje(idViaje)
             .stream()
             .map(n -> mapearNotificacion(n, null))
+            .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<RespuestaEmailDTO> listarRespuestas(Long idViaje, Long idNotificacion) {
+        validarIdPositivo(idNotificacion, "idNotificacion");
+        return repositorioRespuesta.findByNotificacionIdOrderByFechaRecibidaAsc(idNotificacion)
+            .stream()
+            .map(r -> new RespuestaEmailDTO(
+                r.getId(), r.getNotificacionId(), r.getRemitenteEmail(),
+                r.getAsunto(), r.getContenido(), r.getFechaRecibida(), r.isLeida()))
             .toList();
     }
 

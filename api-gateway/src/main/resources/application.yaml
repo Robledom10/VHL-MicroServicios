@@ -12,6 +12,14 @@ spring:
     gateway:
       routes:
         # =========================================================
+        # DOCUMENT SERVICE - ADMIN
+        # =========================================================
+        - id: document-service-admin
+          uri: http://document-service:8087
+          predicates:
+            - Path=/api/admin/documents/**
+
+        # =========================================================
         # AUTH SERVICE
         # =========================================================
         - id: auth-service
@@ -76,30 +84,7 @@ spring:
             - Path=/api/documents/**,/api/validation/**,/api/ia/**,/api/history/**,/api/contracts/**,/api/reservation/**
 
 
-      # =========================================================
-      # CORS CORREGIDO (Alineado perfectamente con 'routes')
-      # =========================================================
-      globalcors:
-        cors-configurations:
-          '[/**]':
-            allowedOrigins:
-              - "http://localhost:4200"
-              - "https://hernando-lopera-jade.vercel.app"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - OPTIONS
-            allowedHeaders:
-              - "*"
-            allowCredentials: true
-
-      # =========================================================
-      # DEFAULT FILTERS CORREGIDO
-      # =========================================================
-      default-filters:
-        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
+      # CORS is handled exclusively by CorsWebFilter bean in CorsConfig.java
 
 # =========================================================
 # JWT
