@@ -31,7 +31,6 @@ public class SolicitudCrearReserva {
 
 	private List<@Valid ContactoEmergenciaDTO> contactosEmergencia;
 
-	@NotBlank
 	private String paqueteNombre;
 
 	@NotBlank

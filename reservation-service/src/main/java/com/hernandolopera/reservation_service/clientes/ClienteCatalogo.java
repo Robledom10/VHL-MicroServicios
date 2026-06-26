@@ -20,16 +20,23 @@ public class ClienteCatalogo {
 	private String catalogUrl;
 
 	@SuppressWarnings("unchecked")
-	public String obtenerDestino(Long idPaquete) {
+	private Map<String, Object> obtenerPaquete(Long idPaquete) {
 		if (idPaquete == null) return null;
 		try {
-			Map<String, Object> raw = restTemplate.getForObject(
-					catalogUrl + "/api/paquetes/" + idPaquete, Map.class);
-			if (raw == null) return null;
-			return (String) raw.get("destino");
+			return restTemplate.getForObject(catalogUrl + "/api/paquetes/" + idPaquete, Map.class);
 		} catch (Exception e) {
-			log.warn("No se pudo obtener destino del paquete {}: {}", idPaquete, e.getMessage());
+			log.warn("No se pudo obtener paquete {}: {}", idPaquete, e.getMessage());
 			return null;
 		}
+	}
+
+	public String obtenerDestino(Long idPaquete) {
+		Map<String, Object> raw = obtenerPaquete(idPaquete);
+		return raw != null ? (String) raw.get("destino") : null;
+	}
+
+	public String obtenerNombre(Long idPaquete) {
+		Map<String, Object> raw = obtenerPaquete(idPaquete);
+		return raw != null ? (String) raw.get("titulo") : null;
 	}
 }
