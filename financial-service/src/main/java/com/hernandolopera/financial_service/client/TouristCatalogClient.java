@@ -23,7 +23,7 @@ public class TouristCatalogClient {
                 .build()
                 .get()
                 .uri(
-                    "http://tourist-catalog-service:8082/api/packages/"
+                    "http://tourist-catalog-service:8083/api/paquetes/"
                     + packageId)
                 .retrieve()
                 .bodyToMono(TouristPackageResponse.class)
