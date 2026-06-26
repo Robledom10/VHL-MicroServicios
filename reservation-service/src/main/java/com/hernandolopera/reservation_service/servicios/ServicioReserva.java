@@ -7,10 +7,14 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.hernandolopera.reservation_service.clientes.ClienteAuth;
+import com.hernandolopera.reservation_service.clientes.ClienteCatalogo;
 import com.hernandolopera.reservation_service.clientes.ClienteOperaciones;
 import com.hernandolopera.reservation_service.dto.AcompananteDTO;
 import com.hernandolopera.reservation_service.dto.ContactoEmergenciaDTO;
@@ -43,16 +47,18 @@ public class ServicioReserva {
 	private final RepositorioContactoEmergenciaReserva repositorioContactoEmergencia;
 	private final ClienteAuth clienteAuth;
 	private final ClienteOperaciones clienteOperaciones;
+	private final ClienteCatalogo clienteCatalogo;
+	private final ServicioEmail servicioEmail;
 
-	// ─── Obtener todas las reservas (panel admin) ─────────────────────────────
+	// ─── Obtener todas las reservas (panel admin) — paginado ─────────────────
 
 	@Transactional(readOnly = true)
-	public List<ReservaDTO> obtenerTodasLasReservas() {
-		log.info("Obteniendo todas las reservas");
+	public Page<ReservaDTO> obtenerTodasLasReservas(int pagina, int tamano) {
+		log.info("Obteniendo reservas — página {} tamaño {}", pagina, tamano);
 		actualizarReservasPasadas();
-		return repositorioReserva.findAll().stream()
-				.map(this::convertirADTO)
-				.collect(Collectors.toList());
+		return repositorioReserva
+				.findAll(PageRequest.of(pagina, tamano, Sort.by(Sort.Direction.DESC, "id")))
+				.map(this::convertirADTO);
 	}
 
 	// ─── Obtener por ID ───────────────────────────────────────────────────────
@@ -94,6 +100,15 @@ public class ServicioReserva {
 	}
 
 	@Transactional(readOnly = true)
+	public List<ReservaDTO> obtenerReservasPorViaje(Long idViaje) {
+		log.info("Obteniendo reservas del viaje: {}", idViaje);
+		actualizarReservasPasadas();
+		return repositorioReserva.findByIdViaje(idViaje).stream()
+				.map(this::convertirADTO)
+				.collect(Collectors.toList());
+	}
+
+	@Transactional(readOnly = true)
 	public List<ReservaDTO> obtenerReservasPorEstado(EstadoReserva estado) {
 		log.info("Obteniendo reservas con estado: {}", estado);
 		actualizarReservasPasadas();
@@ -129,6 +144,12 @@ public class ServicioReserva {
 	public ReservaDTO crearReserva(SolicitudCrearReserva solicitud) {
 		log.info("Creando reserva para usuario ID: {}", solicitud.getIdUsuario());
 
+		String destino = clienteCatalogo.obtenerDestino(solicitud.getIdPaquete());
+		String paqueteNombre = clienteCatalogo.obtenerNombre(solicitud.getIdPaquete());
+		if (paqueteNombre == null || paqueteNombre.isBlank()) {
+			paqueteNombre = solicitud.getPaqueteNombre();
+		}
+
 		Reserva reserva = Reserva.builder()
 				.numeroReserva(generarNumeroReserva())
 				.estado(EstadoReserva.PENDIENTE)
@@ -138,11 +159,11 @@ public class ServicioReserva {
 				.idPaquete(solicitud.getIdPaquete())
 				.cantidadPasajeros(solicitud.getPersonas())
 				.precioTotal(solicitud.getTotal())
-				.fechaInicioViaje(LocalDate.parse(solicitud.getFechaSalida()).atStartOfDay())
-				.fechaFinViaje(LocalDate.parse(solicitud.getFechaRegreso()).atStartOfDay())
+				.fechaInicioViaje(parsearFecha(solicitud.getFechaSalida()))
+				.fechaFinViaje(parsearFecha(solicitud.getFechaRegreso()))
 				.notas(solicitud.getNotas())
-				.paqueteNombre(solicitud.getPaqueteNombre())
-				.destino(solicitud.getDestino())
+				.paqueteNombre(paqueteNombre)
+				.destino(destino)
 				.tipoHabitacion(solicitud.getTipoHabitacion())
 				.solicitudEspecial(solicitud.getSolicitudEspecial())
 				.idViaje(solicitud.getIdViaje())
@@ -182,7 +203,19 @@ public class ServicioReserva {
 		}
 
 		log.info("Reserva {} creada exitosamente", guardada.getNumeroReserva());
-		return convertirADTO(guardada);
+		ReservaDTO dto = convertirADTO(guardada);
+		servicioEmail.enviarConfirmacionReserva(dto);
+		return dto;
+	}
+
+	// ─── Notificar reserva (admin) ────────────────────────────────────────────
+
+	public void notificarReserva(Long idReserva, String asunto, String mensaje) {
+		Reserva reserva = repositorioReserva.findById(idReserva)
+				.orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
+		ReservaDTO dto = convertirADTO(reserva);
+		servicioEmail.enviarNotificacionAdmin(dto, asunto, mensaje);
+		log.info("Notificación admin enviada para reserva {}", dto.getNumeroReserva());
 	}
 
 	// ─── Actualizar reserva ───────────────────────────────────────────────────
@@ -259,6 +292,12 @@ public class ServicioReserva {
 
 	// ─── Helpers privados ─────────────────────────────────────────────────────
 
+	private LocalDateTime parsearFecha(String fecha) {
+		if (fecha == null || fecha.isBlank()) return null;
+		String soloFecha = fecha.contains("T") ? fecha.split("T")[0] : fecha.split(" ")[0];
+		return LocalDate.parse(soloFecha).atStartOfDay();
+	}
+
 	private String generarNumeroReserva() {
 		return "RES-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
 	}
@@ -321,6 +360,7 @@ public class ServicioReserva {
 				.id(reserva.getId())
 				.numeroReserva(reserva.getNumeroReserva())
 				.idPaquete(reserva.getIdPaquete())
+				.idViaje(reserva.getIdViaje())
 				.idUsuario(reserva.getIdUsuario())
 				.cantidadPasajeros(reserva.getCantidadPasajeros())
 				.precioTotal(reserva.getPrecioTotal())

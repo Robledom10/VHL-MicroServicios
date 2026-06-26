@@ -5,6 +5,9 @@ import com.hernandolopera.operation_servicio.entidades.ProveedorTuristico;
 import com.hernandolopera.operation_servicio.repositorio.RepositorioProveedorTuristico;
 import com.hernandolopera.operation_servicio.transferencia.DatosOperacion.*;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +38,16 @@ public class ServicioProveedor {
     public List<RespuestaProveedor> buscarPorTipo(String tipo) {
         return repositorio.findByTipoProveedorIgnoreCaseAndActivoTrue(tipo)
             .stream().map(mapeador::aRespuestaProveedor).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<RespuestaProveedor> buscarPaginado(String tipo, String busqueda, int pagina, int tamano) {
+        PageRequest pageRequest = PageRequest.of(pagina, tamano, Sort.by(Sort.Direction.ASC, "nombre"));
+        return repositorio.buscarPaginado(
+                tipo == null || tipo.isBlank() ? null : tipo,
+                busqueda == null || busqueda.isBlank() ? null : busqueda,
+                pageRequest
+        ).map(mapeador::aRespuestaProveedor);
     }
 
     @Transactional

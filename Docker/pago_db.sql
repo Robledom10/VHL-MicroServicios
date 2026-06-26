@@ -47,8 +47,7 @@ CREATE TABLE payment (
         'reembolsado'
     ) NOT NULL DEFAULT 'pendiente',
     reference_number VARCHAR(100) UNIQUE,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (fk_id_account) REFERENCES accounts_receivable (id_account)
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- =========================================

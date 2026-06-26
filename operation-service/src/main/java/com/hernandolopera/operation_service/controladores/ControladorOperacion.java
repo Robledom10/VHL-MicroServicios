@@ -10,6 +10,7 @@ import com.hernandolopera.operation_service.dto.DatosOperacion.SolicitudContacto
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaDashboard;
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaIncidente;
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaInformacionMedica;
+import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaEmailDTO;
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaNotificacion;
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaTransporte;
 import com.hernandolopera.operation_service.dto.DatosOperacion.RespuestaViaje;
@@ -27,6 +28,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -37,6 +39,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -135,9 +138,11 @@ public class ControladorOperacion {
     // =========================================================
 
     @GetMapping("/viajes")
-    public ResponseEntity<List<RespuestaViaje>> listarViajes() {
-        log.info("GET /api/v1/operaciones/viajes");
-        return ResponseEntity.ok(servicioOperacion.listarViajes());
+    public ResponseEntity<Page<RespuestaViaje>> listarViajes(
+            @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(defaultValue = "10") int tamano) {
+        log.info("GET /api/v1/operaciones/viajes?pagina={}&tamano={}", pagina, tamano);
+        return ResponseEntity.ok(servicioOperacion.listarViajes(pagina, tamano));
     }
 
     @GetMapping("/viajes/{idViaje}/transporte")
@@ -186,6 +191,13 @@ public class ControladorOperacion {
     public ResponseEntity<List<RespuestaNotificacion>> listarNotificaciones(@PathVariable Long idViaje) {
         log.info("GET /api/v1/operaciones/viajes/{}/notificaciones", idViaje);
         return ResponseEntity.ok(servicioOperacion.listarNotificaciones(idViaje));
+    }
+
+    @GetMapping("/viajes/{idViaje}/notificaciones/{id}/respuestas")
+    public ResponseEntity<List<RespuestaEmailDTO>> listarRespuestas(
+            @PathVariable Long idViaje, @PathVariable Long id) {
+        log.info("GET /api/v1/operaciones/viajes/{}/notificaciones/{}/respuestas", idViaje, id);
+        return ResponseEntity.ok(servicioOperacion.listarRespuestas(idViaje, id));
     }
 
     @PutMapping("/viajes/{idViaje}/notificaciones/{id}")

@@ -21,6 +21,10 @@ public class UserResponse {
 
     private String phone;
 
+    private String documentType;
+
+    private String documentNumber;
+
     private String role;
 
     private Boolean active;

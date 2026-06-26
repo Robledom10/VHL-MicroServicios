@@ -31,11 +31,7 @@ public class SolicitudCrearReserva {
 
 	private List<@Valid ContactoEmergenciaDTO> contactosEmergencia;
 
-	@NotBlank
 	private String paqueteNombre;
-
-	@NotBlank
-	private String destino;
 
 	@NotBlank
 	private String fechaSalida;
@@ -43,7 +39,6 @@ public class SolicitudCrearReserva {
 	@NotBlank
 	private String fechaRegreso;
 
-	@NotBlank
 	private String tipoHabitacion;
 
 	private String solicitudEspecial;

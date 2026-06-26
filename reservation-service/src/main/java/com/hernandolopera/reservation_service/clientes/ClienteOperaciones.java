@@ -42,7 +42,8 @@ public class ClienteOperaciones {
 				restTemplate.postForObject(url, body, Map.class);
 				log.info("Contacto de emergencia '{}' sincronizado con operation-service para viaje {}", c.getNombre(), idViaje);
 			} catch (Exception e) {
-				log.warn("No se pudo sincronizar contacto '{}' con operation-service: {}", c.getNombre(), e.getMessage());
+				log.error("No se pudo sincronizar contacto '{}' con operation-service (viaje {}): {} — body enviado: nombre={}, parentesco={}, telefono={}",
+						c.getNombre(), idViaje, e.getMessage(), c.getNombre(), c.getParentesco(), c.getTelefono());
 			}
 		}
 	}

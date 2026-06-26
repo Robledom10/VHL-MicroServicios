@@ -25,6 +25,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.text.Normalizer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -47,7 +49,6 @@ public class TravelerDocumentServiceImpl
     public TravelerDocument uploadDocument(
             Integer userId,
             Integer reservationId,
-            String documentType,
             MultipartFile file
     ) {
 
@@ -60,8 +61,6 @@ public class TravelerDocumentServiceImpl
                         userId,
                         reservationId
                 );
-
-        DocumentType parsedDocumentType = parseDocumentType(documentType);
 
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("Archivo vacio");
@@ -84,6 +83,9 @@ public class TravelerDocumentServiceImpl
         if (originalFilename.contains("..")) {
             throw new IllegalArgumentException("Nombre de archivo invalido");
         }
+
+        DocumentType parsedDocumentType =
+                inferDocumentTypeFromFilename(originalFilename);
 
         String fileName = System.currentTimeMillis() + "_" + originalFilename;
         Path uploadPath = Paths.get(uploadDir);
@@ -256,25 +258,59 @@ public class TravelerDocumentServiceImpl
         }
     }
 
-    private DocumentType parseDocumentType(String documentType) {
-        if (documentType == null || documentType.isBlank()) {
+    private DocumentType inferDocumentTypeFromFilename(String filename) {
+        String normalizedFilename = normalizeDocumentName(filename);
+
+        if (normalizedFilename.isBlank()) {
             throw new IllegalArgumentException(
-                    "El documentType es obligatorio"
+                    "El nombre del archivo es obligatorio"
             );
         }
 
-        String normalizedDocumentType = documentType.trim();
+        List<DocumentType> matchingTypes = new ArrayList<>();
 
-        return Arrays.stream(DocumentType.values())
-                .filter(type -> type.name().equalsIgnoreCase(
-                        normalizedDocumentType
-                ))
-                .findFirst()
-                .orElseThrow(
-                        () -> new IllegalArgumentException(
-                                "Tipo de documento invalido. Valores permitidos: "
-                                        + Arrays.toString(DocumentType.values())
-                        )
-                );
+        for (DocumentType type : DocumentType.values()) {
+            String normalizedType = normalizeDocumentName(type.name());
+
+            if (normalizedFilename.equals(normalizedType)
+                    || normalizedFilename.startsWith(normalizedType + "_")
+                    || normalizedFilename.endsWith("_" + normalizedType)
+                    || normalizedFilename.contains("_" + normalizedType + "_")) {
+                matchingTypes.add(type);
+            }
+        }
+
+        if (matchingTypes.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "El nombre del archivo debe incluir un tipo de documento valido: "
+                            + Arrays.toString(DocumentType.values())
+            );
+        }
+
+        if (matchingTypes.size() > 1) {
+            throw new IllegalArgumentException(
+                    "El nombre del archivo solo puede referenciar un tipo de documento"
+            );
+        }
+
+        return matchingTypes.get(0);
+    }
+
+    private String normalizeDocumentName(String value) {
+        String normalizedValue = Normalizer.normalize(
+                value,
+                Normalizer.Form.NFD
+        ).replaceAll("\\p{M}", "");
+
+        int extensionStart = normalizedValue.lastIndexOf('.');
+
+        if (extensionStart > 0) {
+            normalizedValue = normalizedValue.substring(0, extensionStart);
+        }
+
+        return normalizedValue
+                .toLowerCase()
+                .replaceAll("[^a-z0-9]+", "_")
+                .replaceAll("^_+|_+$", "");
     }
 }

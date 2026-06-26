@@ -29,7 +29,6 @@ public class TravelerDocumentController {
             uploadDocument(
                     @RequestParam Integer userId,
                     @RequestParam(required = false) Integer reservationId,
-                    @RequestParam String documentType,
                     @RequestParam MultipartFile file
             ) {
 
@@ -37,7 +36,6 @@ public class TravelerDocumentController {
                 service.uploadDocument(
                         userId,
                         reservationId,
-                        documentType,
                         file
                 )
         );
