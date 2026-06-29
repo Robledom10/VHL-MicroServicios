@@ -170,6 +170,8 @@ public class PaymentService {
                 "amount",
                 payment.getAmount());
 
+        wompiRequest.setReference(reference);
+
         wompiRequest.setMetadata(metadata);
 
         // =========================

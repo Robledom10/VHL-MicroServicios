@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS lodging_assignment (
     id_lodging BIGINT AUTO_INCREMENT PRIMARY KEY,
     fk_id_trip BIGINT NOT NULL,
     id_traveler BIGINT,
+    traveler_name VARCHAR(150),
     hotel_name VARCHAR(150) NOT NULL,
     address VARCHAR(255) NOT NULL,
     room_number VARCHAR(60),
@@ -71,6 +72,7 @@ CREATE TABLE IF NOT EXISTS traveler_medical_info (
     medications VARCHAR(500),
     medical_conditions VARCHAR(500),
     medical_phone VARCHAR(30),
+    traveler_name VARCHAR(150),
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (fk_id_trip) REFERENCES trip_departure(id_trip)
 );
@@ -83,6 +85,7 @@ CREATE TABLE IF NOT EXISTS emergency_contact (
     relationship VARCHAR(80) NOT NULL,
     phone VARCHAR(30) NOT NULL,
     email VARCHAR(150),
+    traveler_name VARCHAR(150),
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (fk_id_trip) REFERENCES trip_departure(id_trip)
 );
@@ -97,5 +100,41 @@ CREATE TABLE IF NOT EXISTS notification_history (
     recipients TEXT,
     sent_at DATETIME NOT NULL,
     status VARCHAR(30) NOT NULL,
+    message_ids LONGTEXT,
     FOREIGN KEY (fk_id_trip) REFERENCES trip_departure(id_trip)
+);
+
+CREATE TABLE IF NOT EXISTS guide_assignment (
+    id_guide BIGINT AUTO_INCREMENT PRIMARY KEY,
+    fk_id_trip BIGINT NOT NULL,
+    guide_name VARCHAR(150) NOT NULL,
+    phone VARCHAR(30),
+    email VARCHAR(150),
+    specialty VARCHAR(200),
+    language VARCHAR(100),
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (fk_id_trip) REFERENCES trip_departure(id_trip)
+);
+
+CREATE TABLE IF NOT EXISTS restaurant_assignment (
+    id_restaurant BIGINT AUTO_INCREMENT PRIMARY KEY,
+    fk_id_trip BIGINT NOT NULL,
+    restaurant_name VARCHAR(150) NOT NULL,
+    address VARCHAR(255),
+    phone VARCHAR(30),
+    meal_type VARCHAR(100),
+    notes VARCHAR(500),
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (fk_id_trip) REFERENCES trip_departure(id_trip)
+);
+
+CREATE TABLE IF NOT EXISTS email_respuestas (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    notificacion_id BIGINT NOT NULL,
+    remitente_email VARCHAR(255),
+    asunto VARCHAR(500),
+    contenido MEDIUMTEXT,
+    fecha_recibida DATETIME,
+    leida TINYINT(1) NOT NULL DEFAULT 0,
+    incoming_message_id VARCHAR(500) UNIQUE
 );

@@ -14,7 +14,7 @@ public class ComentarioPaquete {
     @JoinColumn(name = "fk_id_package", nullable = false)
     public PaqueteTuristico paqueteTuristico;
 
-    @Column(name = "comment", nullable = false, length = 500)
+    @Column(name = "comment", nullable = false, length = 2000)
     public String comentario;
 
     @Column(name = "score", nullable = false)

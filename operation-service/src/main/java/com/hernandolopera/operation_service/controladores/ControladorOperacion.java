@@ -329,6 +329,13 @@ public class ControladorOperacion {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/contactos-emergencia/{id}")
+    public ResponseEntity<Void> eliminarContacto(@PathVariable Long id) {
+        log.info("DELETE /api/v1/operaciones/contactos-emergencia/{}", id);
+        servicioOperacion.eliminarContacto(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @DeleteMapping("/viajes/{idViaje}/guias/{id}")
     public ResponseEntity<Void> eliminarGuia(@PathVariable Long idViaje, @PathVariable Long id) {
         log.info("DELETE /api/v1/operaciones/viajes/{}/guias/{}", idViaje, id);

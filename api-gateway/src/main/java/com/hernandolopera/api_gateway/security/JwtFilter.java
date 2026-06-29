@@ -63,7 +63,10 @@ public class JwtFilter implements GlobalFilter, Ordered {
         boolean isPublicCatalogRead = HttpMethod.GET.equals(method)
                 && (path.equals("/api/paquetes") || path.startsWith("/api/paquetes/"));
 
-        if (isPublic || isPreflight || isPublicCatalogRead) {
+        boolean isPublicViajesRead = HttpMethod.GET.equals(method)
+                && path.startsWith("/api/v1/operaciones/viajes");
+
+        if (isPublic || isPreflight || isPublicCatalogRead || isPublicViajesRead) {
             return chain.filter(exchange);
         }
 
