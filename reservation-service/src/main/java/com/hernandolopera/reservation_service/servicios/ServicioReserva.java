@@ -290,6 +290,32 @@ public class ServicioReserva {
 				.collect(Collectors.toList());
 	}
 
+	@Transactional
+	public ContactoEmergenciaDTO actualizarContactoReserva(Long id, ContactoEmergenciaDTO datos) {
+		ContactoEmergenciaReserva c = repositorioContactoEmergencia.findById(id)
+				.orElseThrow(() -> new RuntimeException("Contacto no encontrado con id: " + id));
+		c.setNombre(datos.getNombre());
+		c.setParentesco(datos.getParentesco());
+		c.setTelefono(datos.getTelefono());
+		c.setCorreo(datos.getCorreo());
+		ContactoEmergenciaReserva saved = repositorioContactoEmergencia.save(c);
+		return ContactoEmergenciaDTO.builder()
+				.id(saved.getId())
+				.nombre(saved.getNombre())
+				.parentesco(saved.getParentesco())
+				.telefono(saved.getTelefono())
+				.correo(saved.getCorreo())
+				.build();
+	}
+
+	@Transactional
+	public void eliminarContactoReserva(Long id) {
+		if (!repositorioContactoEmergencia.existsById(id)) {
+			throw new RuntimeException("Contacto de emergencia no encontrado con id: " + id);
+		}
+		repositorioContactoEmergencia.deleteById(id);
+	}
+
 	// ─── Helpers privados ─────────────────────────────────────────────────────
 
 	private LocalDateTime parsearFecha(String fecha) {

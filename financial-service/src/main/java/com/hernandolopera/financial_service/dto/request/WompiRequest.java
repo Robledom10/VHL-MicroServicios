@@ -29,6 +29,8 @@ public class WompiRequest {
     @JsonProperty("redirect_url")
     private String redirectUrl;
 
+    private String reference;
+
     // 🔥 METADATA PERSONALIZADA
     private Map<String, Object> metadata;
 }

@@ -663,6 +663,14 @@ public class ServicioOperacion {
         return mapearContacto(guardado, "Contacto de emergencia actualizado correctamente");
     }
 
+    public void eliminarContacto(Long id) {
+        validarIdPositivo(id, "id");
+        if (!repositorioContactoEmergencia.existsById(id)) {
+            throw new RecursoNoEncontradoExcepcion("Contacto de emergencia no encontrado con id: " + id);
+        }
+        repositorioContactoEmergencia.deleteById(id);
+    }
+
     // =========================================================
     // PRIVATE HELPERS
     // =========================================================
