@@ -149,9 +149,10 @@ def _formatear_paquete(p: dict, comentarios: list, viajes: list) -> str:
 async def _fetch_viajes() -> list:
     try:
         async with httpx.AsyncClient(timeout=8.0) as client:
-            resp = await client.get(OPERATION_SERVICE_URL)
+            resp = await client.get(OPERATION_SERVICE_URL, params={"pagina": 0, "tamano": 1000})
             resp.raise_for_status()
-            return resp.json()
+            data = resp.json()
+            return data.get("content", data) if isinstance(data, dict) else data
     except Exception as e:
         print(f"[Sharky] No se pudo traer viajes de operaciones: {e}")
         return []
@@ -160,9 +161,10 @@ async def _fetch_viajes() -> list:
 async def fetch_reservas() -> list:
     try:
         async with httpx.AsyncClient(timeout=8.0) as client:
-            resp = await client.get(RESERVATION_SERVICE_URL)
+            resp = await client.get(RESERVATION_SERVICE_URL, params={"pagina": 0, "tamano": 1000})
             resp.raise_for_status()
-            return resp.json()
+            data = resp.json()
+            return data.get("content", data) if isinstance(data, dict) else data
     except Exception as e:
         print(f"[Sharky] No se pudo traer reservas: {e}")
         return []
@@ -689,9 +691,26 @@ async def call_ollama_chat(messages: list[dict], system: str) -> str:
         "messages": full_messages,
         "stream": False,
         "think": False,
-        "options": {"temperature": 0.7, "top_p": 0.9, "num_predict": 200, "num_ctx": 2048},
+        "options": {"temperature": 0.7, "top_p": 0.9, "num_predict": 150, "num_ctx": 3072},
     }
     async with httpx.AsyncClient(timeout=600.0) as client:
+        resp = await client.post(f"{OLLAMA_URL}/api/chat", json=payload)
+        resp.raise_for_status()
+        return clean_response(resp.json()["message"]["content"])
+
+
+async def call_ollama_voucher(text: str, system: str) -> str:
+    payload = {
+        "model": MODEL,
+        "messages": [
+            {"role": "system", "content": system},
+            {"role": "user", "content": text[:2500]},
+        ],
+        "stream": False,
+        "think": False,
+        "options": {"temperature": 0.3, "top_p": 0.9, "num_predict": 120, "num_ctx": 1024},
+    }
+    async with httpx.AsyncClient(timeout=300.0) as client:
         resp = await client.post(f"{OLLAMA_URL}/api/chat", json=payload)
         resp.raise_for_status()
         return clean_response(resp.json()["message"]["content"])
@@ -825,7 +844,7 @@ async def chat(body: ChatRequest):
             "Máximo 5 oraciones."
         )
         try:
-            reply = await call_ollama_chat(history, system)
+            reply = await call_ollama_chat(history[-6:], system)
         except httpx.ConnectError:
             raise HTTPException(503, "No se pudo conectar a Ollama.")
         except httpx.HTTPStatusError as e:
@@ -886,10 +905,8 @@ async def validate_document(file: UploadFile = File(...)):
             ),
         )
 
-    messages = [{"role": "user", "content": extracted_text[:4000]}]
-
     try:
-        result = await call_ollama_chat(messages, VOUCHER_SYSTEM_PROMPT)
+        result = await call_ollama_voucher(extracted_text, VOUCHER_SYSTEM_PROMPT)
     except httpx.ConnectError:
         raise HTTPException(503, "No se pudo conectar a Ollama.")
     except Exception as e:
