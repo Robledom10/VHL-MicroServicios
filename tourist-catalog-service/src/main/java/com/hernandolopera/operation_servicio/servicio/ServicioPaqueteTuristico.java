@@ -89,6 +89,14 @@ public class ServicioPaqueteTuristico {
     }
 
     @Transactional
+    public void reactivar(Integer id) {
+        PaqueteTuristico paquete = repositorioPaquete.findById(id)
+            .orElseThrow(() -> new RecursoNoEncontradoExcepcion("No existe el paquete turistico con id " + id));
+        paquete.activo = true;
+        repositorioPaquete.save(paquete);
+    }
+
+    @Transactional
     public void eliminarPermanente(Integer id) {
         PaqueteTuristico paquete = repositorioPaquete.findById(id)
             .orElseThrow(() -> new RecursoNoEncontradoExcepcion("No existe el paquete turistico con id " + id));

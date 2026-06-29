@@ -58,6 +58,12 @@ public class ControladorPaqueteTuristico {
         return ResponseEntity.ok(servicio.actualizar(id, solicitud));
     }
 
+    @PutMapping("/{id}/reactivar")
+    public ResponseEntity<Void> reactivar(@PathVariable Integer id) {
+        servicio.reactivar(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
         servicio.eliminar(id);
