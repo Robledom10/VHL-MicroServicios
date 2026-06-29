@@ -44,6 +44,31 @@ public class ControladorReserva {
 		return ResponseEntity.ok(servicioReserva.obtenerContactosPorViaje(idViaje));
 	}
 
+	@PutMapping("/contactos-emergencia/{id}")
+	public ResponseEntity<ContactoEmergenciaDTO> actualizarContactoReserva(
+			@PathVariable Long id,
+			@RequestBody ContactoEmergenciaDTO datos) {
+		log.info("PUT /api/v1/reservas/contactos-emergencia/{}", id);
+		try {
+			return ResponseEntity.ok(servicioReserva.actualizarContactoReserva(id, datos));
+		} catch (RuntimeException e) {
+			log.error("Error al actualizar contacto de emergencia {}: {}", id, e.getMessage());
+			return ResponseEntity.notFound().build();
+		}
+	}
+
+	@DeleteMapping("/contactos-emergencia/{id}")
+	public ResponseEntity<Void> eliminarContactoReserva(@PathVariable Long id) {
+		log.info("DELETE /api/v1/reservas/contactos-emergencia/{}", id);
+		try {
+			servicioReserva.eliminarContactoReserva(id);
+			return ResponseEntity.noContent().build();
+		} catch (RuntimeException e) {
+			log.error("Error al eliminar contacto de emergencia {}: {}", id, e.getMessage());
+			return ResponseEntity.notFound().build();
+		}
+	}
+
 	/**
 	 * Obtiene todas las reservas (panel admin) — paginado
 	 */
