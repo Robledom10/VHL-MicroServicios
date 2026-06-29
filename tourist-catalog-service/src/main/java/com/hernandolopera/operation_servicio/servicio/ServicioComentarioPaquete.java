@@ -16,6 +16,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class ServicioComentarioPaquete {
+    private static final int MAX_PALABRAS_COMENTARIO = 250;
+
     private final RepositorioComentarioPaquete repositorioComentario;
     private final RepositorioPaqueteTuristico repositorioPaquete;
     private final MapeadorOperaciones mapeador;
@@ -37,6 +39,8 @@ public class ServicioComentarioPaquete {
         PaqueteTuristico paquete = repositorioPaquete.findById(idPaquete)
             .filter(p -> Boolean.TRUE.equals(p.activo))
             .orElseThrow(() -> new RecursoNoEncontradoExcepcion("No existe el paquete turistico con id " + idPaquete));
+
+        validarLimitePalabras(solicitud.comentario());
 
         ComentarioPaquete comentario = new ComentarioPaquete();
         comentario.paqueteTuristico = paquete;
@@ -67,12 +71,47 @@ public class ServicioComentarioPaquete {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Solo puede editar sus propios comentarios");
         }
 
+        validarLimitePalabras(solicitud.comentario());
+
         comentario.comentario = solicitud.comentario().trim();
         comentario.puntaje = solicitud.puntaje();
         comentario.autor = autor;
         comentario.correoAutor = correoNormalizado;
 
         return mapeador.aRespuestaComentario(comentario);
+    }
+
+    @Transactional
+    public void eliminar(Integer idPaquete, Integer idComentario, String nombreUsuario, String correoUsuario) {
+        String autor = obtenerAutorVisible(nombreUsuario, correoUsuario);
+        String correoNormalizado = normalizarCorreo(correoUsuario);
+        if (autor == null || correoNormalizado == null) {
+            throw new ExcepcionReglaNegocio("No se pudo identificar el usuario que realiza el comentario");
+        }
+
+        ComentarioPaquete comentario = repositorioComentario.findById(idComentario)
+            .orElseThrow(() -> new RecursoNoEncontradoExcepcion("No existe el comentario con id " + idComentario));
+
+        if (!idPaquete.equals(comentario.paqueteTuristico.id)) {
+            throw new RecursoNoEncontradoExcepcion("El comentario no pertenece al paquete con id " + idPaquete);
+        }
+        if (!esAutorDelComentario(comentario, autor, correoNormalizado)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Solo puede eliminar sus propios comentarios");
+        }
+
+        repositorioComentario.delete(comentario);
+    }
+
+    private void validarLimitePalabras(String comentario) {
+        if (comentario == null) {
+            return;
+        }
+        String limpio = comentario.trim();
+        int palabras = limpio.isEmpty() ? 0 : limpio.split("\\s+").length;
+        if (palabras > MAX_PALABRAS_COMENTARIO) {
+            throw new ExcepcionReglaNegocio(
+                "El comentario no puede superar las " + MAX_PALABRAS_COMENTARIO + " palabras");
+        }
     }
 
     private String obtenerAutorVisible(String nombreUsuario, String correoUsuario) {
