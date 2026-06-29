@@ -11,22 +11,28 @@ import org.springframework.web.cors.reactive.CorsWebFilter;
 @Configuration
 public class CorsConfig {
 
-        @Bean
-        public CorsWebFilter corsWebFilter() {
-                CorsConfiguration config = new CorsConfiguration();
+    @Bean
+    public CorsWebFilter corsWebFilter() {
+        CorsConfiguration config = new CorsConfiguration();
 
-                config.setAllowCredentials(true);
-                config.setAllowedOrigins(
-                                Arrays.asList("http://localhost:4200", "https://hernando-lopera-jade.vercel.app"));
-                config.setAllowedHeaders(
-                                Arrays.asList("*"));
-                config.setAllowedMethods(
-                                Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowCredentials(true);
 
-                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        // allowedOriginPatterns is required when allowCredentials=true (wildcard origins not supported)
+        config.addAllowedOriginPattern("http://localhost:4200");
+        config.addAllowedOriginPattern("https://hernando-lopera-jade.vercel.app");
+        config.addAllowedOriginPattern("https://*.ngrok-free.app");
+        config.addAllowedOriginPattern("https://*.ngrok-free.dev");
 
-                source.registerCorsConfiguration("/**", config);
+        config.addAllowedHeader("*");
 
-                return new CorsWebFilter(source);
-        }
+        config.setAllowedMethods(
+                Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+
+        config.addExposedHeader("Content-Disposition");
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+
+        return new CorsWebFilter(source);
+    }
 }
