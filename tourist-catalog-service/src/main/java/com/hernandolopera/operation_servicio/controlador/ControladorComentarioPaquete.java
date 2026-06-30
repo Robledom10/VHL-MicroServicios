@@ -41,4 +41,13 @@ public class ControladorComentarioPaquete {
         @Valid @RequestBody SolicitudComentarioPaquete solicitud) {
         return ResponseEntity.ok(servicio.editar(idPaquete, idComentario, nombreUsuario, correoUsuario, solicitud));
     }
+
+    @DeleteMapping("/{idComentario}")
+    public ResponseEntity<Void> eliminar(@PathVariable Integer idPaquete,
+        @PathVariable Integer idComentario,
+        @RequestHeader("X-User-Email") String correoUsuario,
+        @RequestHeader(value = "X-User-Name", required = false) String nombreUsuario) {
+        servicio.eliminar(idPaquete, idComentario, nombreUsuario, correoUsuario);
+        return ResponseEntity.noContent().build();
+    }
 }
