@@ -118,59 +118,38 @@ public class ServicioContratoPDF {
     // ── Encabezado con logo igual al frontend ────────────────────────────────
 
     private void agregarEncabezado(Document doc, String ref, String hoy) throws Exception {
-        // Banner azul completo (logo + texto)
-        PdfPTable banner = new PdfPTable(new float[]{22f, 78f});
+        // ── Banner: una sola tabla, 2 columnas, CERO bordes ──────────────────
+        PdfPTable banner = new PdfPTable(new float[]{20f, 80f});
         banner.setWidthPercentage(100);
         banner.setSpacingAfter(10);
 
         // Celda del logo
-        PdfPCell celdaLogo = new PdfPCell();
-        celdaLogo.setBackgroundColor(AZUL);
-        celdaLogo.setBorder(Rectangle.NO_BORDER);
-        celdaLogo.setPadding(8);
+        PdfPCell celdaLogo = sinBorde(new PdfPCell(), AZUL);
+        celdaLogo.setPadding(10);
         celdaLogo.setVerticalAlignment(Element.ALIGN_MIDDLE);
         try {
-            ClassPathResource res = new ClassPathResource("logo.png");
-            Image logo = Image.getInstance(res.getURL());
-            logo.scaleToFit(60, 60);
+            Image logo = Image.getInstance(new ClassPathResource("logo.png").getURL());
+            logo.scaleToFit(58, 58);
+            logo.setAlignment(Image.ALIGN_CENTER);
             celdaLogo.addElement(logo);
         } catch (Exception e) {
             log.warn("No se pudo cargar el logo: {}", e.getMessage());
         }
         banner.addCell(celdaLogo);
 
-        // Celda del texto (agencia + empresa + título del documento)
-        PdfPTable textos = new PdfPTable(1);
-        textos.setWidthPercentage(100);
+        // Celda de texto: agencia + empresa + título  (todo en un Paragraph, sin tabla interna)
+        Paragraph contenido = new Paragraph();
+        contenido.add(new Chunk("A G E N C I A   D E   V I A J E S   Y   E X C U R S I O N E S\n", F_AGENCIA));
+        contenido.add(new Chunk("Hernando Lopera\n", F_EMPRESA));
+        contenido.add(new Chunk("CONTRATO DE PRESTACIÓN DE SERVICIOS TURÍSTICOS", F_TITULO_DOC));
+        contenido.setAlignment(Element.ALIGN_CENTER);
 
-        PdfPCell cAgencia = celda(new Phrase("A G E N C I A   D E   V I A J E S   Y   E X C U R S I O N E S", F_AGENCIA), AZUL);
-        cAgencia.setPaddingTop(10);
-        cAgencia.setHorizontalAlignment(Element.ALIGN_CENTER);
-        textos.addCell(cAgencia);
-
-        PdfPCell cEmpresa = celda(new Phrase("Hernando Lopera", F_EMPRESA), AZUL);
-        cEmpresa.setHorizontalAlignment(Element.ALIGN_CENTER);
-        textos.addCell(cEmpresa);
-
-        // Línea separadora blanca
-        PdfPCell linea = new PdfPCell(new Phrase(" "));
-        linea.setBackgroundColor(AZUL);
-        linea.setBorder(Rectangle.BOTTOM);
-        linea.setBorderColor(new Color(255, 255, 255, 120));
-        linea.setBorderWidth(0.5f);
-        linea.setPaddingBottom(2);
-        textos.addCell(linea);
-
-        PdfPCell cTitulo = celda(new Phrase("CONTRATO DE PRESTACIÓN DE SERVICIOS TURÍSTICOS", F_TITULO_DOC), AZUL);
-        cTitulo.setHorizontalAlignment(Element.ALIGN_CENTER);
-        cTitulo.setPaddingBottom(10);
-        textos.addCell(cTitulo);
-
-        PdfPCell celdaTextos = new PdfPCell(textos);
-        celdaTextos.setBackgroundColor(AZUL);
-        celdaTextos.setBorder(Rectangle.NO_BORDER);
-        celdaTextos.setPadding(0);
-        banner.addCell(celdaTextos);
+        PdfPCell celdaTexto = sinBorde(new PdfPCell(contenido), AZUL);
+        celdaTexto.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        celdaTexto.setPaddingTop(10);
+        celdaTexto.setPaddingBottom(10);
+        celdaTexto.setHorizontalAlignment(Element.ALIGN_CENTER);
+        banner.addCell(celdaTexto);
 
         doc.add(banner);
 
@@ -179,6 +158,12 @@ public class ServicioContratoPDF {
         refPar.setAlignment(Element.ALIGN_RIGHT);
         refPar.setSpacingAfter(8);
         doc.add(refPar);
+    }
+
+    private PdfPCell sinBorde(PdfPCell cell, Color bg) {
+        cell.setBackgroundColor(bg);
+        cell.setBorder(Rectangle.NO_BORDER);
+        return cell;
     }
 
     // ── Sección de datos ─────────────────────────────────────────────────────
