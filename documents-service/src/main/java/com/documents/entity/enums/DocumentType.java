@@ -4,6 +4,6 @@ public enum DocumentType {
     pasaporte,
     visa,
     permiso_menor,
-    vacuna,
+    contrato,
     otro
 }
