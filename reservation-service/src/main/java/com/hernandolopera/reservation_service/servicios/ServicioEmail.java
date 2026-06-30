@@ -9,6 +9,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -23,11 +24,9 @@ import org.thymeleaf.context.Context;
 @Slf4j
 public class ServicioEmail {
 
-    private static final String RUTA_CONTRATO = "documentos/contrato-vhl.pdf";
-    private static final String NOMBRE_ADJUNTO = "Contrato_Reserva_VHL.pdf";
-
     private final JavaMailSender mailSender;
     private final TemplateEngine templateEngine;
+    private final ServicioContratoPDF servicioContratoPDF;
 
     @Value("${spring.mail.username:}")
     private String remitente;
@@ -58,13 +57,12 @@ public class ServicioEmail {
 
             String html = templateEngine.process("email-confirmacion", ctx);
 
-            // Adjuntar contrato PDF si existe en los recursos
+            // Generar contrato PDF personalizado con los datos de la reserva
             Map<String, Resource> adjuntos = new LinkedHashMap<>();
-            ClassPathResource contrato = new ClassPathResource(RUTA_CONTRATO);
-            if (contrato.exists()) {
-                adjuntos.put(NOMBRE_ADJUNTO, contrato);
-            } else {
-                log.warn("Contrato PDF no encontrado en classpath: {}", RUTA_CONTRATO);
+            byte[] contratoPdf = servicioContratoPDF.generar(reserva);
+            if (contratoPdf.length > 0) {
+                adjuntos.put("Contrato_Reserva_VHL.pdf", new ByteArrayResource(contratoPdf));
+                log.info("Contrato PDF generado ({} bytes) para reserva {}", contratoPdf.length, reserva.getNumeroReserva());
             }
 
             enviar(email, "Confirmación de tu reserva " + reserva.getNumeroReserva(), html, adjuntos);
