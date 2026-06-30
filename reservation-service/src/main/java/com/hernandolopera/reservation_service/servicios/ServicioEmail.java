@@ -1,12 +1,17 @@
 package com.hernandolopera.reservation_service.servicios;
 
 import com.hernandolopera.reservation_service.dto.ReservaDTO;
+import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import java.util.LinkedHashMap;
 import java.util.Locale;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -21,6 +26,7 @@ public class ServicioEmail {
 
     private final JavaMailSender mailSender;
     private final TemplateEngine templateEngine;
+    private final ServicioContratoPDF servicioContratoPDF;
 
     @Value("${spring.mail.username:}")
     private String remitente;
@@ -45,12 +51,21 @@ public class ServicioEmail {
             ctx.setVariable("precioTotal",
                 reserva.getPrecioTotal() != null
                     ? String.format("$%,.0f COP", reserva.getPrecioTotal().doubleValue()) : "N/D");
-            ctx.setVariable("estado",           reserva.getEstadoDescripcion() != null ? reserva.getEstadoDescripcion() : "Pendiente");
-            ctx.setVariable("viajeros",         reserva.getViajeros());
-            ctx.setVariable("acompanantes",     reserva.getAcompanantes());
+            ctx.setVariable("estado",       reserva.getEstadoDescripcion() != null ? reserva.getEstadoDescripcion() : "Pendiente");
+            ctx.setVariable("viajeros",     reserva.getViajeros());
+            ctx.setVariable("acompanantes", reserva.getAcompanantes());
 
             String html = templateEngine.process("email-confirmacion", ctx);
-            enviar(email, "Confirmación de tu reserva " + reserva.getNumeroReserva(), html);
+
+            // Generar contrato PDF personalizado con los datos de la reserva
+            Map<String, Resource> adjuntos = new LinkedHashMap<>();
+            byte[] contratoPdf = servicioContratoPDF.generar(reserva);
+            if (contratoPdf.length > 0) {
+                adjuntos.put("Contrato_Reserva_VHL.pdf", new ByteArrayResource(contratoPdf));
+                log.info("Contrato PDF generado ({} bytes) para reserva {}", contratoPdf.length, reserva.getNumeroReserva());
+            }
+
+            enviar(email, "Confirmación de tu reserva " + reserva.getNumeroReserva(), html, adjuntos);
             log.info("Email de confirmación enviado a {} para reserva {}", email, reserva.getNumeroReserva());
         } catch (Exception e) {
             log.warn("No se pudo enviar email de confirmación para reserva {}: {}", reserva.getNumeroReserva(), e.getMessage());
@@ -75,14 +90,20 @@ public class ServicioEmail {
             ctx.setVariable("mensajeExtra",  mensajeExtra);
 
             String html = templateEngine.process("email-notificacion", ctx);
-            enviar(email, asunto, html);
+            enviar(email, asunto, html, null);
             log.info("Notificación enviada a {} para reserva {}", email, reserva.getNumeroReserva());
         } catch (Exception e) {
             log.warn("No se pudo enviar notificación para reserva {}: {}", reserva.getNumeroReserva(), e.getMessage());
         }
     }
 
-    private void enviar(String destinatario, String asunto, String html) throws Exception {
+    /**
+     * Envía un correo HTML con adjuntos opcionales.
+     *
+     * @param adjuntos mapa de nombreArchivo → Resource; puede ser null o vacío
+     */
+    private void enviar(String destinatario, String asunto, String html, Map<String, Resource> adjuntos)
+            throws MessagingException, Exception {
         MimeMessage mensaje = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mensaje, true, "UTF-8");
         helper.setFrom(remitente, "VHL Viajes");
@@ -90,6 +111,13 @@ public class ServicioEmail {
         helper.setSubject(asunto);
         helper.setText(html, true);
         helper.addInline("logo", new ClassPathResource("logo.png"));
+
+        if (adjuntos != null) {
+            for (Map.Entry<String, Resource> entry : adjuntos.entrySet()) {
+                helper.addAttachment(entry.getKey(), entry.getValue());
+            }
+        }
+
         mailSender.send(mensaje);
     }
 
