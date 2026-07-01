@@ -1,0 +1,19 @@
+package com.hernandolopera.auth_service.dto.request.auth;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.Data;
+
+@Data
+public class ResetPasswordRequest {
+
+    @NotBlank(message = "El token es obligatorio")
+    private String token;
+
+    @NotBlank(message = "La nueva contraseña es obligatoria")
+    @Size(min = 6, message = "La contraseña debe tener mínimo 6 caracteres")
+    private String newPassword;
+
+    @NotBlank(message = "La confirmación de contraseña es obligatoria")
+    private String confirmPassword;
+}
