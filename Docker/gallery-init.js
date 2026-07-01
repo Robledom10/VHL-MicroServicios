@@ -50,22 +50,22 @@ db.createCollection("media", {
           bsonType: "string",
           minLength: 2,
           maxLength: 100,
-          description: "Excursion name"
+          description: "Excursion name (e.g. Cartagena, Guatape, San Andres)"
         },
 
-        location: {
+        activity: {
           bsonType: "string",
-          description: "Excursion location"
+          description: "Excursion location or activity (e.g. Bolivar, Antioquia, San Andres Islands)"
         },
 
         folder: {
           bsonType: "string",
-          description: "Cloudinary folder path"
+          description: "Cloudinary folder path (e.g. gallery-service/excursions/2025/cartagena)"
         },
 
         createdAt: {
           bsonType: "date",
-          description: "Creation date"
+          description: "Media creation date"
         }
       }
     }
@@ -76,6 +76,10 @@ db.media.createIndex({ year: 1 });
 
 db.media.createIndex({ excursion: 1 });
 
-db.media.createIndex({ location: 1 });
+db.media.createIndex({ activity: 1 });
 
 db.media.createIndex({ type: 1 });
+
+db.media.createIndex({ year: 1, type: 1 });
+
+db.media.createIndex({ year: 1, excursion: 1 });

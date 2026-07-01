@@ -68,11 +68,13 @@ public class AuthService {
 
                         newUser.setEmail(email);
 
+                        String givenName = (String) payload.get("given_name");
                         newUser.setFirstName(
-                                (String) payload.get("given_name"));
+                                givenName != null ? givenName : email.split("@")[0]);
 
+                        String familyName = (String) payload.get("family_name");
                         newUser.setLastName(
-                                (String) payload.get("family_name"));
+                                familyName != null ? familyName : "");
 
                         newUser.setEmailVerified(true);
 
