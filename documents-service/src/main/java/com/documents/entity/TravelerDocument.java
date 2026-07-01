@@ -45,6 +45,12 @@ public class TravelerDocument {
     @Column(name = "reservation_id")
     private Integer reservationId;
 
+    @Column(name = "package_id")
+    private Long packageId;
+
+    @Column(name = "trip_id")
+    private Long tripId;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

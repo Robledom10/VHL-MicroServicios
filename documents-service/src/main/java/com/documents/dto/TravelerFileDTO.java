@@ -20,6 +20,10 @@ public class TravelerFileDTO {
 
     private Integer reservationId;
 
+    private Long packageId;
+
+    private Long tripId;
+
     private List<TravelerDocument> documents;
 
 }

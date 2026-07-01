@@ -28,6 +28,7 @@ import java.nio.file.StandardCopyOption;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,11 +57,7 @@ public class TravelerDocumentServiceImpl
             throw new IllegalArgumentException("El userId es obligatorio");
         }
 
-        Integer resolvedReservationId =
-                resolveReservationId(
-                        userId,
-                        reservationId
-                );
+        ResolvedContext context = resolveContext(userId, reservationId);
 
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("Archivo vacio");
@@ -110,7 +107,9 @@ public class TravelerDocumentServiceImpl
 
         TravelerDocument document = TravelerDocument.builder()
                 .userId(userId)
-                .reservationId(resolvedReservationId)
+                .reservationId(context.reservationId())
+                .packageId(context.packageId())
+                .tripId(context.tripId())
                 .documentType(parsedDocumentType)
                 .fileUrl(filePath.toString())
                 .status(DocumentStatus.pendiente)
@@ -204,17 +203,33 @@ public class TravelerDocumentServiceImpl
         repository.delete(document);
     }
 
-    private Integer resolveReservationId(
+    private ResolvedContext resolveContext(
             Integer userId,
             Integer reservationId
     ) {
 
+        RestTemplate restTemplate = new RestTemplate();
+
         if (reservationId != null) {
-            return reservationId;
+            try {
+                ResponseEntity<ReservationSummaryDTO> response =
+                        restTemplate.getForEntity(
+                                reservationServiceUrl
+                                        + "/api/v1/reservas/"
+                                        + reservationId,
+                                ReservationSummaryDTO.class
+                        );
+                ReservationSummaryDTO res = response.getBody();
+                if (res == null) {
+                    return new ResolvedContext(reservationId, null, null);
+                }
+                return new ResolvedContext(reservationId, res.getIdPaquete(), res.getIdViaje());
+            } catch (RestClientException ex) {
+                return new ResolvedContext(reservationId, null, null);
+            }
         }
 
         try {
-            RestTemplate restTemplate = new RestTemplate();
             ResponseEntity<ReservationSummaryDTO[]> response =
                     restTemplate.getForEntity(
                             reservationServiceUrl
@@ -232,22 +247,19 @@ public class TravelerDocumentServiceImpl
             }
 
             return Arrays.stream(reservations)
-                    .filter(reservation -> reservation.getId() != null)
-                    .filter(reservation ->
-                            reservation.getEstado() == null
+                    .filter(r -> r.getId() != null)
+                    .filter(r ->
+                            r.getEstado() == null
                             || (
-                                    !reservation.getEstado()
-                                            .equalsIgnoreCase("CANCELADA")
-                                    && !reservation.getEstado()
-                                            .equalsIgnoreCase("PASADA")
+                                    !r.getEstado().equalsIgnoreCase("CANCELADA")
+                                    && !r.getEstado().equalsIgnoreCase("PASADA")
                             )
                     )
-                    .map(ReservationSummaryDTO::getId)
-                    .max(Integer::compareTo)
+                    .max(Comparator.comparing(ReservationSummaryDTO::getId))
+                    .map(r -> new ResolvedContext(r.getId(), r.getIdPaquete(), r.getIdViaje()))
                     .orElseThrow(
                             () -> new IllegalArgumentException(
-                                    "No existe reserva activa para el usuario "
-                                            + userId
+                                    "No existe reserva activa para el usuario " + userId
                             )
                     );
         } catch (RestClientException ex) {
@@ -257,6 +269,8 @@ public class TravelerDocumentServiceImpl
             );
         }
     }
+
+    private record ResolvedContext(Integer reservationId, Long packageId, Long tripId) {}
 
     private DocumentType inferDocumentTypeFromFilename(String filename) {
         String normalizedFilename = normalizeDocumentName(filename);
