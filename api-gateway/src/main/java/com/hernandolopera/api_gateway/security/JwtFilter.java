@@ -53,6 +53,8 @@ public class JwtFilter implements GlobalFilter, Ordered {
                 "/api/auth/tokens/refresh",
                 "/api/auth/tokens/logout",
                 "/api/auth/check-blacklist",
+                "/api/auth/forgot-password",
+                "/api/auth/reset-password",
                 "/api/webhook",
                 "/api/media",
                 "/api/payments/create-link");
