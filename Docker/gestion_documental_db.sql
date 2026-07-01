@@ -82,6 +82,8 @@ CREATE TABLE `traveler_document` (
   `id_document` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
   `reservation_id` int(11) DEFAULT NULL,
+  `package_id` bigint(20) DEFAULT NULL,
+  `trip_id` bigint(20) DEFAULT NULL,
   `document_type` enum('cedula','pasaporte','visa','permiso_menor','vacuna','otro') NOT NULL,
   `file_url` varchar(255) NOT NULL,
   `status` enum('pendiente','en_proceso','aprobado','rechazado') NOT NULL DEFAULT 'pendiente',

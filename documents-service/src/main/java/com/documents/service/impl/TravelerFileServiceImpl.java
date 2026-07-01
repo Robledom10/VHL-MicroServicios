@@ -24,15 +24,13 @@ public class TravelerFileServiceImpl
         List<TravelerDocument> documents =
                 repository.findByUserId(userId);
 
-        Integer reservationId =
-                documents.isEmpty()
-                ? null
-                : documents.get(0)
-                           .getReservationId();
+        TravelerDocument first = documents.isEmpty() ? null : documents.get(0);
 
         return TravelerFileDTO.builder()
                 .userId(userId)
-                .reservationId(reservationId)
+                .reservationId(first == null ? null : first.getReservationId())
+                .packageId(first == null ? null : first.getPackageId())
+                .tripId(first == null ? null : first.getTripId())
                 .documents(documents)
                 .build();
     }

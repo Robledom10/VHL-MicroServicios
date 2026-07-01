@@ -12,4 +12,8 @@ public class ReservationSummaryDTO {
     private Integer id;
 
     private String estado;
+
+    private Long idPaquete;
+
+    private Long idViaje;
 }
