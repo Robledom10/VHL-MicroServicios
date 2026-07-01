@@ -34,6 +34,8 @@ public class SecurityConfig {
                                 "/api/auth/google-login",
                                 "/api/auth/tokens/**",
                                 "/api/auth/check-blacklist",
+                                "/api/auth/forgot-password",
+                                "/api/auth/reset-password",
                                 "/api/statistics/**",
                                 "/api/internal/**")
 

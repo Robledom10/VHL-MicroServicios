@@ -9,11 +9,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.hernandolopera.auth_service.dto.request.auth.ForgotPasswordRequest;
 import com.hernandolopera.auth_service.dto.request.auth.GoogleLoginRequest;
 import com.hernandolopera.auth_service.dto.request.auth.LoginRequest;
 import com.hernandolopera.auth_service.dto.request.auth.RegisterRequest;
+import com.hernandolopera.auth_service.dto.request.auth.ResetPasswordRequest;
 import com.hernandolopera.auth_service.dto.response.AuthResponse;
 import com.hernandolopera.auth_service.service.auth.AuthService;
+import com.hernandolopera.auth_service.service.auth.PasswordResetService;
 import com.hernandolopera.auth_service.service.token.BlacklistedTokenService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -30,6 +33,7 @@ public class AuthEntryPointController {
 
     private final AuthService authService;
     private final BlacklistedTokenService blacklistedTokenService;
+    private final PasswordResetService passwordResetService;
 
     @PostMapping("/register")
     public ResponseEntity<Map<String, Object>> register(@Valid @RequestBody RegisterRequest request) {
@@ -91,5 +95,23 @@ public class AuthEntryPointController {
         String token = authHeader.substring(7);
         boolean isBlacklisted = blacklistedTokenService.isBlacklisted(token);
         return ResponseEntity.ok(isBlacklisted);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Map<String, Object>> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequest request) {
+        passwordResetService.requestPasswordReset(request.getEmail());
+        return ResponseEntity.ok(Map.of(
+                "message", "Si el correo está registrado, recibirás un enlace para restablecer tu contraseña",
+                "status", HttpStatus.OK.value()));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, Object>> resetPassword(
+            @Valid @RequestBody ResetPasswordRequest request) {
+        passwordResetService.resetPassword(request.getToken(), request.getNewPassword(), request.getConfirmPassword());
+        return ResponseEntity.ok(Map.of(
+                "message", "Contraseña actualizada correctamente",
+                "status", HttpStatus.OK.value()));
     }
 }
