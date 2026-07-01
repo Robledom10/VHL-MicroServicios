@@ -29,10 +29,16 @@ public class ReservationFlowServiceImpl
 
         // Validar documentos
         List<TravelerDocument> documents =
-                repository.findByUserId(userId);
+                repository.findByReservationId(reservationId)
+                        .stream()
+                        .filter(document ->
+                                userId.equals(document.getUserId())
+                        )
+                        .toList();
 
         boolean documentsApproved =
-                documents.stream()
+                !documents.isEmpty()
+                && documents.stream()
                         .allMatch(doc ->
                                 doc.getStatus()
                                         == DocumentStatus.aprobado

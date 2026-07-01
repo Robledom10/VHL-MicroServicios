@@ -1,5 +1,6 @@
 package com.documents.service.impl;
 
+import com.documents.dto.ReservationSummaryDTO;
 import com.documents.entity.TravelerDocument;
 import com.documents.entity.enums.DocumentStatus;
 import com.documents.entity.enums.DocumentType;
@@ -7,11 +8,15 @@ import com.documents.repository.DocumentValidationRepository;
 import com.documents.repository.TravelerDocumentRepository;
 import com.documents.service.TravelerDocumentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -20,6 +25,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.text.Normalizer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -35,10 +42,13 @@ public class TravelerDocumentServiceImpl
 
     private final String uploadDir = "uploads/";
 
+    @Value("${reservation.service.url:http://reservation-service:8082}")
+    private String reservationServiceUrl;
+
     @Override
     public TravelerDocument uploadDocument(
             Integer userId,
-            String documentType,
+            Integer reservationId,
             MultipartFile file
     ) {
 
@@ -46,7 +56,11 @@ public class TravelerDocumentServiceImpl
             throw new IllegalArgumentException("El userId es obligatorio");
         }
 
-        DocumentType parsedDocumentType = parseDocumentType(documentType);
+        Integer resolvedReservationId =
+                resolveReservationId(
+                        userId,
+                        reservationId
+                );
 
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("Archivo vacio");
@@ -69,6 +83,9 @@ public class TravelerDocumentServiceImpl
         if (originalFilename.contains("..")) {
             throw new IllegalArgumentException("Nombre de archivo invalido");
         }
+
+        DocumentType parsedDocumentType =
+                inferDocumentTypeFromFilename(originalFilename);
 
         String fileName = System.currentTimeMillis() + "_" + originalFilename;
         Path uploadPath = Paths.get(uploadDir);
@@ -93,6 +110,7 @@ public class TravelerDocumentServiceImpl
 
         TravelerDocument document = TravelerDocument.builder()
                 .userId(userId)
+                .reservationId(resolvedReservationId)
                 .documentType(parsedDocumentType)
                 .fileUrl(filePath.toString())
                 .status(DocumentStatus.pendiente)
@@ -186,25 +204,113 @@ public class TravelerDocumentServiceImpl
         repository.delete(document);
     }
 
-    private DocumentType parseDocumentType(String documentType) {
-        if (documentType == null || documentType.isBlank()) {
+    private Integer resolveReservationId(
+            Integer userId,
+            Integer reservationId
+    ) {
+
+        if (reservationId != null) {
+            return reservationId;
+        }
+
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<ReservationSummaryDTO[]> response =
+                    restTemplate.getForEntity(
+                            reservationServiceUrl
+                                    + "/api/v1/reservas/usuario/"
+                                    + userId,
+                            ReservationSummaryDTO[].class
+                    );
+
+            ReservationSummaryDTO[] reservations = response.getBody();
+
+            if (reservations == null || reservations.length == 0) {
+                throw new IllegalArgumentException(
+                        "No existe reserva para el usuario " + userId
+                );
+            }
+
+            return Arrays.stream(reservations)
+                    .filter(reservation -> reservation.getId() != null)
+                    .filter(reservation ->
+                            reservation.getEstado() == null
+                            || (
+                                    !reservation.getEstado()
+                                            .equalsIgnoreCase("CANCELADA")
+                                    && !reservation.getEstado()
+                                            .equalsIgnoreCase("PASADA")
+                            )
+                    )
+                    .map(ReservationSummaryDTO::getId)
+                    .max(Integer::compareTo)
+                    .orElseThrow(
+                            () -> new IllegalArgumentException(
+                                    "No existe reserva activa para el usuario "
+                                            + userId
+                            )
+                    );
+        } catch (RestClientException ex) {
+            throw new IllegalStateException(
+                    "No se pudo consultar la reserva del usuario",
+                    ex
+            );
+        }
+    }
+
+    private DocumentType inferDocumentTypeFromFilename(String filename) {
+        String normalizedFilename = normalizeDocumentName(filename);
+
+        if (normalizedFilename.isBlank()) {
             throw new IllegalArgumentException(
-                    "El documentType es obligatorio"
+                    "El nombre del archivo es obligatorio"
             );
         }
 
-        String normalizedDocumentType = documentType.trim();
+        List<DocumentType> matchingTypes = new ArrayList<>();
 
-        return Arrays.stream(DocumentType.values())
-                .filter(type -> type.name().equalsIgnoreCase(
-                        normalizedDocumentType
-                ))
-                .findFirst()
-                .orElseThrow(
-                        () -> new IllegalArgumentException(
-                                "Tipo de documento invalido. Valores permitidos: "
-                                        + Arrays.toString(DocumentType.values())
-                        )
-                );
+        for (DocumentType type : DocumentType.values()) {
+            String normalizedType = normalizeDocumentName(type.name());
+
+            if (normalizedFilename.equals(normalizedType)
+                    || normalizedFilename.startsWith(normalizedType + "_")
+                    || normalizedFilename.endsWith("_" + normalizedType)
+                    || normalizedFilename.contains("_" + normalizedType + "_")) {
+                matchingTypes.add(type);
+            }
+        }
+
+        if (matchingTypes.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "El nombre del archivo debe incluir un tipo de documento valido: "
+                            + Arrays.toString(DocumentType.values())
+            );
+        }
+
+        if (matchingTypes.size() > 1) {
+            throw new IllegalArgumentException(
+                    "El nombre del archivo solo puede referenciar un tipo de documento"
+            );
+        }
+
+        return matchingTypes.get(0);
+    }
+
+    private String normalizeDocumentName(String value) {
+        String normalizedValue = Normalizer.normalize(
+                value,
+                Normalizer.Form.NFD
+        ).replaceAll("\\p{M}", "");
+
+        int extensionStart = normalizedValue.lastIndexOf('.');
+
+        if (extensionStart > 0) {
+            normalizedValue = normalizedValue.substring(0, extensionStart);
+        }
+
+        return normalizedValue
+                .toLowerCase()
+                .replaceAll("[^a-z0-9]+", "_")
+                .replaceAll("^_+|_+$", "");
     }
 }

@@ -28,14 +28,14 @@ public class TravelerDocumentController {
     public ResponseEntity<TravelerDocument>
             uploadDocument(
                     @RequestParam Integer userId,
-                    @RequestParam String documentType,
+                    @RequestParam(required = false) Integer reservationId,
                     @RequestParam MultipartFile file
             ) {
 
         return ResponseEntity.ok(
                 service.uploadDocument(
                         userId,
-                        documentType,
+                        reservationId,
                         file
                 )
         );
